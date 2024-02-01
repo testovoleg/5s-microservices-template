@@ -2,8 +2,9 @@ package kafka
 
 import (
 	"context"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/logger"
+
 	"github.com/segmentio/kafka-go"
+	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 )
 
 type Producer interface {

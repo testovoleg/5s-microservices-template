@@ -1,13 +1,12 @@
 package server
 
 import (
-	"github.com/AleksK1NG/cqrs-microservices/docs"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"strings"
 	"time"
 
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/testovoleg/5s-microservice-template/docs"
 )
 
 const (
@@ -32,11 +31,9 @@ func (s *server) runHttpServer() error {
 func (s *server) mapRoutes() {
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Title = "API Gateway"
-	docs.SwaggerInfo.Description = "API Gateway CQRS microservices."
+	docs.SwaggerInfo.Description = "API Gateway microservices."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/api/v1"
-
-	s.echo.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	s.echo.Use(s.mw.RequestLoggerMiddleware)
 	s.echo.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{

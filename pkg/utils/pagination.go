@@ -26,7 +26,7 @@ func NewPaginationFromQueryParams(size string, page string) *Pagination {
 	p := &Pagination{Size: defaultSize, Page: 1}
 
 	if sizeNum, err := strconv.Atoi(size); err == nil && sizeNum != 0 {
-		p.Page = sizeNum
+		p.Size = sizeNum
 	}
 
 	if pageNum, err := strconv.Atoi(page); err == nil && pageNum != 0 {
@@ -113,5 +113,5 @@ func (q *Pagination) GetTotalPages(totalCount int) int {
 
 // GetHasMore Get has more
 func (q *Pagination) GetHasMore(totalCount int) bool {
-	return q.GetPage() < totalCount/q.GetSize()
+	return q.GetPage() < q.GetTotalPages(totalCount)
 }

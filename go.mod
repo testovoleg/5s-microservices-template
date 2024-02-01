@@ -1,4 +1,4 @@
-module github.com/AleksK1NG/cqrs-microservices
+module github.com/testovoleg/5s-microservice-template
 
 go 1.16
 
@@ -18,6 +18,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 	github.com/jackc/pgx/v4 v4.13.0
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/leodido/go-urn v1.2.1 // indirect

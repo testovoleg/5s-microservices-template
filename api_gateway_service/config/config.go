@@ -3,13 +3,15 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/constants"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/kafka"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/logger"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/probes"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/tracing"
-	"github.com/pkg/errors"
 	"os"
+
+	"github.com/pkg/errors"
+	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
+	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/probes"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 
 	"github.com/spf13/viper"
 )
@@ -43,7 +45,7 @@ type Http struct {
 }
 
 type Grpc struct {
-	ReaderServicePort string `mapstructure:"readerServicePort"`
+	CoreServicePort string `mapstructure:"coreServicePort"`
 }
 
 type KafkaTopics struct {
@@ -79,6 +81,12 @@ func InitConfig() (*Config, error) {
 		return nil, errors.Wrap(err, "viper.Unmarshal")
 	}
 
+	utils.CheckEnvStr(&cfg.Http.Port, constants.HttpPort)
+	utils.CheckEnvStr(&cfg.Jaeger.HostPort, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.Grpc.CoreServicePort, constants.CoreServicePort)
+	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.Http.BasePath, constants.HttpBasePath)
+
 	httpPort := os.Getenv(constants.HttpPort)
 	if httpPort != "" {
 		cfg.Http.Port = httpPort
@@ -91,9 +99,9 @@ func InitConfig() (*Config, error) {
 	if jaegerAddr != "" {
 		cfg.Jaeger.HostPort = jaegerAddr
 	}
-	readerServicePort := os.Getenv(constants.ReaderServicePort)
-	if readerServicePort != "" {
-		cfg.Grpc.ReaderServicePort = readerServicePort
+	coreServicePort := os.Getenv(constants.CoreServicePort)
+	if coreServicePort != "" {
+		cfg.Grpc.CoreServicePort = coreServicePort
 	}
 
 	return cfg, nil

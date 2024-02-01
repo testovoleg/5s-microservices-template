@@ -1,6 +1,6 @@
 package dto
 
-import readerService "github.com/AleksK1NG/cqrs-microservices/reader_service/proto/product_reader"
+import coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 
 type ProductsListResponse struct {
 	TotalCount int64              `json:"totalCount" bson:"totalCount"`
@@ -11,7 +11,7 @@ type ProductsListResponse struct {
 	Products   []*ProductResponse `json:"products" bson:"products"`
 }
 
-func ProductsListResponseFromGrpc(listResponse *readerService.SearchRes) *ProductsListResponse {
+func ProductsListResponseFromGrpc(listResponse *coreService.SearchRes) *ProductsListResponse {
 	list := make([]*ProductResponse, 0, len(listResponse.GetProducts()))
 	for _, product := range listResponse.GetProducts() {
 		list = append(list, ProductResponseFromGrpc(product))

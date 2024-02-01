@@ -2,10 +2,11 @@ package interceptors
 
 import (
 	"context"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/logger"
+	"time"
+
+	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"time"
 )
 
 type InterceptorManager interface {

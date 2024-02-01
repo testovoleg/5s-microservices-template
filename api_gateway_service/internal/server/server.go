@@ -2,23 +2,24 @@ package server
 
 import (
 	"context"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/config"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/internal/client"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/internal/metrics"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/internal/middlewares"
-	v1 "github.com/AleksK1NG/cqrs-microservices/api_gateway_service/internal/products/delivery/http/v1"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/internal/products/service"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/interceptors"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/kafka"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/logger"
-	"github.com/AleksK1NG/cqrs-microservices/pkg/tracing"
-	readerService "github.com/AleksK1NG/cqrs-microservices/reader_service/proto/product_reader"
-	"github.com/go-playground/validator"
-	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/go-playground/validator"
+	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
+	v1 "github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/delivery/http/v1"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/service"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/client"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/metrics"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/middlewares"
+	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
+	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
+	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
+	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
 type server struct {
@@ -28,7 +29,7 @@ type server struct {
 	mw   middlewares.MiddlewareManager
 	im   interceptors.InterceptorManager
 	echo *echo.Echo
-	ps   *service.ProductService
+	svc  *service.Service
 	m    *metrics.ApiGatewayMetrics
 }
 
@@ -44,20 +45,20 @@ func (s *server) Run() error {
 	s.im = interceptors.NewInterceptorManager(s.log)
 	s.m = metrics.NewApiGatewayMetrics(s.cfg)
 
-	readerServiceConn, err := client.NewReaderServiceConn(ctx, s.cfg, s.im)
+	coreServiceConn, err := client.NewcoreServiceConn(ctx, s.cfg, s.im)
 	if err != nil {
 		return err
 	}
-	defer readerServiceConn.Close() // nolint: errcheck
-	rsClient := readerService.NewReaderServiceClient(readerServiceConn)
+	defer coreServiceConn.Close() // nolint: errcheck
+	csClient := coreService.NewCoreServiceClient(coreServiceConn)
 
 	kafkaProducer := kafka.NewProducer(s.log, s.cfg.Kafka.Brokers)
 	defer kafkaProducer.Close() // nolint: errcheck
 
-	s.ps = service.NewProductService(s.log, s.cfg, kafkaProducer, rsClient)
+	s.svc = service.NewAppService(s.log, s.cfg, kafkaProducer, csClient)
 
-	productHandlers := v1.NewProductsHandlers(s.echo.Group(s.cfg.Http.ProductsPath), s.log, s.mw, s.cfg, s.ps, s.v, s.m)
-	productHandlers.MapRoutes()
+	appHandlers := v1.NewAppHandlers(s.echo.Group(s.cfg.Http.ProductsPath), s.log, s.mw, s.cfg, s.svc, s.v, s.m)
+	appHandlers.MapRoutes()
 
 	go func() {
 		if err := s.runHttpServer(); err != nil {

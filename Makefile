@@ -1,13 +1,13 @@
 .PHONY:
 
-run_api_gateway:
+run_gw:
 	go run api_gateway_service/cmd/main.go -config=./api_gateway_service/config/config.yaml
 
-run_writer_microservice:
-	go run writer_service/cmd/main.go -config=./writer_service/config/config.yaml
+run_core:
+	go run core_service/cmd/main.go -config=./core_service/config/config.yaml
 
-run_reader_microservice:
-	go run writer_service/cmd/main.go -config=./writer_service/config/config.yaml
+run_graph:
+	go run graphql_service/cmd/main.go -config=./graphql_service/config/config.yaml
 
 # ==============================================================================
 # Docker
@@ -96,40 +96,38 @@ migrate_up:
 migrate_down:
 	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path migrations down 1
 
-
-# ==============================================================================
-# MongoDB
-
-mongo:
-	cd ./scripts && mongo admin -u admin -p admin < init.js
-
-
 # ==============================================================================
 # Swagger
 
 swagger:
 	@echo Starting swagger generating
-	swag init -g **/**/*.go
+	swag init -g api_gateway_service/cmd/main.go
 
 # ==============================================================================
 # Proto
 
 proto_kafka:
 	@echo Generating kafka proto
-	cd proto/kafka && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. kafka.proto
+	cd proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. kafka.proto
 
-proto_writer:
-	@echo Generating product writer microservice proto
-	cd writer_service/proto/product_writer && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. product_writer.proto
+proto_auth:
+	@echo Generating authorization microservice proto
+	cd auth_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. --proto_path=. auth_service.proto auth_dto.proto
+		
+proto_core:
+	@echo Generating connector microservice proto
+	cd core_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. core_svc.proto core_messages.proto
 
-proto_writer_message:
-	@echo Generating product writer messages microservice proto
-	cd writer_service/proto/product_writer && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. product_writer_messages.proto
+# ==============================================================================
+# Evans
 
-proto_reader:
-	@echo Generating product reader microservice proto
-	cd reader_service/proto/product_reader && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. product_reader.proto
+evans_core:
+	@echo Run grpc client with core proto
+	cd core_service/proto && evans core_svc.proto -p 5003
 
-proto_reader_message:
-	@echo Generating product reader messages microservice proto
-	cd reader_service/proto/product_reader && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. product_reader_messages.proto
+# ==============================================================================
+# gqlgen
+
+gqlgen:
+	@echo Generating GraphQL modules
+	cd .data/gqlgen && go run -mod=mod github.com/99designs/gqlgen --verbose gener

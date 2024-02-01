@@ -1,6 +1,6 @@
 serviceName: api_gateway_service
 grpc:
-  readerServicePort: :5003
+  coreServicePort: :5002
 http:
   port: :5001
   development: true

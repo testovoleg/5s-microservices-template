@@ -1,8 +1,9 @@
 package dto
 
 import (
-	readerService "github.com/AleksK1NG/cqrs-microservices/reader_service/proto/product_reader"
 	"time"
+
+	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 )
 
 type ProductResponse struct {
@@ -14,7 +15,7 @@ type ProductResponse struct {
 	UpdatedAt   time.Time `json:"updatedAt,omitempty"`
 }
 
-func ProductResponseFromGrpc(product *readerService.Product) *ProductResponse {
+func ProductResponseFromGrpc(product *coreService.Product) *ProductResponse {
 	return &ProductResponse{
 		ProductID:   product.GetProductID(),
 		Name:        product.GetName(),

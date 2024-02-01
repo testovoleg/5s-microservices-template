@@ -2,19 +2,20 @@ package metrics
 
 import (
 	"fmt"
-	"github.com/AleksK1NG/cqrs-microservices/api_gateway_service/config"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 )
 
 type ApiGatewayMetrics struct {
-	SuccessHttpRequests        prometheus.Counter
-	ErrorHttpRequests          prometheus.Counter
-	CreateProductHttpRequests  prometheus.Counter
-	UpdateProductHttpRequests  prometheus.Counter
-	DeleteProductHttpRequests  prometheus.Counter
-	GetProductByIdHttpRequests prometheus.Counter
-	SearchProductHttpRequests  prometheus.Counter
+	SuccessHttpRequests             prometheus.Counter
+	ErrorHttpRequests               prometheus.Counter
+	InvoiceHandlersListHttpRequests prometheus.Counter
+	UpdateProductHttpRequests       prometheus.Counter
+	DeleteProductHttpRequests       prometheus.Counter
+	GetProductByIdHttpRequests      prometheus.Counter
+	SearchProductHttpRequests       prometheus.Counter
 }
 
 func NewApiGatewayMetrics(cfg *config.Config) *ApiGatewayMetrics {
@@ -27,9 +28,9 @@ func NewApiGatewayMetrics(cfg *config.Config) *ApiGatewayMetrics {
 			Name: fmt.Sprintf("%s_error_http_requests_total", cfg.ServiceName),
 			Help: "The total number of error http requests",
 		}),
-		CreateProductHttpRequests: promauto.NewCounter(prometheus.CounterOpts{
-			Name: fmt.Sprintf("%s_create_product_http_requests_total", cfg.ServiceName),
-			Help: "The total number of create product http requests",
+		InvoiceHandlersListHttpRequests: promauto.NewCounter(prometheus.CounterOpts{
+			Name: fmt.Sprintf("%s_invoice_handlers_list_http_requests_total", cfg.ServiceName),
+			Help: "The total number of invoice handlers list http requests",
 		}),
 		UpdateProductHttpRequests: promauto.NewCounter(prometheus.CounterOpts{
 			Name: fmt.Sprintf("%s_update_product_http_requests_total", cfg.ServiceName),

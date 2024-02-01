@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package coreService;
+
+option go_package = "./;coreService";
+
+import "core_messages.proto";
+
+service coreService {
+  rpc InvoiceHandlersList(InvoiceHandlersListReq) returns (InvoiceHandlersListRes);
+  rpc UpdateProduct(UpdateProductReq) returns (UpdateProductRes);
+  rpc GetProductById(GetProductByIdReq) returns (GetProductByIdRes);
+  rpc SearchProduct(SearchReq) returns (SearchRes);
+  rpc DeleteProductByID(DeleteProductByIdReq) returns (DeleteProductByIdRes);
+}
