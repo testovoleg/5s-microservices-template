@@ -1,0 +1,26 @@
+enum OrderBy {
+  ID
+  NAME
+}
+
+type BugsResponse {
+  totalCount: Int
+  totalPages: Int
+  page: Int
+  size: Int
+  hasMore: Boolean
+  bugs: [Bug!]
+}
+
+type Query {
+  "Get list of bugs with pagination"
+  bugs(
+    productID: Int!
+    state: BugState
+    bugID: Int
+    solvedInReleaseID: Int
+    page: Int! = 1
+    size: Int! = 100
+    orderBy: OrderBy
+  ): BugsResponse!
+}

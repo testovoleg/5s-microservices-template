@@ -22,8 +22,8 @@ const (
 	KeycloakClientId     = "KEYCLOAK_CLIENTID"
 	KeycloakClientSecret = "KEYCLOAK_CLIENTSECRET"
 
-	CoreServicePort     = "CORESERVICE_PORT"
-	ReleasesServicePort = "RELEASESSERVICE_PORT"
+	CoreServicePort = "CORESERVICE_PORT"
+	coreServicePort = "coreService_PORT"
 
 	GraphQLQuery = "GRAPHQL_QUERY"
 

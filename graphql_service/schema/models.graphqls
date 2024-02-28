@@ -1,0 +1,64 @@
+scalar Upload
+
+type Product {
+  id: ID!
+  name: String
+  description: String
+}
+
+type Release {
+  id: ID!
+  name: String
+  product: Product
+  createdAt: String
+}
+
+enum BugState {
+  NEW
+  INWORK
+  DONE
+  REJECTED
+}
+
+enum CommentState {
+  COMMENT
+  WORKAROUND
+  RESULT
+}
+
+enum VoteState {
+  LIKE
+  DISLIKE
+}
+
+type Bug {
+  id: ID!
+  name: String
+  description: String
+  createdAt: String
+  updatedAt: String
+  state: BugState
+  createdForRelease: Release
+  solvedInRelease: Release
+  externalID: String
+  files: [File!]
+}
+
+type User {
+  id: ID
+  name: String
+  email: String
+}
+
+type Comment {
+  comment: String
+  date: String
+  user: User
+  files: [File!]
+}
+
+type File {
+  file_id: String
+  full_file_id: String
+  preview_data:String
+}
