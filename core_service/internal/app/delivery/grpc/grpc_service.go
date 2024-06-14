@@ -8,14 +8,12 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/commands"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/queries"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/service"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/metrics"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
-	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -73,53 +71,6 @@ func (s *grpcService) UpdateProduct(ctx context.Context, req *coreService.Update
 
 	s.metrics.SuccessGrpcRequests.Inc()
 	return &coreService.UpdateProductRes{ProductID: req.GetProductID()}, nil
-}
-
-func (s *grpcService) GetProductById(ctx context.Context, req *coreService.GetProductByIdReq) (*coreService.GetProductByIdRes, error) {
-	s.metrics.GetProductByIdGrpcRequests.Inc()
-
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.GetProductById")
-	defer span.Finish()
-
-	productUUID, err := uuid.FromString(req.GetProductID())
-	if err != nil {
-		s.log.WarnMsg("uuid.FromString", err)
-		return nil, s.errResponse(codes.InvalidArgument, err)
-	}
-
-	query := queries.NewGetProductByIdQuery(productUUID)
-	if err := s.v.StructCtx(ctx, query); err != nil {
-		s.log.WarnMsg("validate", err)
-		return nil, s.errResponse(codes.InvalidArgument, err)
-	}
-
-	product, err := s.svc.Queries.GetProductById.Handle(ctx, query)
-	if err != nil {
-		s.log.WarnMsg("GetProductById.Handle", err)
-		return nil, s.errResponse(codes.Internal, err)
-	}
-
-	s.metrics.SuccessGrpcRequests.Inc()
-	return &coreService.GetProductByIdRes{Product: models.ProductToGrpcMessage(product)}, nil
-}
-
-func (s *grpcService) SearchProduct(ctx context.Context, req *coreService.SearchReq) (*coreService.SearchRes, error) {
-	s.metrics.SearchProductGrpcRequests.Inc()
-
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.SearchProduct")
-	defer span.Finish()
-
-	pq := utils.NewPaginationQuery(int(req.GetSize()), int(req.GetPage()))
-
-	query := queries.NewSearchProductQuery(req.GetSearch(), pq)
-	productsList, err := s.svc.Queries.SearchProduct.Handle(ctx, query)
-	if err != nil {
-		s.log.WarnMsg("SearchProduct.Handle", err)
-		return nil, s.errResponse(codes.Internal, err)
-	}
-
-	s.metrics.SuccessGrpcRequests.Inc()
-	return models.ProductListToGrpc(productsList), nil
 }
 
 func (s *grpcService) DeleteProductByID(ctx context.Context, req *coreService.DeleteProductByIdReq) (*coreService.DeleteProductByIdRes, error) {

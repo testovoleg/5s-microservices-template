@@ -72,19 +72,3 @@ func ProductToGrpcMessage(product *Product) *coreService.Product {
 		UpdatedAt:   timestamppb.New(product.UpdatedAt),
 	}
 }
-
-func ProductListToGrpc(products *ProductsList) *coreService.SearchRes {
-	list := make([]*coreService.Product, 0, len(products.Products))
-	for _, product := range products.Products {
-		list = append(list, ProductToGrpcMessage(product))
-	}
-
-	return &coreService.SearchRes{
-		TotalCount: products.TotalCount,
-		TotalPages: products.TotalPages,
-		Page:       products.Page,
-		Size:       products.Size,
-		HasMore:    products.HasMore,
-		Products:   list,
-	}
-}

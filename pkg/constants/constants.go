@@ -26,6 +26,7 @@ const (
 	coreServicePort = "coreService_PORT"
 
 	GraphQLQuery = "GRAPHQL_QUERY"
+	RedoclyJSON  = "REDOCLY_JSON"
 
 	RoleAdministrator = "Administrator"
 	RoleWebservice    = "Webservice"

@@ -21,8 +21,6 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	CoreService_InvoiceHandlersList_FullMethodName = "/coreService.coreService/InvoiceHandlersList"
 	CoreService_UpdateProduct_FullMethodName       = "/coreService.coreService/UpdateProduct"
-	CoreService_GetProductById_FullMethodName      = "/coreService.coreService/GetProductById"
-	CoreService_SearchProduct_FullMethodName       = "/coreService.coreService/SearchProduct"
 	CoreService_DeleteProductByID_FullMethodName   = "/coreService.coreService/DeleteProductByID"
 )
 
@@ -32,8 +30,6 @@ const (
 type CoreServiceClient interface {
 	InvoiceHandlersList(ctx context.Context, in *InvoiceHandlersListReq, opts ...grpc.CallOption) (*InvoiceHandlersListRes, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductReq, opts ...grpc.CallOption) (*UpdateProductRes, error)
-	GetProductById(ctx context.Context, in *GetProductByIdReq, opts ...grpc.CallOption) (*GetProductByIdRes, error)
-	SearchProduct(ctx context.Context, in *SearchReq, opts ...grpc.CallOption) (*SearchRes, error)
 	DeleteProductByID(ctx context.Context, in *DeleteProductByIdReq, opts ...grpc.CallOption) (*DeleteProductByIdRes, error)
 }
 
@@ -63,24 +59,6 @@ func (c *coreServiceClient) UpdateProduct(ctx context.Context, in *UpdateProduct
 	return out, nil
 }
 
-func (c *coreServiceClient) GetProductById(ctx context.Context, in *GetProductByIdReq, opts ...grpc.CallOption) (*GetProductByIdRes, error) {
-	out := new(GetProductByIdRes)
-	err := c.cc.Invoke(ctx, CoreService_GetProductById_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *coreServiceClient) SearchProduct(ctx context.Context, in *SearchReq, opts ...grpc.CallOption) (*SearchRes, error) {
-	out := new(SearchRes)
-	err := c.cc.Invoke(ctx, CoreService_SearchProduct_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *coreServiceClient) DeleteProductByID(ctx context.Context, in *DeleteProductByIdReq, opts ...grpc.CallOption) (*DeleteProductByIdRes, error) {
 	out := new(DeleteProductByIdRes)
 	err := c.cc.Invoke(ctx, CoreService_DeleteProductByID_FullMethodName, in, out, opts...)
@@ -96,8 +74,6 @@ func (c *coreServiceClient) DeleteProductByID(ctx context.Context, in *DeletePro
 type CoreServiceServer interface {
 	InvoiceHandlersList(context.Context, *InvoiceHandlersListReq) (*InvoiceHandlersListRes, error)
 	UpdateProduct(context.Context, *UpdateProductReq) (*UpdateProductRes, error)
-	GetProductById(context.Context, *GetProductByIdReq) (*GetProductByIdRes, error)
-	SearchProduct(context.Context, *SearchReq) (*SearchRes, error)
 	DeleteProductByID(context.Context, *DeleteProductByIdReq) (*DeleteProductByIdRes, error)
 }
 
@@ -110,12 +86,6 @@ func (UnimplementedCoreServiceServer) InvoiceHandlersList(context.Context, *Invo
 }
 func (UnimplementedCoreServiceServer) UpdateProduct(context.Context, *UpdateProductReq) (*UpdateProductRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
-}
-func (UnimplementedCoreServiceServer) GetProductById(context.Context, *GetProductByIdReq) (*GetProductByIdRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProductById not implemented")
-}
-func (UnimplementedCoreServiceServer) SearchProduct(context.Context, *SearchReq) (*SearchRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchProduct not implemented")
 }
 func (UnimplementedCoreServiceServer) DeleteProductByID(context.Context, *DeleteProductByIdReq) (*DeleteProductByIdRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProductByID not implemented")
@@ -168,42 +138,6 @@ func _CoreService_UpdateProduct_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CoreService_GetProductById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProductByIdReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CoreServiceServer).GetProductById(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CoreService_GetProductById_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).GetProductById(ctx, req.(*GetProductByIdReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _CoreService_SearchProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CoreServiceServer).SearchProduct(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CoreService_SearchProduct_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CoreServiceServer).SearchProduct(ctx, req.(*SearchReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _CoreService_DeleteProductByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteProductByIdReq)
 	if err := dec(in); err != nil {
@@ -236,14 +170,6 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProduct",
 			Handler:    _CoreService_UpdateProduct_Handler,
-		},
-		{
-			MethodName: "GetProductById",
-			Handler:    _CoreService_GetProductById_Handler,
-		},
-		{
-			MethodName: "SearchProduct",
-			Handler:    _CoreService_SearchProduct_Handler,
 		},
 		{
 			MethodName: "DeleteProductByID",

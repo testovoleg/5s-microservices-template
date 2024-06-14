@@ -16,21 +16,16 @@ type DeleteProductCmdHandler interface {
 type deleteProductCmdHandler struct {
 	log       logger.Logger
 	cfg       *config.Config
-	mongoRepo repository.Repository
 	redisRepo repository.CacheRepository
 }
 
-func NewDeleteProductCmdHandler(log logger.Logger, cfg *config.Config, mongoRepo repository.Repository, redisRepo repository.CacheRepository) *deleteProductCmdHandler {
-	return &deleteProductCmdHandler{log: log, cfg: cfg, mongoRepo: mongoRepo, redisRepo: redisRepo}
+func NewDeleteProductCmdHandler(log logger.Logger, cfg *config.Config, redisRepo repository.CacheRepository) *deleteProductCmdHandler {
+	return &deleteProductCmdHandler{log: log, cfg: cfg, redisRepo: redisRepo}
 }
 
 func (c *deleteProductCmdHandler) Handle(ctx context.Context, command *DeleteProductCommand) error {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "deleteProductCmdHandler.Handle")
 	defer span.Finish()
-
-	if err := c.mongoRepo.DeleteProduct(ctx, command.ProductID); err != nil {
-		return err
-	}
 
 	c.redisRepo.DelProduct(ctx, command.ProductID.String())
 	return nil

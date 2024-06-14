@@ -382,250 +382,6 @@ func (x *UpdateProductRes) GetProductID() string {
 	return ""
 }
 
-type GetProductByIdReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ProductID string `protobuf:"bytes,1,opt,name=ProductID,proto3" json:"ProductID,omitempty"`
-}
-
-func (x *GetProductByIdReq) Reset() {
-	*x = GetProductByIdReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetProductByIdReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetProductByIdReq) ProtoMessage() {}
-
-func (x *GetProductByIdReq) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetProductByIdReq.ProtoReflect.Descriptor instead.
-func (*GetProductByIdReq) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetProductByIdReq) GetProductID() string {
-	if x != nil {
-		return x.ProductID
-	}
-	return ""
-}
-
-type GetProductByIdRes struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Product *Product `protobuf:"bytes,1,opt,name=Product,proto3" json:"Product,omitempty"`
-}
-
-func (x *GetProductByIdRes) Reset() {
-	*x = GetProductByIdRes{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetProductByIdRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetProductByIdRes) ProtoMessage() {}
-
-func (x *GetProductByIdRes) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetProductByIdRes.ProtoReflect.Descriptor instead.
-func (*GetProductByIdRes) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetProductByIdRes) GetProduct() *Product {
-	if x != nil {
-		return x.Product
-	}
-	return nil
-}
-
-type SearchReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Search string `protobuf:"bytes,1,opt,name=Search,proto3" json:"Search,omitempty"`
-	Page   int64  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	Size   int64  `protobuf:"varint,3,opt,name=size,proto3" json:"size,omitempty"`
-}
-
-func (x *SearchReq) Reset() {
-	*x = SearchReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SearchReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SearchReq) ProtoMessage() {}
-
-func (x *SearchReq) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SearchReq.ProtoReflect.Descriptor instead.
-func (*SearchReq) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *SearchReq) GetSearch() string {
-	if x != nil {
-		return x.Search
-	}
-	return ""
-}
-
-func (x *SearchReq) GetPage() int64 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *SearchReq) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-type SearchRes struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	TotalCount int64      `protobuf:"varint,1,opt,name=TotalCount,proto3" json:"TotalCount,omitempty"`
-	TotalPages int64      `protobuf:"varint,2,opt,name=TotalPages,proto3" json:"TotalPages,omitempty"`
-	Page       int64      `protobuf:"varint,3,opt,name=Page,proto3" json:"Page,omitempty"`
-	Size       int64      `protobuf:"varint,4,opt,name=Size,proto3" json:"Size,omitempty"`
-	HasMore    bool       `protobuf:"varint,5,opt,name=HasMore,proto3" json:"HasMore,omitempty"`
-	Products   []*Product `protobuf:"bytes,6,rep,name=Products,proto3" json:"Products,omitempty"`
-}
-
-func (x *SearchRes) Reset() {
-	*x = SearchRes{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SearchRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SearchRes) ProtoMessage() {}
-
-func (x *SearchRes) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SearchRes.ProtoReflect.Descriptor instead.
-func (*SearchRes) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *SearchRes) GetTotalCount() int64 {
-	if x != nil {
-		return x.TotalCount
-	}
-	return 0
-}
-
-func (x *SearchRes) GetTotalPages() int64 {
-	if x != nil {
-		return x.TotalPages
-	}
-	return 0
-}
-
-func (x *SearchRes) GetPage() int64 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *SearchRes) GetSize() int64 {
-	if x != nil {
-		return x.Size
-	}
-	return 0
-}
-
-func (x *SearchRes) GetHasMore() bool {
-	if x != nil {
-		return x.HasMore
-	}
-	return false
-}
-
-func (x *SearchRes) GetProducts() []*Product {
-	if x != nil {
-		return x.Products
-	}
-	return nil
-}
-
 type DeleteProductByIdReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -637,7 +393,7 @@ type DeleteProductByIdReq struct {
 func (x *DeleteProductByIdReq) Reset() {
 	*x = DeleteProductByIdReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[10]
+		mi := &file_core_messages_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -650,7 +406,7 @@ func (x *DeleteProductByIdReq) String() string {
 func (*DeleteProductByIdReq) ProtoMessage() {}
 
 func (x *DeleteProductByIdReq) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[10]
+	mi := &file_core_messages_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -663,7 +419,7 @@ func (x *DeleteProductByIdReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProductByIdReq.ProtoReflect.Descriptor instead.
 func (*DeleteProductByIdReq) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{10}
+	return file_core_messages_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DeleteProductByIdReq) GetProductID() string {
@@ -682,7 +438,7 @@ type DeleteProductByIdRes struct {
 func (x *DeleteProductByIdRes) Reset() {
 	*x = DeleteProductByIdRes{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_core_messages_proto_msgTypes[11]
+		mi := &file_core_messages_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -695,7 +451,7 @@ func (x *DeleteProductByIdRes) String() string {
 func (*DeleteProductByIdRes) ProtoMessage() {}
 
 func (x *DeleteProductByIdRes) ProtoReflect() protoreflect.Message {
-	mi := &file_core_messages_proto_msgTypes[11]
+	mi := &file_core_messages_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -708,7 +464,7 @@ func (x *DeleteProductByIdRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteProductByIdRes.ProtoReflect.Descriptor instead.
 func (*DeleteProductByIdRes) Descriptor() ([]byte, []int) {
-	return file_core_messages_proto_rawDescGZIP(), []int{11}
+	return file_core_messages_proto_rawDescGZIP(), []int{7}
 }
 
 var File_core_messages_proto protoreflect.FileDescriptor
@@ -757,38 +513,14 @@ var file_core_messages_proto_rawDesc = []byte{
 	0x04, 0x20, 0x01, 0x28, 0x01, 0x52, 0x05, 0x50, 0x72, 0x69, 0x63, 0x65, 0x22, 0x30, 0x0a, 0x10,
 	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x65, 0x73,
 	0x12, 0x1c, 0x0a, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44, 0x22, 0x31,
-	0x0a, 0x11, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x42, 0x79, 0x49, 0x64,
-	0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49,
-	0x44, 0x22, 0x43, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x42,
-	0x79, 0x49, 0x64, 0x52, 0x65, 0x73, 0x12, 0x2e, 0x0a, 0x07, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63,
-	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x07, 0x50,
-	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x22, 0x4b, 0x0a, 0x09, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68,
-	0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x12, 0x12, 0x0a, 0x04, 0x70,
-	0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12,
-	0x12, 0x0a, 0x04, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x04, 0x73,
-	0x69, 0x7a, 0x65, 0x22, 0xbf, 0x01, 0x0a, 0x09, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x52, 0x65,
-	0x73, 0x12, 0x1e, 0x0a, 0x0a, 0x54, 0x6f, 0x74, 0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x54, 0x6f, 0x74, 0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e,
-	0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x54, 0x6f, 0x74, 0x61, 0x6c, 0x50, 0x61, 0x67, 0x65, 0x73, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x54, 0x6f, 0x74, 0x61, 0x6c, 0x50, 0x61, 0x67, 0x65,
-	0x73, 0x12, 0x12, 0x0a, 0x04, 0x50, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x04, 0x50, 0x61, 0x67, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x04, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x48, 0x61, 0x73,
-	0x4d, 0x6f, 0x72, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x48, 0x61, 0x73, 0x4d,
-	0x6f, 0x72, 0x65, 0x12, 0x30, 0x0a, 0x08, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x18,
-	0x06, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x52, 0x08, 0x50, 0x72, 0x6f,
-	0x64, 0x75, 0x63, 0x74, 0x73, 0x22, 0x34, 0x0a, 0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50,
-	0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a,
-	0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44, 0x22, 0x16, 0x0a, 0x14, 0x44,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x42, 0x79, 0x49, 0x64,
-	0x52, 0x65, 0x73, 0x42, 0x10, 0x5a, 0x0e, 0x2e, 0x2f, 0x3b, 0x63, 0x6f, 0x72, 0x65, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x01, 0x28, 0x09, 0x52, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49, 0x44, 0x22, 0x34,
+	0x0a, 0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x42,
+	0x79, 0x49, 0x64, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63,
+	0x74, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x50, 0x72, 0x6f, 0x64, 0x75,
+	0x63, 0x74, 0x49, 0x44, 0x22, 0x16, 0x0a, 0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x72,
+	0x6f, 0x64, 0x75, 0x63, 0x74, 0x42, 0x79, 0x49, 0x64, 0x52, 0x65, 0x73, 0x42, 0x10, 0x5a, 0x0e,
+	0x2e, 0x2f, 0x3b, 0x63, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -803,7 +535,7 @@ func file_core_messages_proto_rawDescGZIP() []byte {
 	return file_core_messages_proto_rawDescData
 }
 
-var file_core_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_core_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_core_messages_proto_goTypes = []interface{}{
 	(*InvoiceHandler)(nil),         // 0: coreService.InvoiceHandler
 	(*InvoiceHandlersListReq)(nil), // 1: coreService.InvoiceHandlersListReq
@@ -811,25 +543,19 @@ var file_core_messages_proto_goTypes = []interface{}{
 	(*Product)(nil),                // 3: coreService.Product
 	(*UpdateProductReq)(nil),       // 4: coreService.UpdateProductReq
 	(*UpdateProductRes)(nil),       // 5: coreService.UpdateProductRes
-	(*GetProductByIdReq)(nil),      // 6: coreService.GetProductByIdReq
-	(*GetProductByIdRes)(nil),      // 7: coreService.GetProductByIdRes
-	(*SearchReq)(nil),              // 8: coreService.SearchReq
-	(*SearchRes)(nil),              // 9: coreService.SearchRes
-	(*DeleteProductByIdReq)(nil),   // 10: coreService.DeleteProductByIdReq
-	(*DeleteProductByIdRes)(nil),   // 11: coreService.DeleteProductByIdRes
-	(*timestamppb.Timestamp)(nil),  // 12: google.protobuf.Timestamp
+	(*DeleteProductByIdReq)(nil),   // 6: coreService.DeleteProductByIdReq
+	(*DeleteProductByIdRes)(nil),   // 7: coreService.DeleteProductByIdRes
+	(*timestamppb.Timestamp)(nil),  // 8: google.protobuf.Timestamp
 }
 var file_core_messages_proto_depIdxs = []int32{
-	0,  // 0: coreService.InvoiceHandlersListRes.Handlers:type_name -> coreService.InvoiceHandler
-	12, // 1: coreService.Product.CreatedAt:type_name -> google.protobuf.Timestamp
-	12, // 2: coreService.Product.UpdatedAt:type_name -> google.protobuf.Timestamp
-	3,  // 3: coreService.GetProductByIdRes.Product:type_name -> coreService.Product
-	3,  // 4: coreService.SearchRes.Products:type_name -> coreService.Product
-	5,  // [5:5] is the sub-list for method output_type
-	5,  // [5:5] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0, // 0: coreService.InvoiceHandlersListRes.Handlers:type_name -> coreService.InvoiceHandler
+	8, // 1: coreService.Product.CreatedAt:type_name -> google.protobuf.Timestamp
+	8, // 2: coreService.Product.UpdatedAt:type_name -> google.protobuf.Timestamp
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_core_messages_proto_init() }
@@ -911,54 +637,6 @@ func file_core_messages_proto_init() {
 			}
 		}
 		file_core_messages_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetProductByIdReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_core_messages_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetProductByIdRes); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_core_messages_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_core_messages_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchRes); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_core_messages_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteProductByIdReq); i {
 			case 0:
 				return &v.state
@@ -970,7 +648,7 @@ func file_core_messages_proto_init() {
 				return nil
 			}
 		}
-		file_core_messages_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_core_messages_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteProductByIdRes); i {
 			case 0:
 				return &v.state
@@ -989,7 +667,7 @@ func file_core_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_core_messages_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

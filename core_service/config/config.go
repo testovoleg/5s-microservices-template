@@ -10,11 +10,11 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
-	"github.com/testovoleg/5s-microservice-template/pkg/mongodb"
 	"github.com/testovoleg/5s-microservice-template/pkg/postgres"
 	"github.com/testovoleg/5s-microservice-template/pkg/probes"
 	"github.com/testovoleg/5s-microservice-template/pkg/redis"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
 var configPath string
@@ -30,12 +30,12 @@ type Config struct {
 	GRPC             GRPC                `mapstructure:"grpc"`
 	Postgresql       *postgres.Config    `mapstructure:"postgres"`
 	Kafka            *kafkaClient.Config `mapstructure:"kafka"`
-	Mongo            *mongodb.Config     `mapstructure:"mongo"`
 	Redis            *redis.Config       `mapstructure:"redis"`
 	MongoCollections MongoCollections    `mapstructure:"mongoCollections"`
 	Probes           probes.Config       `mapstructure:"probes"`
 	ServiceSettings  ServiceSettings     `mapstructure:"serviceSettings"`
 	Jaeger           *tracing.Config     `mapstructure:"jaeger"`
+	Resources        Resources           `mapstructure:"resources"`
 }
 
 type GRPC struct {
@@ -55,6 +55,10 @@ type KafkaTopics struct {
 
 type ServiceSettings struct {
 	RedisProductPrefixKey string `mapstructure:"redisProductPrefixKey"`
+}
+
+type Resources struct {
+	REDOCLY_JSON string `mapstructure:"redocly_json"`
 }
 
 func InitConfig() (*Config, error) {
@@ -84,43 +88,10 @@ func InitConfig() (*Config, error) {
 		return nil, errors.Wrap(err, "viper.Unmarshal")
 	}
 
-	grpcPort := os.Getenv(constants.GrpcPort)
-	if grpcPort != "" {
-		cfg.GRPC.Port = grpcPort
-	}
-	postgresHost := os.Getenv(constants.PostgresqlHost)
-	if postgresHost != "" {
-		cfg.Postgresql.Host = postgresHost
-	}
-	postgresPort := os.Getenv(constants.PostgresqlPort)
-	if postgresPort != "" {
-		cfg.Postgresql.Port = postgresPort
-	}
-	mongoURI := os.Getenv(constants.MongoDbURI)
-	if mongoURI != "" {
-		//cfg.Mongo.URI = "mongodb://host.docker.internal:27017"
-		cfg.Mongo.URI = mongoURI
-	}
-	redisAddr := os.Getenv(constants.RedisAddr)
-	if redisAddr != "" {
-		cfg.Redis.Addr = redisAddr
-	}
-	//jaegerAddr := os.Getenv("JAEGER_HOST")
-	//if jaegerAddr != "" {
-	//	cfg.Jaeger.HostPort = jaegerAddr
-	//}
-	//kafkaBrokers := os.Getenv("KAFKA_BROKERS")
-	//if kafkaBrokers != "" {
-	//	cfg.Kafka.Brokers = []string{"host.docker.internal:9092"}
-	//}
-	kafkaBrokers := os.Getenv(constants.KafkaBrokers)
-	if kafkaBrokers != "" {
-		cfg.Kafka.Brokers = []string{kafkaBrokers}
-	}
-	jaegerAddr := os.Getenv(constants.JaegerHostPort)
-	if jaegerAddr != "" {
-		cfg.Jaeger.HostPort = jaegerAddr
-	}
+	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
+	utils.CheckEnvStr(&cfg.Jaeger.HostPort, constants.KafkaBrokers)
+	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.Resources.REDOCLY_JSON, constants.RedoclyJSON)
 
 	return cfg, nil
 }

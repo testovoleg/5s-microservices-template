@@ -19,7 +19,6 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
-	"github.com/testovoleg/5s-microservice-template/pkg/mongodb"
 	redisClient "github.com/testovoleg/5s-microservice-template/pkg/redis"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -48,22 +47,13 @@ func (s *server) Run() error {
 	s.im = interceptors.NewInterceptorManager(s.log)
 	s.metrics = metrics.NewCoreServiceMetrics(s.cfg)
 
-	mongoDBConn, err := mongodb.NewMongoDBConn(ctx, s.cfg.Mongo)
-	if err != nil {
-		return errors.Wrap(err, "NewMongoDBConn")
-	}
-	s.mongoClient = mongoDBConn
-	defer mongoDBConn.Disconnect(ctx) // nolint: errcheck
-	s.log.Infof("Mongo connected: %v", mongoDBConn.NumberSessionsInProgress())
-
 	s.redisClient = redisClient.NewUniversalRedisClient(s.cfg.Redis)
 	defer s.redisClient.Close() // nolint: errcheck
 	s.log.Infof("Redis connected: %+v", s.redisClient.PoolStats())
 
-	mongoRepo := repository.NewMongoRepository(s.log, s.cfg, s.mongoClient)
 	redisRepo := repository.NewRedisRepository(s.log, s.cfg, s.redisClient)
 
-	s.svc = service.NewAppService(s.log, s.cfg, mongoRepo, redisRepo)
+	s.svc = service.NewAppService(s.log, s.cfg, redisRepo)
 
 	readerMessageProcessor := readerKafka.NewReaderMessageProcessor(s.log, s.cfg, s.v, s.svc, s.metrics)
 
