@@ -1,0 +1,28 @@
+{
+  // Используйте IntelliSense, чтобы узнать о возможных атрибутах.
+  // Наведите указатель мыши, чтобы просмотреть описания существующих атрибутов.
+  // Для получения дополнительной информации посетите: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Core service",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "core_service/cmd/main.go",
+      "args": [
+        "-config=${workspaceFolder}/core_service/config/config.yaml"
+      ]
+    },
+    {
+      "name": "Gateway service",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "api_gateway_service/cmd/main.go",
+      "args": [
+        "-config=${workspaceFolder}/api_gateway_service/config/config.yaml"
+      ]
+    },
+  ]
+}
