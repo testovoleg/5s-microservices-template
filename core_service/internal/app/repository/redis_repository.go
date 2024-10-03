@@ -27,8 +27,11 @@ func NewRedisRepository(log logger.Logger, cfg *config.Config, redisClient redis
 }
 
 func (r *redisRepository) PutProduct(ctx context.Context, key string, product *models.Product) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "redisRepository.PutProduct")
-	defer span.Finish()
+	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
+		var span opentracing.Span
+		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.PutProduct")
+		defer span.Finish()
+	}
 
 	productBytes, err := json.Marshal(product)
 	if err != nil {
@@ -44,8 +47,11 @@ func (r *redisRepository) PutProduct(ctx context.Context, key string, product *m
 }
 
 func (r *redisRepository) GetProduct(ctx context.Context, key string) (*models.Product, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "redisRepository.GetProduct")
-	defer span.Finish()
+	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
+		var span opentracing.Span
+		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.GetProduct")
+		defer span.Finish()
+	}
 
 	productBytes, err := r.redisClient.HGet(ctx, r.getRedisProductPrefixKey(), key).Bytes()
 	if err != nil {
@@ -65,6 +71,12 @@ func (r *redisRepository) GetProduct(ctx context.Context, key string) (*models.P
 }
 
 func (r *redisRepository) DelProduct(ctx context.Context, key string) {
+	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
+		var span opentracing.Span
+		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.DelProduct")
+		defer span.Finish()
+	}
+
 	if err := r.redisClient.HDel(ctx, r.getRedisProductPrefixKey(), key).Err(); err != nil {
 		r.log.WarnMsg("redisClient.HDel", err)
 		return
@@ -73,6 +85,12 @@ func (r *redisRepository) DelProduct(ctx context.Context, key string) {
 }
 
 func (r *redisRepository) DelAllProducts(ctx context.Context) {
+	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
+		var span opentracing.Span
+		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.DelAllProducts")
+		defer span.Finish()
+	}
+
 	if err := r.redisClient.Del(ctx, r.getRedisProductPrefixKey()).Err(); err != nil {
 		r.log.WarnMsg("redisClient.HDel", err)
 		return
