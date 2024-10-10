@@ -87,22 +87,5 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
 	utils.CheckEnvStr(&cfg.Http.BasePath, constants.HttpBasePath)
 
-	httpPort := os.Getenv(constants.HttpPort)
-	if httpPort != "" {
-		cfg.Http.Port = httpPort
-	}
-	kafkaBrokers := os.Getenv(constants.KafkaBrokers)
-	if kafkaBrokers != "" {
-		cfg.Kafka.Brokers = []string{kafkaBrokers}
-	}
-	jaegerAddr := os.Getenv(constants.JaegerHostPort)
-	if jaegerAddr != "" {
-		cfg.Jaeger.HostPort = jaegerAddr
-	}
-	coreServicePort := os.Getenv(constants.CoreServicePort)
-	if coreServicePort != "" {
-		cfg.Grpc.CoreServicePort = coreServicePort
-	}
-
 	return cfg, nil
 }
