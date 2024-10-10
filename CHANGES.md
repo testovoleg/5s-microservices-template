@@ -24,4 +24,17 @@ Dockerfile каждого контейнера
 ## Изменения
 Описаны в [changelogs/2_golang_change_version.md](changelogs/2_golang_change_version.md)
 
+# 3. Изменение библиотеки трассировки
+Изменяется библиотека трассировки с opentracing на opentelemetry.
+
+## Причины изменений 
+Библиотека opentracing теперь deprecated ( более не поддерживается и не обновляется )
+
+## Что изменять
+Все что связано с opentracing ( начало/конец трассировок, создание сервера трассировки и т.д. )
+
+## Изменения
+Описаны в [changelogs/3_tracing_library_change.md](changelogs/3_tracing_library_change.md)
+
+
 
