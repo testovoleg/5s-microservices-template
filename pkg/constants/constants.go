@@ -48,6 +48,7 @@ const (
 	REQUEST  = "REQUEST"
 	REPLY    = "REPLY"
 	TIME     = "TIME"
+	TRACEID  = "TRACEID"
 
 	Topic     = "topic"
 	Partition = "partition"

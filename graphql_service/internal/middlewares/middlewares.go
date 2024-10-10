@@ -54,9 +54,10 @@ func (mw *middlewareManager) RequestLoggerMiddleware(next echo.HandlerFunc) echo
 		status := res.Status
 		size := res.Size
 		s := time.Since(start)
+		traceID, _ := ctx.Get("traceid").(string)
 
 		if !mw.checkIgnoredURI(ctx.Request().RequestURI, mw.cfg.Http.IgnoreLogUrls) {
-			mw.log.HttpMiddlewareAccessLogger(req.Method, req.URL.String(), status, size, s)
+			mw.log.HttpMiddlewareAccessLogger(req.Method, req.URL.String(), status, size, s, traceID)
 		}
 
 		return err

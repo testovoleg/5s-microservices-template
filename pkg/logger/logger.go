@@ -39,7 +39,7 @@ type Logger interface {
 	Fatalf(template string, args ...interface{})
 	Printf(template string, args ...interface{})
 	WithName(name string)
-	HttpMiddlewareAccessLogger(method string, uri string, status int, size int64, time time.Duration)
+	HttpMiddlewareAccessLogger(method string, uri string, status int, size int64, time time.Duration, traceID string)
 	GrpcMiddlewareAccessLogger(method string, time time.Duration, metaData map[string][]string, err error)
 	GrpcClientInterceptorLogger(method string, req interface{}, reply interface{}, time time.Duration, metaData map[string][]string, err error)
 	KafkaProcessMessage(topic string, partition int, message string, workerID int, offset int64, time time.Time)
@@ -218,7 +218,7 @@ func (l *appLogger) Sync() error {
 	return l.sugarLogger.Sync()
 }
 
-func (l *appLogger) HttpMiddlewareAccessLogger(method, uri string, status int, size int64, time time.Duration) {
+func (l *appLogger) HttpMiddlewareAccessLogger(method, uri string, status int, size int64, time time.Duration, traceID string) {
 	l.logger.Info(
 		constants.HTTP,
 		zap.String(constants.METHOD, method),
@@ -226,6 +226,7 @@ func (l *appLogger) HttpMiddlewareAccessLogger(method, uri string, status int, s
 		zap.Int(constants.STATUS, status),
 		zap.Int64(constants.SIZE, size),
 		zap.Duration(constants.TIME, time),
+		zap.String(constants.TRACEID, traceID),
 	)
 }
 
