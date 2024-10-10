@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 golang:1.21 AS builder
+FROM --platform=linux/amd64 golang:1.22 AS builder
 
 LABEL stage=gobuilder
 ENV CGO_ENABLED 0
