@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/mutations"
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
+	model "github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	graph "github.com/testovoleg/5s-microservice-template/graphql_service/schema"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateBug(ctx context.Context, input model.NewBug) (*
 	r.metrics.CreateBugGraphQLQueries.Inc()
 
 	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "mutationResolver.CreateBug")
-	defer span.Finish()
+	defer span.End()
 
 	token := ctx.Value(constants.ContextKeyToken).(string)
 

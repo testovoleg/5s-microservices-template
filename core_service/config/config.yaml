@@ -60,8 +60,7 @@ mongoCollections:
   products: products
 serviceSettings:
   redisProductPrefixKey: "reader:product"
-jaeger:
+otl:
   enable: true
   serviceName: core_service
-  hostPort: "localhost:6831"
-  logSpans: false
+  endpoint: "localhost:4317"

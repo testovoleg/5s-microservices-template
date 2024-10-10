@@ -34,7 +34,7 @@ func (s *grpcService) InvoiceHandlersList(ctx context.Context, req *coreService.
 	s.metrics.InvoiceHandlersListGrpcRequests.Inc()
 
 	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.InvoiceHandlersList")
-	defer span.Finish()
+	defer span.End()
 
 	command := commands.NewInvoiceHandlersListCommand()
 	if err := s.v.StructCtx(ctx, command); err != nil {
@@ -56,7 +56,7 @@ func (s *grpcService) UpdateProduct(ctx context.Context, req *coreService.Update
 	s.metrics.UpdateProductGrpcRequests.Inc()
 
 	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.UpdateProduct")
-	defer span.Finish()
+	defer span.End()
 
 	command := commands.NewUpdateProductCommand(req.GetProductID(), req.GetName(), req.GetDescription(), req.GetPrice(), time.Now())
 	if err := s.v.StructCtx(ctx, command); err != nil {
@@ -77,7 +77,7 @@ func (s *grpcService) DeleteProductByID(ctx context.Context, req *coreService.De
 	s.metrics.DeleteProductGrpcRequests.Inc()
 
 	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.DeleteProductByID")
-	defer span.Finish()
+	defer span.End()
 
 	productUUID, err := uuid.FromString(req.GetProductID())
 	if err != nil {

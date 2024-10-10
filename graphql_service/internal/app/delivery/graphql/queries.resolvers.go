@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/queries"
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
+	model "github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	graph "github.com/testovoleg/5s-microservice-template/graphql_service/schema"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"github.com/testovoleg/5s-microservice-template/pkg/utils"
@@ -20,7 +20,7 @@ func (r *queryResolver) Bugs(ctx context.Context, productID int, state *model.Bu
 	r.metrics.GetBugsGraphQLQueries.Inc()
 
 	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "queryResolver.Bugs")
-	defer span.Finish()
+	defer span.End()
 
 	pq := utils.NewPaginationFromQueryParams(strconv.Itoa(size), strconv.Itoa(page))
 	query := queries.NewGetBugsQuery(pq, productID, state, bugID, solvedInReleaseID)

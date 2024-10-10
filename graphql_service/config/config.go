@@ -23,15 +23,15 @@ func init() {
 }
 
 type Config struct {
-	ServiceName string          `mapstructure:"serviceName"`
-	Resources   Resources       `mapstructure:"resources"`
-	Logger      *logger.Config  `mapstructure:"logger"`
-	KafkaTopics KafkaTopics     `mapstructure:"kafkaTopics"`
-	Http        Http            `mapstructure:"http"`
-	Grpc        Grpc            `mapstructure:"grpc"`
-	Kafka       *kafka.Config   `mapstructure:"kafka"`
-	Probes      probes.Config   `mapstructure:"probes"`
-	Jaeger      *tracing.Config `mapstructure:"jaeger"`
+	ServiceName string             `mapstructure:"serviceName"`
+	Resources   Resources          `mapstructure:"resources"`
+	Logger      *logger.Config     `mapstructure:"logger"`
+	KafkaTopics KafkaTopics        `mapstructure:"kafkaTopics"`
+	Http        Http               `mapstructure:"http"`
+	Grpc        Grpc               `mapstructure:"grpc"`
+	Kafka       *kafka.Config      `mapstructure:"kafka"`
+	Probes      probes.Config      `mapstructure:"probes"`
+	OTL         *tracing.OTLConfig `mapstructure:"otl"`
 }
 
 type Resources struct {
@@ -86,7 +86,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	utils.CheckEnvStr(&cfg.Http.Port, constants.HttpPort)
-	utils.CheckEnvStr(&cfg.Jaeger.HostPort, constants.JaegerHostPort)
+	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvStr(&cfg.Grpc.CoreServicePort, constants.CoreServicePort)
 	utils.CheckEnvStr(&cfg.Resources.GRAPHQL_QUERY, constants.GraphQLQuery)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)

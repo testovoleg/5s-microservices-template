@@ -34,7 +34,7 @@ type Config struct {
 	MongoCollections MongoCollections    `mapstructure:"mongoCollections"`
 	Probes           probes.Config       `mapstructure:"probes"`
 	ServiceSettings  ServiceSettings     `mapstructure:"serviceSettings"`
-	Jaeger           *tracing.Config     `mapstructure:"jaeger"`
+	OTL              *tracing.OTLConfig  `mapstructure:"otl"`
 	Resources        Resources           `mapstructure:"resources"`
 }
 
@@ -89,7 +89,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
-	utils.CheckEnvStr(&cfg.Jaeger.HostPort, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
 	utils.CheckEnvStr(&cfg.Resources.REDOCLY_JSON, constants.RedoclyJSON)
 

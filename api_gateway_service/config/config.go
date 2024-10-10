@@ -23,14 +23,14 @@ func init() {
 }
 
 type Config struct {
-	ServiceName string          `mapstructure:"serviceName"`
-	Logger      *logger.Config  `mapstructure:"logger"`
-	KafkaTopics KafkaTopics     `mapstructure:"kafkaTopics"`
-	Http        Http            `mapstructure:"http"`
-	Grpc        Grpc            `mapstructure:"grpc"`
-	Kafka       *kafka.Config   `mapstructure:"kafka"`
-	Probes      probes.Config   `mapstructure:"probes"`
-	Jaeger      *tracing.Config `mapstructure:"jaeger"`
+	ServiceName string             `mapstructure:"serviceName"`
+	Logger      *logger.Config     `mapstructure:"logger"`
+	KafkaTopics KafkaTopics        `mapstructure:"kafkaTopics"`
+	Http        Http               `mapstructure:"http"`
+	Grpc        Grpc               `mapstructure:"grpc"`
+	Kafka       *kafka.Config      `mapstructure:"kafka"`
+	Probes      probes.Config      `mapstructure:"probes"`
+	OTL         *tracing.OTLConfig `mapstructure:"otl"`
 }
 
 type Http struct {
@@ -82,7 +82,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	utils.CheckEnvStr(&cfg.Http.Port, constants.HttpPort)
-	utils.CheckEnvStr(&cfg.Jaeger.HostPort, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvStr(&cfg.Grpc.CoreServicePort, constants.CoreServicePort)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
 	utils.CheckEnvStr(&cfg.Http.BasePath, constants.HttpBasePath)

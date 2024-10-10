@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
@@ -29,8 +28,8 @@ func NewUpdateProductHandler(log logger.Logger, cfg *config.Config, kafkaProduce
 }
 
 func (c *updateProductCmdHandler) Handle(ctx context.Context, command *UpdateProductCommand) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "updateProductCmdHandler.Handle")
-	defer span.Finish()
+	ctx, span := tracing.StartSpan(ctx, "updateProductCmdHandler.Handle")
+	defer span.End()
 
 	updateDto := &kafkaMessages.ProductUpdate{
 		ProductID:   command.UpdateDto.ProductID.String(),
@@ -48,6 +47,6 @@ func (c *updateProductCmdHandler) Handle(ctx context.Context, command *UpdatePro
 		Topic:   c.cfg.KafkaTopics.ProductUpdate.TopicName,
 		Value:   dtoBytes,
 		Time:    time.Now().UTC(),
-		Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(span.Context()),
+		Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(ctx),
 	})
 }

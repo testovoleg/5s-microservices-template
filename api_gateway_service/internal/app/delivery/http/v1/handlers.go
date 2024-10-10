@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/commands"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/service"
@@ -15,6 +14,8 @@ import (
 	httpErrors "github.com/testovoleg/5s-microservice-template/pkg/http_errors"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type appHandlers struct {
@@ -52,7 +53,7 @@ func (h *appHandlers) InvoiceHandlerList() echo.HandlerFunc {
 		h.metrics.InvoiceHandlersListHttpRequests.Inc()
 
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.InvoiceHandlersList")
-		defer span.Finish()
+		defer span.End()
 
 		reqDto := &dto.InvoiceHandlersListReqDto{}
 		if err := c.Bind(reqDto); err != nil {
@@ -79,8 +80,8 @@ func (h *appHandlers) InvoiceHandlerList() echo.HandlerFunc {
 	}
 }
 
-func (h *appHandlers) traceErr(span opentracing.Span, err error) {
-	span.SetTag("error", true)
-	span.LogKV("error_code", err.Error())
+func (h *appHandlers) traceErr(span trace.Span, err error) {
+	span.SetStatus(codes.Error, "operation in api_gateway failed")
+	span.RecordError(err)
 	h.metrics.ErrorHttpRequests.Inc()
 }

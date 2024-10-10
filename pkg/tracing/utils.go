@@ -2,29 +2,36 @@ package tracing
 
 import (
 	"context"
+
 	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
 )
 
-func StartHttpServerTracerSpan(c echo.Context, operationName string) (context.Context, opentracing.Span) {
-	spanCtx, err := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(c.Request().Header))
-	if err != nil {
-		serverSpan := opentracing.GlobalTracer().StartSpan(operationName)
-		ctx := opentracing.ContextWithSpan(c.Request().Context(), serverSpan)
-		return ctx, serverSpan
-	}
+func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
+	return otel.GetTracerProvider().Tracer("").Start(ctx, name)
+}
 
-	serverSpan := opentracing.GlobalTracer().StartSpan(operationName, ext.RPCServerOption(spanCtx))
-	ctx := opentracing.ContextWithSpan(c.Request().Context(), serverSpan)
+func StartHttpServerTracerSpan(c echo.Context, operationName string) (context.Context, trace.Span) {
+	ctx := c.Request().Context()
+
+	ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(c.Request().Header))
+
+	ctx, serverSpan := otel.GetTracerProvider().Tracer("").Start(ctx, operationName)
+
+	traceID := serverSpan.SpanContext().TraceID()
+	if traceID.IsValid() {
+		c.Set("traceid", traceID.String())
+	}
 
 	return ctx, serverSpan
 }
 
-func GetTextMapCarrierFromMetaData(ctx context.Context) opentracing.TextMapCarrier {
-	metadataMap := make(opentracing.TextMapCarrier)
+func GetTextMapCarrierFromMetaData(ctx context.Context) propagation.MapCarrier {
+	metadataMap := make(propagation.MapCarrier)
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		for key := range md.Copy() {
 			metadataMap.Set(key, md.Get(key)[0])
@@ -33,80 +40,63 @@ func GetTextMapCarrierFromMetaData(ctx context.Context) opentracing.TextMapCarri
 	return metadataMap
 }
 
-func StartGrpcServerTracerSpan(ctx context.Context, operationName string) (context.Context, opentracing.Span) {
+func StartGrpcServerTracerSpan(ctx context.Context, operationName string) (context.Context, trace.Span) {
 	textMapCarrierFromMetaData := GetTextMapCarrierFromMetaData(ctx)
 
-	span, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, textMapCarrierFromMetaData)
-	if err != nil {
-		serverSpan := opentracing.GlobalTracer().StartSpan(operationName)
-		ctx = opentracing.ContextWithSpan(ctx, serverSpan)
-		return ctx, serverSpan
-	}
+	ctx = otel.GetTextMapPropagator().Extract(ctx, textMapCarrierFromMetaData)
 
-	serverSpan := opentracing.GlobalTracer().StartSpan(operationName, ext.RPCServerOption(span))
-	ctx = opentracing.ContextWithSpan(ctx, serverSpan)
+	ctx, serverSpan := otel.GetTracerProvider().Tracer("").Start(ctx, operationName)
 
 	return ctx, serverSpan
 }
 
-func StartKafkaConsumerTracerSpan(ctx context.Context, headers []kafka.Header, operationName string) (context.Context, opentracing.Span) {
+func StartKafkaConsumerTracerSpan(ctx context.Context, headers []kafka.Header, operationName string) (context.Context, trace.Span) {
 	carrierFromKafkaHeaders := TextMapCarrierFromKafkaMessageHeaders(headers)
 
-	spanCtx, err := opentracing.GlobalTracer().Extract(opentracing.TextMap, carrierFromKafkaHeaders)
-	if err != nil {
-		serverSpan := opentracing.GlobalTracer().StartSpan(operationName)
-		ctx = opentracing.ContextWithSpan(ctx, serverSpan)
-		return ctx, serverSpan
-	}
+	ctx = otel.GetTextMapPropagator().Extract(ctx, carrierFromKafkaHeaders)
 
-	serverSpan := opentracing.GlobalTracer().StartSpan(operationName, ext.RPCServerOption(spanCtx))
-	ctx = opentracing.ContextWithSpan(ctx, serverSpan)
+	ctx, serverSpan := otel.GetTracerProvider().Tracer("").Start(ctx, operationName)
+	//ctx = trace.ContextWithSpan(ctx, spanCtx)
 
 	return ctx, serverSpan
 }
-
-func TextMapCarrierToKafkaMessageHeaders(textMap opentracing.TextMapCarrier) []kafka.Header {
+func TextMapCarrierToKafkaMessageHeaders(textMap propagation.MapCarrier) []kafka.Header {
 	headers := make([]kafka.Header, 0, len(textMap))
 
-	if err := textMap.ForeachKey(func(key, val string) error {
+	for key, val := range textMap {
 		headers = append(headers, kafka.Header{
 			Key:   key,
 			Value: []byte(val),
 		})
-		return nil
-	}); err != nil {
-		return headers
 	}
 
 	return headers
 }
 
-func TextMapCarrierFromKafkaMessageHeaders(headers []kafka.Header) opentracing.TextMapCarrier {
+func TextMapCarrierFromKafkaMessageHeaders(headers []kafka.Header) propagation.MapCarrier {
 	textMap := make(map[string]string, len(headers))
 	for _, header := range headers {
 		textMap[header.Key] = string(header.Value)
 	}
-	return opentracing.TextMapCarrier(textMap)
+	return propagation.MapCarrier(textMap)
 }
 
-func InjectTextMapCarrier(spanCtx opentracing.SpanContext) (opentracing.TextMapCarrier, error) {
-	m := make(opentracing.TextMapCarrier)
-	if err := opentracing.GlobalTracer().Inject(spanCtx, opentracing.TextMap, m); err != nil {
-		return nil, err
-	}
+func InjectTextMapCarrier(ctx context.Context) (propagation.MapCarrier, error) {
+	m := make(propagation.MapCarrier)
+	otel.GetTextMapPropagator().Inject(ctx, m)
 	return m, nil
 }
 
-func InjectTextMapCarrierToGrpcMetaData(ctx context.Context, spanCtx opentracing.SpanContext) context.Context {
-	if textMapCarrier, err := InjectTextMapCarrier(spanCtx); err == nil {
+func InjectTextMapCarrierToGrpcMetaData(ctx context.Context, spanCtx trace.SpanContext) context.Context {
+	if textMapCarrier, err := InjectTextMapCarrier(ctx); err == nil {
 		md := metadata.New(textMapCarrier)
 		ctx = metadata.NewOutgoingContext(ctx, md)
 	}
 	return ctx
 }
 
-func GetKafkaTracingHeadersFromSpanCtx(spanCtx opentracing.SpanContext) []kafka.Header {
-	textMapCarrier, err := InjectTextMapCarrier(spanCtx)
+func GetKafkaTracingHeadersFromSpanCtx(ctx context.Context) []kafka.Header {
+	textMapCarrier, err := InjectTextMapCarrier(ctx)
 	if err != nil {
 		return []kafka.Header{}
 	}

@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 	v1 "github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/delivery/http/v1"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/service"
@@ -20,6 +19,7 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"go.opentelemetry.io/otel"
 )
 
 type server struct {
@@ -71,13 +71,14 @@ func (s *server) Run() error {
 	s.runMetrics(cancel)
 	s.runHealthCheck(ctx)
 
-	if s.cfg.Jaeger.Enable {
-		tracer, closer, err := tracing.NewJaegerTracer(s.cfg.Jaeger)
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
 		if err != nil {
 			return err
 		}
-		defer closer.Close() // nolint: errcheck
-		opentracing.SetGlobalTracer(tracer)
+		defer func() { _ = shutdown(ctx) }()
+
+		otel.SetTracerProvider(provider)
 	}
 
 	<-ctx.Done()

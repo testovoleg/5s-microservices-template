@@ -3,10 +3,10 @@ package commands
 import (
 	"context"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
 type DeleteProductCmdHandler interface {
@@ -24,8 +24,8 @@ func NewDeleteProductCmdHandler(log logger.Logger, cfg *config.Config, redisRepo
 }
 
 func (c *deleteProductCmdHandler) Handle(ctx context.Context, command *DeleteProductCommand) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "deleteProductCmdHandler.Handle")
-	defer span.Finish()
+	ctx, span := tracing.StartSpan(ctx, "deleteProductCmdHandler.Handle")
+	defer span.End()
 
 	c.redisRepo.DelProduct(ctx, command.ProductID.String())
 	return nil

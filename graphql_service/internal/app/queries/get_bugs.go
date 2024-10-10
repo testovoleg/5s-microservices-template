@@ -3,11 +3,11 @@ package queries
 import (
 	"context"
 
-	"github.com/opentracing/opentracing-go"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/config"
 	model "github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
 type GetBugsHandler interface {
@@ -25,10 +25,10 @@ func NewGetBugsHandler(log logger.Logger, cfg *config.Config, coreClient coreSer
 }
 
 func (s *getBugsHandler) Handle(ctx context.Context, query *GetBugsQuery) (*model.BugsResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "getBugsHandler.Handle")
-	defer span.Finish()
+	ctx, span := tracing.StartSpan(ctx, "getBugsHandler.Handle")
+	defer span.End()
 
-	// ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.Context())
+	// ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	// res, err := s.coreClient.GetBugList(ctx, &coreService.GetBugListReq{
 	// 	ProductID: query.ProductID,
 	// 	State:     model.GetBugStateToGrpc(query.State),

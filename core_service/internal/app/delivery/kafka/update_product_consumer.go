@@ -15,7 +15,7 @@ func (s *readerMessageProcessor) processProductUpdated(ctx context.Context, r *k
 	s.metrics.UpdateProductKafkaMessages.Inc()
 
 	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "readerMessageProcessor.processProductUpdated")
-	defer span.Finish()
+	defer span.End()
 
 	msg := &kafkaMessages.ProductUpdated{}
 	if err := proto.Unmarshal(m.Value, msg); err != nil {

@@ -6,7 +6,7 @@ const (
 	HttpBasePath         = "HTTP_BASEPATH"
 	ConfigPath           = "CONFIG_PATH"
 	KafkaBrokers         = "KAFKA_BROKERS"
-	JaegerHostPort       = "JAEGER_HOST"
+	OTLEndpoint          = "OTL_ENDPOINT"
 	RedisAddr            = "REDIS_ADDR"
 	RedisPassword        = "REDIS_PASSWORD"
 	RedisDB              = "REDIS_DB"

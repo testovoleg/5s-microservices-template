@@ -23,8 +23,8 @@ func NewUpdateProductCmdHandler(log logger.Logger, cfg *config.Config, redisRepo
 }
 
 func (c *updateProductCmdHandler) Handle(ctx context.Context, command *UpdateProductCommand) error {
-	// span, ctx := opentracing.StartSpanFromContext(ctx, "updateProductCmdHandler.Handle")
-	// defer span.Finish()
+	// ctx, span := tracing.StartSpan(ctx, "updateProductCmdHandler.Handle")
+	// defer span.End()
 
 	// product := &models.Product{
 	// 	ProductID:   command.ProductID,

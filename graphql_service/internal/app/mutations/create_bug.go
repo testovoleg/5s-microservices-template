@@ -3,7 +3,6 @@ package mutations
 import (
 	"context"
 
-	"github.com/opentracing/opentracing-go"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/config"
 	model "github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
@@ -38,10 +37,10 @@ func NewCreateBugHandler(
 }
 
 func (c *createBugHandler) Handle(ctx context.Context, command *CreateBugCommand) (*model.Bug, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "createBugHandler.Handle")
-	defer span.Finish()
+	ctx, span := tracing.StartSpan(ctx, "createBugHandler.Handle")
+	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.Context())
+	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	// res, err := c.coreClient.CreateBug(ctx, &coreService.CreateBugReq{
 	// 	AccessToken:        command.AccessToken,
 	// 	Name:               command.Name,
@@ -74,7 +73,7 @@ func (c *createBugHandler) Handle(ctx context.Context, command *CreateBugCommand
 	// 	Topic:   c.cfg.KafkaTopics.FileUploaded.TopicName,
 	// 	Value:   dtoBytes,
 	// 	Time:    time.Now().UTC(),
-	// 	Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(span.Context()),
+	// 	Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(ctx),
 	// })
 
 	// return model.BugFromGrpcMessage(bug), nil

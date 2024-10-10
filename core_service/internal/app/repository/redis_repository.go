@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -27,10 +28,10 @@ func NewRedisRepository(log logger.Logger, cfg *config.Config, redisClient redis
 }
 
 func (r *redisRepository) PutProduct(ctx context.Context, key string, product *models.Product) {
-	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
-		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.PutProduct")
-		defer span.Finish()
+	if trace.SpanContextFromContext(ctx).IsValid() { // if have tracing, start new span
+		var span trace.Span
+		ctx, span = tracing.StartSpan(ctx, "redisRepository.PutProduct")
+		defer span.End()
 	}
 
 	productBytes, err := json.Marshal(product)
@@ -47,10 +48,10 @@ func (r *redisRepository) PutProduct(ctx context.Context, key string, product *m
 }
 
 func (r *redisRepository) GetProduct(ctx context.Context, key string) (*models.Product, error) {
-	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
-		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.GetProduct")
-		defer span.Finish()
+	if trace.SpanContextFromContext(ctx).IsValid() { // if have tracing, start new span
+		var span trace.Span
+		ctx, span = tracing.StartSpan(ctx, "redisRepository.GetProduct")
+		defer span.End()
 	}
 
 	productBytes, err := r.redisClient.HGet(ctx, r.getRedisProductPrefixKey(), key).Bytes()
@@ -71,10 +72,10 @@ func (r *redisRepository) GetProduct(ctx context.Context, key string) (*models.P
 }
 
 func (r *redisRepository) DelProduct(ctx context.Context, key string) {
-	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
-		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.DelProduct")
-		defer span.Finish()
+	if trace.SpanContextFromContext(ctx).IsValid() { // if have tracing, start new span
+		var span trace.Span
+		ctx, span = tracing.StartSpan(ctx, "redisRepository.DelProduct")
+		defer span.End()
 	}
 
 	if err := r.redisClient.HDel(ctx, r.getRedisProductPrefixKey(), key).Err(); err != nil {
@@ -85,10 +86,10 @@ func (r *redisRepository) DelProduct(ctx context.Context, key string) {
 }
 
 func (r *redisRepository) DelAllProducts(ctx context.Context) {
-	if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
-		var span opentracing.Span
-		span, ctx = opentracing.StartSpanFromContext(ctx, "redisRepository.DelAllProducts")
-		defer span.Finish()
+	if trace.SpanContextFromContext(ctx).IsValid() { // if have tracing, start new span
+		var span trace.Span
+		ctx, span = tracing.StartSpan(ctx, "redisRepository.DelAllProducts")
+		defer span.End()
 	}
 
 	if err := r.redisClient.Del(ctx, r.getRedisProductPrefixKey()).Err(); err != nil {

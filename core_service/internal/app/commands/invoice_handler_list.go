@@ -24,8 +24,8 @@ func NewInvoiceHandlersListHandler(log logger.Logger, cfg *config.Config, redisR
 }
 
 func (c *invoiceHandlersListHandler) Handle(ctx context.Context, command *InvoiceHandlersListCommand) ([]*models.InvoiceHandler, error) {
-	// span, ctx := opentracing.StartSpanFromContext(ctx, "invoiceHandlersListHandler.Handle")
-	// defer span.Finish()
+	// ctx, span := tracing.StartSpan(ctx, "invoiceHandlersListHandler.Handle")
+	// defer span.End()
 
 	// product := &models.Product{
 	// 	ProductID:   command.ProductID,

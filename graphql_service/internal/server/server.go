@@ -9,7 +9,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/config"
 	graph_resolvers "github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/delivery/graphql"
@@ -22,6 +21,7 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"go.opentelemetry.io/otel"
 )
 
 type server struct {
@@ -77,13 +77,14 @@ func (s *server) Run() error {
 	s.runMetrics(cancel)
 	s.runHealthCheck(ctx)
 
-	if s.cfg.Jaeger.Enable {
-		tracer, closer, err := tracing.NewJaegerTracer(s.cfg.Jaeger)
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
 		if err != nil {
 			return err
 		}
-		defer closer.Close() // nolint: errcheck
-		opentracing.SetGlobalTracer(tracer)
+		defer func() { _ = shutdown(ctx) }()
+
+		otel.SetTracerProvider(provider)
 	}
 
 	<-ctx.Done()

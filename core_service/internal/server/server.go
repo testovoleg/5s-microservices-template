@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/go-redis/redis/v8"
-	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
@@ -22,6 +21,7 @@ import (
 	redisClient "github.com/testovoleg/5s-microservice-template/pkg/redis"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.opentelemetry.io/otel"
 )
 
 type server struct {
@@ -69,13 +69,14 @@ func (s *server) Run() error {
 	s.runHealthCheck(ctx)
 	s.runMetrics(cancel)
 
-	if s.cfg.Jaeger.Enable {
-		tracer, closer, err := tracing.NewJaegerTracer(s.cfg.Jaeger)
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
 		if err != nil {
 			return err
 		}
-		defer closer.Close() // nolint: errcheck
-		opentracing.SetGlobalTracer(tracer)
+		defer func() { _ = shutdown(ctx) }()
+
+		otel.SetTracerProvider(provider)
 	}
 
 	closeGrpcServer, grpcServer, err := s.newReaderGrpcServer()

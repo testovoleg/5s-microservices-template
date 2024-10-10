@@ -16,7 +16,7 @@ func (s *readerMessageProcessor) processProductDeleted(ctx context.Context, r *k
 	s.metrics.DeleteProductKafkaMessages.Inc()
 
 	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "readerMessageProcessor.processProductDeleted")
-	defer span.Finish()
+	defer span.End()
 
 	msg := &kafkaMessages.ProductDeleted{}
 	if err := proto.Unmarshal(m.Value, msg); err != nil {

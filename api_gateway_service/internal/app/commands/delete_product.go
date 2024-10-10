@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
@@ -29,8 +28,8 @@ func NewDeleteProductHandler(log logger.Logger, cfg *config.Config, kafkaProduce
 }
 
 func (c *deleteProductHandler) Handle(ctx context.Context, command *DeleteProductCommand) error {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "deleteProductHandler.Handle")
-	defer span.Finish()
+	ctx, span := tracing.StartSpan(ctx, "deleteProductHandler.Handle")
+	defer span.End()
 
 	createDto := &kafkaMessages.ProductDelete{ProductID: command.ProductID.String()}
 
@@ -43,6 +42,6 @@ func (c *deleteProductHandler) Handle(ctx context.Context, command *DeleteProduc
 		Topic:   c.cfg.KafkaTopics.ProductDelete.TopicName,
 		Value:   dtoBytes,
 		Time:    time.Now().UTC(),
-		Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(span.Context()),
+		Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(ctx),
 	})
 }
