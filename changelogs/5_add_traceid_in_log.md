@@ -2,10 +2,10 @@
 # Добавление traceID в контекст
 В pkg/tracing/utils.go в функции StartHttpServerTracerSpan добавить следующее перед возвратом функции ( возможно у вас уже это сделано ):
 ```go
-	traceID := serverSpan.SpanContext().TraceID()
-	if traceID.IsValid() {
-		c.Set("traceid", traceID.String())
-	}
+traceID := serverSpan.SpanContext().TraceID()
+if traceID.IsValid() {
+    c.Set("traceid", traceID.String())
+}
 ```
 
 # Добавление константы
