@@ -1,0 +1,5 @@
+.data/zk-single-kafka-single
+.data/microservices_pgdata
+main
+.env
+.DS_Store
