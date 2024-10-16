@@ -385,7 +385,7 @@ var span trace.Span
 ## Шестая замена
 Заменяем
 ```go
-tracing.GetKafkaTracingHeadersFromSpanCtx(ctx)
+tracing.GetKafkaTracingHeadersFromSpanCtx(span.SpanContext())
 ```
 на
 ```go
