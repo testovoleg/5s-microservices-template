@@ -34,7 +34,6 @@ type Config struct {
 	Probes          probes.Config       `mapstructure:"probes"`
 	ServiceSettings ServiceSettings     `mapstructure:"serviceSettings"`
 	OTL             *tracing.OTLConfig  `mapstructure:"otl"`
-	Resources       Resources           `mapstructure:"resources"`
 }
 
 type GRPC struct {
@@ -50,10 +49,6 @@ type KafkaTopics struct {
 
 type ServiceSettings struct {
 	RedisProductPrefixKey string `mapstructure:"redisProductPrefixKey"`
-}
-
-type Resources struct {
-	REDOCLY_JSON string `mapstructure:"redocly_json"`
 }
 
 func InitConfig() (*Config, error) {
