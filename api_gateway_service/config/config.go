@@ -30,6 +30,7 @@ type Config struct {
 	Grpc        Grpc               `mapstructure:"grpc"`
 	Kafka       *kafka.Config      `mapstructure:"kafka"`
 	Probes      probes.Config      `mapstructure:"probes"`
+	Resources   Resources          `mapstructure:"resources"`
 	OTL         *tracing.OTLConfig `mapstructure:"otl"`
 }
 
@@ -37,7 +38,7 @@ type Http struct {
 	Port                string   `mapstructure:"port"`
 	Development         bool     `mapstructure:"development"`
 	BasePath            string   `mapstructure:"basePath"`
-	ProductsPath        string   `mapstructure:"productsPath"`
+	V1Path              string   `mapstructure:"v1Path"`
 	DebugHeaders        bool     `mapstructure:"debugHeaders"`
 	HttpClientDebug     bool     `mapstructure:"httpClientDebug"`
 	DebugErrorsResponse bool     `mapstructure:"debugErrorsResponse"`
@@ -52,6 +53,10 @@ type KafkaTopics struct {
 	ProductCreate kafka.TopicConfig `mapstructure:"productCreate"`
 	ProductUpdate kafka.TopicConfig `mapstructure:"productUpdate"`
 	ProductDelete kafka.TopicConfig `mapstructure:"productDelete"`
+}
+
+type Resources struct {
+	REDOCLY_JSON string `mapstructure:"redocly_json"`
 }
 
 func InitConfig() (*Config, error) {
@@ -86,6 +91,7 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvStr(&cfg.Grpc.CoreServicePort, constants.CoreServicePort)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
 	utils.CheckEnvStr(&cfg.Http.BasePath, constants.HttpBasePath)
+	utils.CheckEnvStr(&cfg.Resources.REDOCLY_JSON, constants.RedoclyJSON)
 
 	return cfg, nil
 }

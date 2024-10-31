@@ -34,7 +34,7 @@ paths:
       tags:
       - Invoices
 securityDefinitions:
-  ApiKeyAuth:
+  BearerToken:
     description: 'Bearer token. Example: ''Bearer xxxxxxxxxxxxxxxx'''
     in: header
     name: Authorization

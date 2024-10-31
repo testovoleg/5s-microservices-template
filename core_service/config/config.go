@@ -24,27 +24,22 @@ func init() {
 }
 
 type Config struct {
-	ServiceName      string              `mapstructure:"serviceName"`
-	Logger           *logger.Config      `mapstructure:"logger"`
-	KafkaTopics      KafkaTopics         `mapstructure:"kafkaTopics"`
-	GRPC             GRPC                `mapstructure:"grpc"`
-	Postgresql       *postgres.Config    `mapstructure:"postgres"`
-	Kafka            *kafkaClient.Config `mapstructure:"kafka"`
-	Redis            *redis.Config       `mapstructure:"redis"`
-	MongoCollections MongoCollections    `mapstructure:"mongoCollections"`
-	Probes           probes.Config       `mapstructure:"probes"`
-	ServiceSettings  ServiceSettings     `mapstructure:"serviceSettings"`
-	OTL              *tracing.OTLConfig  `mapstructure:"otl"`
-	Resources        Resources           `mapstructure:"resources"`
+	ServiceName     string              `mapstructure:"serviceName"`
+	Logger          *logger.Config      `mapstructure:"logger"`
+	KafkaTopics     KafkaTopics         `mapstructure:"kafkaTopics"`
+	GRPC            GRPC                `mapstructure:"grpc"`
+	Postgresql      *postgres.Config    `mapstructure:"postgres"`
+	Kafka           *kafkaClient.Config `mapstructure:"kafka"`
+	Redis           *redis.Config       `mapstructure:"redis"`
+	Probes          probes.Config       `mapstructure:"probes"`
+	ServiceSettings ServiceSettings     `mapstructure:"serviceSettings"`
+	OTL             *tracing.OTLConfig  `mapstructure:"otl"`
+	Resources       Resources           `mapstructure:"resources"`
 }
 
 type GRPC struct {
 	Port        string `mapstructure:"port"`
 	Development bool   `mapstructure:"development"`
-}
-
-type MongoCollections struct {
-	Products string `mapstructure:"products"`
 }
 
 type KafkaTopics struct {
@@ -91,7 +86,6 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
 	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
-	utils.CheckEnvStr(&cfg.Resources.REDOCLY_JSON, constants.RedoclyJSON)
 
 	return cfg, nil
 }

@@ -15,7 +15,7 @@ import (
 // @contact.name Oleg Testov
 // @contact.url https://github.com/testovoleg
 // @contact.email o.testov@5systems.ru
-// @securityDefinitions.apikey ApiKeyAuth
+// @securityDefinitions.apikey BearerToken
 // @in header
 // @name Authorization
 // @description Bearer token. Example: 'Bearer xxxxxxxxxxxxxxxx'

@@ -57,7 +57,7 @@ func (s *server) Run() error {
 
 	s.svc = service.NewAppService(s.log, s.cfg, kafkaProducer, csClient)
 
-	appHandlers := v1.NewAppHandlers(s.echo.Group(s.cfg.Http.ProductsPath), s.log, s.mw, s.cfg, s.svc, s.v, s.m)
+	appHandlers := v1.NewAppHandlers(s.echo.Group(s.cfg.Http.V1Path), s.log, s.mw, s.cfg, s.svc, s.v, s.m)
 	appHandlers.MapRoutes()
 
 	go func() {

@@ -33,7 +33,7 @@ func (s *server) mapRoutes() {
 	docs.SwaggerInfo.Title = "API Gateway"
 	docs.SwaggerInfo.Description = "API Gateway microservices."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.BasePath = s.cfg.Http.BasePath
 
 	s.echo.Use(s.mw.RequestLoggerMiddleware)
 	s.echo.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{

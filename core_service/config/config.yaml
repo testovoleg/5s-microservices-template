@@ -1,6 +1,6 @@
 serviceName: core_service
 grpc:
-  port: :5003
+  port: :5002
   development: true
 probes:
   readinessPath: /ready
@@ -51,13 +51,6 @@ redis:
   password: ""
   db: 0
   poolSize: 300
-mongo:
-  uri: "mongodb://localhost:27017"
-  user: admin
-  password: admin
-  db: products
-mongoCollections:
-  products: products
 serviceSettings:
   redisProductPrefixKey: "reader:product"
 otl:
