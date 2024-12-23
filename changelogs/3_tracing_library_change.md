@@ -367,11 +367,11 @@ span.SpanContext()
 ## Четвертая замена
 Заменяем
 ```go
-if opentracing.SpanFromContext(ctx) != nil { // if have tracing, start new span
+if opentracing.SpanFromContext(ctx) != nil {
 ```
 на
 ```go
-if trace.SpanContextFromContext(ctx).IsValid() { // if have tracing, start new span
+if trace.SpanContextFromContext(ctx).IsValid() {
 ```
 ## Пятая замена
 Заменяем
