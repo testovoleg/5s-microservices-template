@@ -20,7 +20,7 @@ var (
 	retryOptions = []retry.Option{retry.Attempts(retryAttempts), retry.Delay(retryDelay), retry.DelayType(retry.BackOffDelay)}
 )
 
-func (s *readerMessageProcessor) processProductCreated(ctx context.Context, r *kafka.Reader, m kafka.Message) {
+func (s *coreMessageProcessor) processProductCreated(ctx context.Context, r *kafka.Reader, m kafka.Message) {
 	s.metrics.CreateProductKafkaMessages.Inc()
 
 	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "readerMessageProcessor.processProductCreated")

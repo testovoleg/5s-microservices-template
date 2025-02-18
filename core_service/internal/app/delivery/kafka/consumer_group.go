@@ -16,7 +16,7 @@ const (
 	PoolSize = 30
 )
 
-type readerMessageProcessor struct {
+type coreMessageProcessor struct {
 	log     logger.Logger
 	cfg     *config.Config
 	v       *validator.Validate
@@ -24,11 +24,11 @@ type readerMessageProcessor struct {
 	metrics *metrics.CoreServiceMetrics
 }
 
-func NewReaderMessageProcessor(log logger.Logger, cfg *config.Config, v *validator.Validate, ps *service.Service, metrics *metrics.CoreServiceMetrics) *readerMessageProcessor {
-	return &readerMessageProcessor{log: log, cfg: cfg, v: v, ps: ps, metrics: metrics}
+func NewCoreMessageProcessor(log logger.Logger, cfg *config.Config, v *validator.Validate, ps *service.Service, metrics *metrics.CoreServiceMetrics) *coreMessageProcessor {
+	return &coreMessageProcessor{log: log, cfg: cfg, v: v, ps: ps, metrics: metrics}
 }
 
-func (s *readerMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Reader, wg *sync.WaitGroup, workerID int) {
+func (s *coreMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Reader, wg *sync.WaitGroup, workerID int) {
 	defer wg.Done()
 
 	for {

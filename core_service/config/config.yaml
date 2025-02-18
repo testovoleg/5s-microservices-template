@@ -22,7 +22,7 @@ postgres:
   dbName: products
   sslMode: false
 kafka:
-  brokers: [ "localhost:9092" ]
+  brokers: ["localhost:9092"]
   groupID: writer_microservice_consumer
   initTopics: true
 kafkaTopics:

@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"

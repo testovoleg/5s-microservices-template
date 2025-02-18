@@ -55,10 +55,6 @@ func (s *server) runHealthCheck(ctx context.Context) {
 		return s.redisClient.Ping(ctx).Err()
 	}, time.Duration(s.cfg.Probes.CheckIntervalSeconds)*time.Second))
 
-	health.AddReadinessCheck(constants.MongoDB, healthcheck.AsyncWithContext(ctx, func() error {
-		return s.mongoClient.Ping(ctx, nil)
-	}, time.Duration(s.cfg.Probes.CheckIntervalSeconds)*time.Second))
-
 	health.AddReadinessCheck(constants.Kafka, healthcheck.AsyncWithContext(ctx, func() error {
 		_, err := s.kafkaConn.Brokers()
 		if err != nil {

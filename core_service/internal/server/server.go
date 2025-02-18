@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/go-playground/validator"
-	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	readerKafka "github.com/testovoleg/5s-microservice-template/core_service/internal/app/delivery/kafka"
@@ -20,7 +20,6 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	redisClient "github.com/testovoleg/5s-microservice-template/pkg/redis"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.opentelemetry.io/otel"
 )
 
@@ -30,7 +29,6 @@ type server struct {
 	v           *validator.Validate
 	kafkaConn   *kafka.Conn
 	im          interceptors.InterceptorManager
-	mongoClient *mongo.Client
 	redisClient redis.UniversalClient
 	svc         *service.Service
 	metrics     *metrics.CoreServiceMetrics
@@ -55,12 +53,10 @@ func (s *server) Run() error {
 
 	s.svc = service.NewAppService(s.log, s.cfg, redisRepo)
 
-	readerMessageProcessor := readerKafka.NewReaderMessageProcessor(s.log, s.cfg, s.v, s.svc, s.metrics)
-
 	s.log.Info("Starting Reader Kafka consumers")
+	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.metrics)
 	cg := kafkaClient.NewConsumerGroup(s.cfg.Kafka.Brokers, s.cfg.Kafka.GroupID, s.log)
-	go cg.ConsumeTopic(ctx, s.getConsumerGroupTopics(), readerKafka.PoolSize, readerMessageProcessor.ProcessMessages)
-
+	go cg.ConsumeTopic(ctx, s.getConsumerGroupTopics(), readerKafka.PoolSize, coreMessageProcessor.ProcessMessages)
 	if err := s.connectKafkaBrokers(ctx); err != nil {
 		return errors.Wrap(err, "s.connectKafkaBrokers")
 	}

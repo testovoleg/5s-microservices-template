@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func (s *readerMessageProcessor) processProductUpdated(ctx context.Context, r *kafka.Reader, m kafka.Message) {
+func (s *coreMessageProcessor) processProductUpdated(ctx context.Context, r *kafka.Reader, m kafka.Message) {
 	s.metrics.UpdateProductKafkaMessages.Inc()
 
 	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "readerMessageProcessor.processProductUpdated")

@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.44
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/go-redis/redis/v8 v8.11.3
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -16,13 +15,13 @@ require (
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.1
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/kafka-go v0.4.17
 	github.com/spf13/viper v1.18.2
 	github.com/swaggo/echo-swagger v1.4.0
 	github.com/swaggo/swag v1.8.12
 	github.com/vektah/gqlparser/v2 v2.5.11
-	go.mongodb.org/mongo-driver v1.7.1
 	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.30.0
 	go.opentelemetry.io/otel/sdk v1.30.0
@@ -50,7 +49,6 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
-	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
@@ -93,10 +91,6 @@ require (
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.0.2 // indirect
-	github.com/xdg-go/stringprep v1.0.2 // indirect
-	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.30.0 // indirect
 	go.opentelemetry.io/otel/metric v1.30.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
@@ -105,7 +99,6 @@ require (
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.29.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/time v0.5.0 // indirect

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func (s *readerMessageProcessor) processProductDeleted(ctx context.Context, r *kafka.Reader, m kafka.Message) {
+func (s *coreMessageProcessor) processProductDeleted(ctx context.Context, r *kafka.Reader, m kafka.Message) {
 	s.metrics.DeleteProductKafkaMessages.Inc()
 
 	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "readerMessageProcessor.processProductDeleted")
