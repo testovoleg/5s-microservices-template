@@ -28,6 +28,7 @@ const (
 	GraphQLQuery = "GRAPHQL_QUERY"
 	RedoclyJSON  = "REDOCLY_JSON"
 
+	RoleSuperuser     = "Superuser"
 	RoleAdministrator = "Administrator"
 	RoleWebservice    = "Webservice"
 
