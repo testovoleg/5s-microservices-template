@@ -34,6 +34,7 @@ type Config struct {
 	Probes          probes.Config       `mapstructure:"probes"`
 	ServiceSettings ServiceSettings     `mapstructure:"serviceSettings"`
 	OTL             *tracing.OTLConfig  `mapstructure:"otl"`
+	DevelopeMode    bool                `mapstructure:"developeMode"`
 }
 
 type GRPC struct {
@@ -45,6 +46,8 @@ type KafkaTopics struct {
 	ProductCreated kafkaClient.TopicConfig `mapstructure:"productCreated"`
 	ProductUpdated kafkaClient.TopicConfig `mapstructure:"productUpdated"`
 	ProductDeleted kafkaClient.TopicConfig `mapstructure:"productDeleted"`
+
+	//ProductCreatedDev kafkaClient.TopicConfig `mapstructure:"productCreatedDev"`
 }
 
 type ServiceSettings struct {
@@ -81,6 +84,15 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
 	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
+
+	var developeMode string
+	utils.CheckEnvStr(&developeMode, constants.DevelopeMode)
+	cfg.DevelopeMode = developeMode != ""
+
+	if cfg.DevelopeMode {
+		// if develope mode change kafka topics
+		//cfg.KafkaTopics.ProductCreated = cfg.KafkaTopics.ProductCreatedDev
+	}
 
 	return cfg, nil
 }

@@ -25,6 +25,8 @@ const (
 	CoreServicePort = "CORESERVICE_PORT"
 	coreServicePort = "coreService_PORT"
 
+	DevelopeMode = "DEVELOPE_MODE"
+
 	GraphQLQuery = "GRAPHQL_QUERY"
 	RedoclyJSON  = "REDOCLY_JSON"
 

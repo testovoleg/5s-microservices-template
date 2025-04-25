@@ -26,25 +26,22 @@ kafka:
   groupID: writer_microservice_consumer
   initTopics: true
 kafkaTopics:
-  productCreate:
-    topicName: product_create
-    partitions: 10
-    replicationFactor: 1
-  productUpdate:
-    topicName: product_update
-    partitions: 10
-    replicationFactor: 1
   productCreated:
     topicName: product_created
-    partitions: 10
+    partitions: 1
     replicationFactor: 1
   productUpdated:
     topicName: product_updated
-    partitions: 10
+    partitions: 1
     replicationFactor: 1
   productDeleted:
     topicName: product_deleted
-    partitions: 10
+    partitions: 1
+    replicationFactor: 1
+
+  productCreatedDev:
+    topicName: product_createdDev
+    partitions: 1
     replicationFactor: 1
 redis:
   addr: "localhost:6379"
