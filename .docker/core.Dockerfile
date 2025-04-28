@@ -13,7 +13,7 @@ RUN go build -ldflags="-s -w" -o /build/core core_service/cmd/main.go
 
 FROM alpine
 
-RUN apk update --no-cache && apk add --no-cache ca-certificates
+RUN apk update --no-cache && apk add --no-cache ca-certificates && apk add mailcap && rm /var/cache/apk/*
 
 WORKDIR /app
 COPY --from=builder /build/core /app/core

@@ -13,7 +13,7 @@ RUN go build -ldflags="-s -w" -o /build/api_gateway api_gateway_service/cmd/main
 
 FROM alpine
 
-RUN apk update --no-cache && apk add --no-cache ca-certificates
+RUN apk update --no-cache && apk add --no-cache ca-certificates && apk add mailcap && rm /var/cache/apk/*
 
 WORKDIR /app
 COPY --from=builder /build/api_gateway /app/api_gateway
