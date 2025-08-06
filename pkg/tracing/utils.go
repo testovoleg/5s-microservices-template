@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
@@ -103,4 +104,10 @@ func GetKafkaTracingHeadersFromSpanCtx(ctx context.Context) []kafka.Header {
 
 	kafkaMessageHeaders := TextMapCarrierToKafkaMessageHeaders(textMapCarrier)
 	return kafkaMessageHeaders
+}
+
+func TraceErr(span trace.Span, description string, err error) error {
+	span.RecordError(err)
+	span.SetStatus(codes.Error, description)
+	return err
 }
