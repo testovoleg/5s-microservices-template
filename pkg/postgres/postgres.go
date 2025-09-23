@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +24,6 @@ const (
 	maxConnIdleTime   = 1 * time.Minute
 	maxConnLifetime   = 3 * time.Minute
 	minConns          = 10
-	lazyConnect       = false
 )
 
 // NewPgxConn pool
@@ -48,9 +47,8 @@ func NewPgxConn(cfg *Config) (*pgxpool.Pool, error) {
 	poolCfg.MaxConnIdleTime = maxConnIdleTime
 	poolCfg.MaxConnLifetime = maxConnLifetime
 	poolCfg.MinConns = minConns
-	poolCfg.LazyConnect = lazyConnect
 
-	connPool, err := pgxpool.ConnectConfig(ctx, poolCfg)
+	connPool, err := pgxpool.NewWithConfig(ctx, poolCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "pgx.ConnectConfig")
 	}
