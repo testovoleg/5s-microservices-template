@@ -49,8 +49,19 @@ redis:
   db: 0
   poolSize: 300
 serviceSettings:
-  redisProductPrefixKey: "reader:product"
+  redisMicroservicePrefixKey: "reader:product"
 otl:
   enable: true
   serviceName: core_service
   endpoint: "localhost:4317"
+keycloak:
+  host: http://localhost:8080
+  realm: 5SYSTEMS
+  clientID: api-accounts
+  clientSecret: amg8vpkpsEZcnAGiR1ZaisYtk5vQCsXo
+5sApi:
+  adminApiUrl: "https://api.5systems.ru/admin/v1"
+  authApiUrl: "https://api.5systems.ru/auth/v1"
+  exportApiUrl: "https://api.5systems.ru/export/v1"
+  storageApiUrl: "https://api.5systems.ru/storage/v1"
+

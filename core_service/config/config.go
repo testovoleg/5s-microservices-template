@@ -26,6 +26,7 @@ func init() {
 type Config struct {
 	ServiceName     string              `mapstructure:"serviceName"`
 	Logger          *logger.Config      `mapstructure:"logger"`
+	Keycloak        Keycloak            `mapstructure:"keycloak"`
 	KafkaTopics     KafkaTopics         `mapstructure:"kafkaTopics"`
 	GRPC            GRPC                `mapstructure:"grpc"`
 	Postgresql      *postgres.Config    `mapstructure:"postgres"`
@@ -34,6 +35,7 @@ type Config struct {
 	Probes          probes.Config       `mapstructure:"probes"`
 	ServiceSettings ServiceSettings     `mapstructure:"serviceSettings"`
 	OTL             *tracing.OTLConfig  `mapstructure:"otl"`
+	API             API                 `mapstructure:"5sApi"`
 	DevelopeMode    bool                `mapstructure:"developeMode"`
 }
 
@@ -51,7 +53,23 @@ type KafkaTopics struct {
 }
 
 type ServiceSettings struct {
-	RedisProductPrefixKey string `mapstructure:"redisProductPrefixKey"`
+	RedisMicroservicePrefixKey string `mapstructure:"redisMicroservicePrefixKey"`
+}
+
+type Keycloak struct {
+	Host         string `mapstructure:"host"`
+	Realm        string `mapstructure:"realm"`
+	ClientID     string `mapstructure:"clientID"`
+	ClientSecret string `mapstructure:"clientSecret"`
+}
+
+type API struct {
+	AdminApiUrl   string `mapstructure:"adminApiUrl"`
+	AuthApiUrl    string `mapstructure:"authApiUrl"`
+	ExportApiUrl  string `mapstructure:"exportApiUrl"`
+	StorageApiUrl string `mapstructure:"storageApiUrl"`
+	ApiUsername   string `mapstructure:"apiUsername"`
+	ApiPassword   string `mapstructure:"apiPassword"`
 }
 
 func InitConfig() (*Config, error) {
@@ -82,8 +100,25 @@ func InitConfig() (*Config, error) {
 	}
 
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
+	utils.CheckEnvStr(&cfg.Postgresql.Host, constants.PostgresqlHost)
+	utils.CheckEnvStr(&cfg.Postgresql.Port, constants.PostgresqlPort)
+	utils.CheckEnvStr(&cfg.Postgresql.User, constants.PostgresqlUser)
+	utils.CheckEnvStr(&cfg.Postgresql.Password, constants.PostgresqlPassword)
+	utils.CheckEnvStr(&cfg.Postgresql.DBName, constants.PostgresqlDatabase)
+	utils.CheckEnvStr(&cfg.Redis.Addr, constants.RedisAddr)
+	utils.CheckEnvStr(&cfg.Redis.Password, constants.RedisPassword)
+	utils.CheckEnvInt(&cfg.Redis.DB, constants.RedisDB)
+	utils.CheckEnvInt(&cfg.Redis.PoolSize, constants.RedisPoolSize)
 	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
+	utils.CheckEnvStr(&cfg.Keycloak.Host, constants.KeycloakHost)
+	utils.CheckEnvStr(&cfg.Keycloak.Realm, constants.KeycloakRealm)
+	utils.CheckEnvStr(&cfg.Keycloak.ClientID, constants.KeycloakClientId)
+	utils.CheckEnvStr(&cfg.Keycloak.ClientSecret, constants.KeycloakClientSecret)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
+	utils.CheckEnvStr(&cfg.API.AdminApiUrl, constants.AdminAPIURL)
+	utils.CheckEnvStr(&cfg.API.AuthApiUrl, constants.AuthAPIURL)
+	utils.CheckEnvStr(&cfg.API.ApiUsername, constants.APIUsername)
+	utils.CheckEnvStr(&cfg.API.ApiPassword, constants.APIPassword)
 
 	var developeMode string
 	utils.CheckEnvStr(&developeMode, constants.DevelopeMode)

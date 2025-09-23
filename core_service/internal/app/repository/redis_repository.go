@@ -100,8 +100,8 @@ func (r *redisRepository) DelAllProducts(ctx context.Context) {
 }
 
 func (r *redisRepository) getRedisProductPrefixKey() string {
-	if r.cfg.ServiceSettings.RedisProductPrefixKey != "" {
-		return r.cfg.ServiceSettings.RedisProductPrefixKey
+	if r.cfg.ServiceSettings.RedisMicroservicePrefixKey != "" {
+		return r.cfg.ServiceSettings.RedisMicroservicePrefixKey
 	}
 
 	return redisProductPrefixKey
