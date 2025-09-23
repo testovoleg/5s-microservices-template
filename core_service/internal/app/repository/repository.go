@@ -23,3 +23,10 @@ type CacheRepository interface {
 	DelProduct(ctx context.Context, key string)
 	DelAllProducts(ctx context.Context)
 }
+
+type IDMRepository interface {
+	UserData(ctx context.Context, access_token string) (*models.User, error)
+	IsAdministrator(u *models.User) bool
+	IsWebservice(u *models.User) bool
+	GetAdminToken(ctx context.Context) (string, error)
+}

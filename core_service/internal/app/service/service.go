@@ -15,6 +15,7 @@ func NewAppService(
 	log logger.Logger,
 	cfg *config.Config,
 	redisRepo repository.CacheRepository,
+	cloakRepo repository.IDMRepository,
 ) *Service {
 
 	invoiceHandlersListCmdHandler := commands.NewInvoiceHandlersListHandler(log, cfg, redisRepo)

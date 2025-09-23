@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/go-playground/validator"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
@@ -24,14 +25,15 @@ import (
 )
 
 type server struct {
-	log         logger.Logger
-	cfg         *config.Config
-	v           *validator.Validate
-	kafkaConn   *kafka.Conn
-	im          interceptors.InterceptorManager
-	redisClient redis.UniversalClient
-	svc         *service.Service
-	metrics     *metrics.CoreServiceMetrics
+	log            logger.Logger
+	cfg            *config.Config
+	v              *validator.Validate
+	kafkaConn      *kafka.Conn
+	im             interceptors.InterceptorManager
+	redisClient    redis.UniversalClient
+	svc            *service.Service
+	metrics        *metrics.CoreServiceMetrics
+	keycloakClient *gocloak.GoCloak
 }
 
 func NewServer(log logger.Logger, cfg *config.Config) *server {
@@ -49,9 +51,12 @@ func (s *server) Run() error {
 	defer s.redisClient.Close() // nolint: errcheck
 	s.log.Infof("Redis connected: %+v", s.redisClient.PoolStats())
 
-	redisRepo := repository.NewRedisRepository(s.log, s.cfg, s.redisClient)
+	s.keycloakClient = gocloak.NewClient(s.cfg.Keycloak.Host)
 
-	s.svc = service.NewAppService(s.log, s.cfg, redisRepo)
+	redisRepo := repository.NewRedisRepository(s.log, s.cfg, s.redisClient)
+	cloakRepo := repository.NewIDMRepository(s.log, s.cfg, s.keycloakClient)
+
+	s.svc = service.NewAppService(s.log, s.cfg, redisRepo, cloakRepo)
 
 	s.log.Info("Starting Reader Kafka consumers")
 	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.metrics)
