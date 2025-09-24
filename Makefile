@@ -108,7 +108,7 @@ swagger:
 
 proto_kafka:
 	@echo Generating kafka proto
-	cd proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. kafka.proto
+	cd proto/kafka && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. kafka.proto payload.proto
 
 proto_core:
 	@echo Generating connector microservice proto

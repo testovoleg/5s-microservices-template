@@ -1,0 +1,26 @@
+//ver. 0.0.2
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package kafkaMessages;
+
+option go_package = "./;kafkaMessages";
+
+message Payload {
+  string EventName = 1;
+  google.protobuf.Timestamp CreatedAt = 2;  
+  PayloadBody Body = 3;
+  PayloadMeta Meta = 4;
+}
+
+message PayloadBody {
+  string Message = 1;
+  string AccessToken = 2;
+}
+
+message PayloadMeta {
+  string CompanyUUID = 1;
+  string BotUUID = 2;
+  string ReplyTo = 3;
+}
