@@ -110,10 +110,6 @@ proto_kafka:
 	@echo Generating kafka proto
 	cd proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. kafka.proto
 
-proto_auth:
-	@echo Generating authorization microservice proto
-	cd auth_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. --proto_path=. auth_service.proto auth_dto.proto
-		
 proto_core:
 	@echo Generating connector microservice proto
 	cd core_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. core_svc.proto core_messages.proto
