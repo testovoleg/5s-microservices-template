@@ -64,7 +64,7 @@ func (s *server) runHealthCheck(ctx context.Context) {
 	}, time.Duration(s.cfg.Probes.CheckIntervalSeconds)*time.Second))
 
 	go func() {
-		s.log.Infof("Reader microservice Kubernetes probes listening on port: %s", s.cfg.Probes.Port)
+		s.log.Infof("Core microservice Kubernetes probes listening on port: %s", s.cfg.Probes.Port)
 		if err := http.ListenAndServe(s.cfg.Probes.Port, health); err != nil {
 			s.log.WarnMsg("ListenAndServe", err)
 		}

@@ -26,7 +26,7 @@ type grpcService struct {
 	metrics *metrics.CoreServiceMetrics
 }
 
-func NewReaderGrpcService(log logger.Logger, cfg *config.Config, v *validator.Validate, svc *service.Service, metrics *metrics.CoreServiceMetrics) *grpcService {
+func NewCoreGrpcService(log logger.Logger, cfg *config.Config, v *validator.Validate, svc *service.Service, metrics *metrics.CoreServiceMetrics) *grpcService {
 	return &grpcService{log: log, cfg: cfg, v: v, svc: svc, metrics: metrics}
 }
 

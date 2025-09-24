@@ -9,7 +9,7 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/pkg/errors"
-	readerGrpc "github.com/testovoleg/5s-microservice-template/core_service/internal/app/delivery/grpc"
+	coreGrpc "github.com/testovoleg/5s-microservice-template/core_service/internal/app/delivery/grpc"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -23,7 +23,7 @@ const (
 	gRPCTime          = 10
 )
 
-func (s *server) newReaderGrpcServer() (func() error, *grpc.Server, error) {
+func (s *server) newCoreGrpcServer() (func() error, *grpc.Server, error) {
 	l, err := net.Listen("tcp", s.cfg.GRPC.Port)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "net.Listen")
@@ -46,8 +46,8 @@ func (s *server) newReaderGrpcServer() (func() error, *grpc.Server, error) {
 		),
 	)
 
-	readerGrpcService := readerGrpc.NewReaderGrpcService(s.log, s.cfg, s.v, s.svc, s.metrics)
-	coreService.RegisterCoreServiceServer(grpcServer, readerGrpcService)
+	coreGrpcService := coreGrpc.NewCoreGrpcService(s.log, s.cfg, s.v, s.svc, s.metrics)
+	coreService.RegisterCoreServiceServer(grpcServer, coreGrpcService)
 	grpc_prometheus.Register(grpcServer)
 
 	if s.cfg.GRPC.Development {
@@ -55,7 +55,7 @@ func (s *server) newReaderGrpcServer() (func() error, *grpc.Server, error) {
 	}
 
 	go func() {
-		s.log.Infof("Reader gRPC server is listening on port: %s", s.cfg.GRPC.Port)
+		s.log.Infof("Core gRPC server is listening on port: %s", s.cfg.GRPC.Port)
 		// start serving grpc
 		err := grpcServer.Serve(l)
 		s.log.Warn(err)

@@ -80,7 +80,7 @@ func (s *server) Run() error {
 		otel.SetTracerProvider(provider)
 	}
 
-	closeGrpcServer, grpcServer, err := s.newReaderGrpcServer()
+	closeGrpcServer, grpcServer, err := s.newCoreGrpcServer()
 	if err != nil {
 		return errors.Wrap(err, "NewScmGrpcServer")
 	}
