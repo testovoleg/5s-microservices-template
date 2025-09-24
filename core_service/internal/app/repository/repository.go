@@ -18,6 +18,9 @@ type Repository interface {
 }
 
 type CacheRepository interface {
+	PutAdminToken(ctx context.Context, token string) error
+	GetAdminToken(ctx context.Context) (string, error)
+
 	PutProduct(ctx context.Context, key string, product *models.Product)
 	GetProduct(ctx context.Context, key string) (*models.Product, error)
 	DelProduct(ctx context.Context, key string)
