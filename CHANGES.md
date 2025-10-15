@@ -80,3 +80,12 @@ Dockerfile каждого контейнера
 
 ## Измененния 
 Описаны в [changelogs/7_traceid_passthrough.md](changelogs/7_traceid_passthrough.md)
+
+# 8. Добавлените идентификатора трассировки в ответах api gateway
+Для большего удобства дебага, было предумано сделать возврат идентификатора трассировки в api_gw. Возвращается он в header.
+
+## Что изменять
+Добавить строчку кода в pkg/tracing/utils.go
+
+## Измененния 
+Описаны в [changelogs/8_x_traceid_gw.md](changelogs/8_x_traceid_gw.md)

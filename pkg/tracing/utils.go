@@ -26,6 +26,7 @@ func StartHttpServerTracerSpan(c echo.Context, operationName string) (context.Co
 	traceID := serverSpan.SpanContext().TraceID()
 	if traceID.IsValid() {
 		c.Set("traceid", traceID.String())
+		c.Response().Header().Set("x-trace-id", traceID.String())
 	}
 
 	return ctx, serverSpan
