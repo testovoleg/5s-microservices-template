@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	PoolSize = 30
+	PoolSize = 5
 )
 
 type coreMessageProcessor struct {
