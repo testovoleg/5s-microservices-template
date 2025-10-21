@@ -19,11 +19,11 @@ type Config struct {
 }
 
 const (
-	maxConn           = 50
+	maxConn           = 15
 	healthCheckPeriod = 1 * time.Minute
 	maxConnIdleTime   = 1 * time.Minute
 	maxConnLifetime   = 3 * time.Minute
-	minConns          = 10
+	minConns          = 2
 )
 
 // NewPgxConn pool
