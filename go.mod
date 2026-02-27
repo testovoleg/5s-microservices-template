@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.17.80
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/avast/retry-go v3.0.0+incompatible
+	github.com/gabriel-vasile/mimetype v1.4.13
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/golang-jwt/jwt/v5 v5.3.0
@@ -21,7 +22,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/go-redis/v9 v9.14.0
-	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/kafka-go v0.4.49
 	github.com/spf13/viper v1.21.0
 	github.com/swaggo/echo-swagger v1.4.1

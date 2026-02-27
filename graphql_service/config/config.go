@@ -19,7 +19,7 @@ import (
 var configPath string
 
 func init() {
-	flag.StringVar(&configPath, "config", "", "API Gateway microservice config path")
+	flag.StringVar(&configPath, "config", "", "GraphQL microservice config path")
 }
 
 type Config struct {
@@ -55,7 +55,7 @@ type Grpc struct {
 }
 
 type KafkaTopics struct {
-	FileUploaded kafka.TopicConfig `mapstructure:"fileUploaded"`
+	WebhookExample kafka.TopicConfig `mapstructure:"webhookExample"`
 }
 
 func InitConfig() (*Config, error) {
@@ -84,6 +84,9 @@ func InitConfig() (*Config, error) {
 	if err := viper.Unmarshal(cfg); err != nil {
 		return nil, errors.Wrap(err, "viper.Unmarshal")
 	}
+
+	utils.CheckKafkaGroup(&cfg.Kafka.GroupID, constants.ShortMicroserviceName)
+	utils.CheckOTLName(&cfg.OTL.ServiceName, constants.GRAPHQL, constants.ShortMicroserviceName)
 
 	utils.CheckEnvStr(&cfg.Http.Port, constants.HttpPort)
 	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)

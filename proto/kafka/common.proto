@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package kafkaMessages;
+
+option go_package = "./;kafkaMessages";

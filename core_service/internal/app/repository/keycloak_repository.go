@@ -19,6 +19,7 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
 type idmRepository struct {
@@ -63,49 +64,48 @@ func (p *idmRepository) DecodeToken(ctx context.Context, accessToken string) (*m
 		ctx, span = tracing.StartSpan(ctx, "idmRepository.DecodeToken")
 		defer span.End()
 	}
-	token_data, claims, err := p.client.DecodeAccessToken(ctx, accessToken, p.cfg.Keycloak.Realm)
+	tokenData, claims, err := p.client.DecodeAccessToken(ctx, accessToken, p.cfg.Keycloak.Realm)
 	if err != nil {
 		return nil, errors.Wrap(err, "Decode token failed")
 	}
-	if !token_data.Valid {
+	if !tokenData.Valid {
 		return nil, errors.New("Invalid token")
 	}
 
-	userUUID, err := getClaim(claims, "user_uuid")
+	userUuid, err := getClaim(claims, "user_uuid")
 	if err != nil {
 		return nil, err
 	}
-	if userUUID == "" {
+	if userUuid == "" {
 		return nil, errors.New("Invalid token")
 	}
 
-	cloakID, err := getClaim(claims, "sub")
+	cloakId, err := getClaim(claims, "sub")
 	if err != nil {
 		return nil, err
 	}
-	if cloakID == "" {
+	if cloakId == "" {
 		return nil, errors.New("Invalid token")
 	}
 
-	login, err := getClaim(claims, "preferred_username")
+	name, err := getClaim(claims, "preferred_username")
 	if err != nil {
 		return nil, err
 	}
 
-	/*
-		userName, err := getClaim(claims, "name")
+	if name == "" {
+		name, err = getClaim(claims, "name")
 		if err != nil {
 			return nil, err
 		}
-	*/
+	}
 
-	/*	userEmail, err := getClaim(claims, "email")
-		if err != nil {
-			return nil, err
-		}
-	*/
+	userEmail, err := getClaim(claims, "email")
+	if err != nil {
+		return nil, err
+	}
 
-	company_uuid, _ := getClaim(claims, "company_uuid")
+	companyUuid, _ := getClaim(claims, "company_uuid")
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -119,12 +119,14 @@ func (p *idmRepository) DecodeToken(ctx context.Context, accessToken string) (*m
 	}
 
 	return &models.User{
-		UserUUID:  userUUID,
-		CloakUUID: cloakID,
-		Username:  login,
-		//Email:    userEmail,
+		Id:      userUuid,
+		CloakId: cloakId,
+		Name:    models.UserName{FullName: name},
+		Contacts: models.UserContacts{
+			Email: []string{userEmail},
+		},
 		Roles:   userRoles,
-		Company: &models.Company{CompanyUUID: company_uuid},
+		Company: &models.Company{Uuid: companyUuid},
 	}, nil
 }
 
@@ -189,11 +191,9 @@ func (p *idmRepository) IsSuperuser(u *models.User) bool {
 }
 
 func (r *idmRepository) GetAdminToken(ctx context.Context) (string, error) {
-	if trace.SpanContextFromContext(ctx).IsValid() {
-		var span trace.Span
-		ctx, span = tracing.StartSpan(ctx, "idmRepository.GetAdminToken")
-		defer span.End()
-	}
+	ctx, span := tracing.StartSpan(ctx, "idmRepository.GetAdminToken")
+	defer span.End()
+
 	client := http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -223,6 +223,10 @@ func (r *idmRepository) GetAdminToken(ctx context.Context) (string, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		return "", errors.Wrap(err, "client.Do")
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return "", utils.NewError(res, span, "Error was during on Admin API")
 	}
 
 	b, err := io.ReadAll(res.Body)
@@ -365,8 +369,8 @@ func (p *idmRepository) getExtUser(ctx context.Context, token, key string) (*mod
 	}
 
 	type ResponseBody struct {
-		UserID      string `json:"client_id"`
-		CompanyUUID string `json:"company_uuid"`
+		UserId      string `json:"client_id"`
+		CompanyUuid string `json:"company_uuid"`
 	}
 	var body ResponseBody
 
@@ -376,9 +380,9 @@ func (p *idmRepository) getExtUser(ctx context.Context, token, key string) (*mod
 	}
 
 	user := &models.User{
-		UserUUID: body.UserID,
+		Id: body.UserId,
 		Company: &models.Company{
-			CompanyUUID: body.CompanyUUID,
+			Uuid: body.CompanyUuid,
 		},
 		External: true,
 	}

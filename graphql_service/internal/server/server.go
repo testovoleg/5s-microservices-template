@@ -14,12 +14,12 @@ import (
 	graph_resolvers "github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/delivery/graphql"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/service"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/client"
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/metrics"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/middlewares"
 	graph "github.com/testovoleg/5s-microservice-template/graphql_service/schema"
 	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
 	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
 )
@@ -31,8 +31,8 @@ type server struct {
 	mw   middlewares.MiddlewareManager
 	im   interceptors.InterceptorManager
 	echo *echo.Echo
-	bs   *service.BugsService
-	m    *metrics.ApiGatewayMetrics
+	bs   *service.GraphQLService
+	m    *metrics.MetricsManager
 	gql  *handler.Server
 }
 
@@ -46,7 +46,7 @@ func (s *server) Run() error {
 
 	s.mw = middlewares.NewMiddlewareManager(s.log, s.cfg)
 	s.im = interceptors.NewInterceptorManager(s.log)
-	s.m = metrics.NewApiGatewayMetrics(s.cfg)
+	s.m = metrics.NewMetricsManager(s.log, s.cfg.ServiceName, s.cfg.Probes.PrometheusPath, s.cfg.Probes.PrometheusPort)
 
 	coreServiceConn, err := client.NewCoreServiceConn(ctx, s.cfg, s.im)
 	if err != nil {
@@ -58,9 +58,7 @@ func (s *server) Run() error {
 	kafkaProducer := kafka.NewProducer(s.log, s.cfg.Kafka.Brokers)
 	defer kafkaProducer.Close() // nolint: errcheck
 
-	// accRepo := repository.NewAccountsRepository(s.log, s.cfg)
-
-	s.bs = service.NewBugsService(s.log, s.cfg, kafkaProducer, coreClient)
+	s.bs = service.NewGraphQLService(s.log, s.cfg, kafkaProducer, coreClient)
 
 	resolverHandlers := graph_resolvers.NewResolverHandlers(s.log, s.mw, s.cfg, s.bs, s.v, s.m)
 
@@ -74,8 +72,8 @@ func (s *server) Run() error {
 	}()
 	s.log.Infof("GraphQL Server is listening on PORT: %s", s.cfg.Http.Port)
 
-	s.runMetrics(cancel)
 	s.runHealthCheck(ctx)
+	s.m.NewServer(cancel, stackSize)
 
 	if s.cfg.OTL.Enable {
 		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)

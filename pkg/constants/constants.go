@@ -1,6 +1,8 @@
 package constants
 
 const (
+	ShortMicroserviceName = "microservice-template"
+
 	GrpcPort             = "GRPC_PORT"
 	HttpPort             = "HTTP_PORT"
 	HttpBasePath         = "HTTP_BASEPATH"
@@ -23,7 +25,6 @@ const (
 	KeycloakClientSecret = "KEYCLOAK_CLIENTSECRET"
 
 	CoreServicePort = "CORESERVICE_PORT"
-	coreServicePort = "coreService_PORT"
 
 	DevelopeMode = "DEVELOPE_MODE"
 
@@ -41,6 +42,10 @@ const (
 	MongoDB  = "mongo"
 
 	GRPC     = "GRPC"
+	KAFKA    = "KAFKA"
+	GRAPHQL  = "GRAPHQL"
+	CORE     = "CORE"
+	GATEWAY  = "GATEWAY"
 	SIZE     = "SIZE"
 	URI      = "URI"
 	STATUS   = "STATUS"
@@ -72,4 +77,17 @@ const (
 	AuthAPIURL  = "AUTH_API_URL"
 	APIUsername = "API_USERNAME"
 	APIPassword = "API_PASSWORD"
+
+	HttpClientTimeout = 10
+	HeaderSecretToken = "Authorization"
+
+	FileStorageTempTag        = "temp"
+	FileStorageValueTempTag   = "true"
+	FileStorageCompanyUuidTag = "company_uuid"
+	FileStorageBotUUIDTag     = "bot_uuid"
+	FileStorageChatIDTag      = "chat_id"
+	FileStorageContentTypeTag = "content_type"
+	FileStorageFilenameTag    = "filename"
+
+	RedisAllItems = "*"
 )

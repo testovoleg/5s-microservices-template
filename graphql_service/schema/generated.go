@@ -14,6 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -47,87 +48,39 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Bug struct {
-		CreatedAt         func(childComplexity int) int
-		CreatedForRelease func(childComplexity int) int
-		Description       func(childComplexity int) int
-		ExternalID        func(childComplexity int) int
-		Files             func(childComplexity int) int
-		ID                func(childComplexity int) int
-		Name              func(childComplexity int) int
-		SolvedInRelease   func(childComplexity int) int
-		State             func(childComplexity int) int
-		UpdatedAt         func(childComplexity int) int
-	}
-
-	BugResponse struct {
-		Bug     func(childComplexity int) int
-		Code    func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	BugsResponse struct {
-		Bugs       func(childComplexity int) int
-		HasMore    func(childComplexity int) int
-		Page       func(childComplexity int) int
-		Size       func(childComplexity int) int
-		TotalCount func(childComplexity int) int
-		TotalPages func(childComplexity int) int
-	}
-
-	Comment struct {
-		Comment func(childComplexity int) int
-		Date    func(childComplexity int) int
-		Files   func(childComplexity int) int
-		User    func(childComplexity int) int
-	}
-
-	File struct {
-		FileID      func(childComplexity int) int
-		FullFileID  func(childComplexity int) int
-		PreviewData func(childComplexity int) int
-	}
-
 	Mutation struct {
-		CreateBug func(childComplexity int, input model.NewBug) int
-	}
-
-	Product struct {
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
+		TmpTipicalMutation func(childComplexity int, input model.GeneralParamsInput) int
 	}
 
 	Query struct {
-		Bugs func(childComplexity int, productID int, state *model.BugState, bugID *int, solvedInReleaseID *int, page int, size int, orderBy *model.OrderBy) int
+		TmpTipicalData     func(childComplexity int, params *model.GeneralParamsInput) int
+		__resolve__service func(childComplexity int) int
 	}
 
-	Release struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Product   func(childComplexity int) int
+	TipicalKafkaResponse struct {
+		EventUUID func(childComplexity int) int
 	}
 
-	TipicalResponse struct {
+	TipicalMutationResponse struct {
 		Code    func(childComplexity int) int
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
 
-	User struct {
-		Email func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Name  func(childComplexity int) int
+	TipicalQueryResponse struct {
+		UUID func(childComplexity int) int
+	}
+
+	_Service struct {
+		SDL func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	CreateBug(ctx context.Context, input model.NewBug) (*model.BugResponse, error)
+	TmpTipicalMutation(ctx context.Context, input model.GeneralParamsInput) (*model.TipicalMutationResponse, error)
 }
 type QueryResolver interface {
-	Bugs(ctx context.Context, productID int, state *model.BugState, bugID *int, solvedInReleaseID *int, page int, size int, orderBy *model.OrderBy) (*model.BugsResponse, error)
+	TmpTipicalData(ctx context.Context, params *model.GeneralParamsInput) (*model.TipicalQueryResponse, error)
 }
 
 type executableSchema struct {
@@ -149,278 +102,75 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Bug.createdAt":
-		if e.complexity.Bug.CreatedAt == nil {
+	case "Mutation.tmp_tipicalMutation":
+		if e.complexity.Mutation.TmpTipicalMutation == nil {
 			break
 		}
 
-		return e.complexity.Bug.CreatedAt(childComplexity), true
-	case "Bug.createdForRelease":
-		if e.complexity.Bug.CreatedForRelease == nil {
-			break
-		}
-
-		return e.complexity.Bug.CreatedForRelease(childComplexity), true
-	case "Bug.description":
-		if e.complexity.Bug.Description == nil {
-			break
-		}
-
-		return e.complexity.Bug.Description(childComplexity), true
-	case "Bug.externalID":
-		if e.complexity.Bug.ExternalID == nil {
-			break
-		}
-
-		return e.complexity.Bug.ExternalID(childComplexity), true
-	case "Bug.files":
-		if e.complexity.Bug.Files == nil {
-			break
-		}
-
-		return e.complexity.Bug.Files(childComplexity), true
-	case "Bug.id":
-		if e.complexity.Bug.ID == nil {
-			break
-		}
-
-		return e.complexity.Bug.ID(childComplexity), true
-	case "Bug.name":
-		if e.complexity.Bug.Name == nil {
-			break
-		}
-
-		return e.complexity.Bug.Name(childComplexity), true
-	case "Bug.solvedInRelease":
-		if e.complexity.Bug.SolvedInRelease == nil {
-			break
-		}
-
-		return e.complexity.Bug.SolvedInRelease(childComplexity), true
-	case "Bug.state":
-		if e.complexity.Bug.State == nil {
-			break
-		}
-
-		return e.complexity.Bug.State(childComplexity), true
-	case "Bug.updatedAt":
-		if e.complexity.Bug.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.Bug.UpdatedAt(childComplexity), true
-
-	case "BugResponse.bug":
-		if e.complexity.BugResponse.Bug == nil {
-			break
-		}
-
-		return e.complexity.BugResponse.Bug(childComplexity), true
-	case "BugResponse.code":
-		if e.complexity.BugResponse.Code == nil {
-			break
-		}
-
-		return e.complexity.BugResponse.Code(childComplexity), true
-	case "BugResponse.message":
-		if e.complexity.BugResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.BugResponse.Message(childComplexity), true
-	case "BugResponse.success":
-		if e.complexity.BugResponse.Success == nil {
-			break
-		}
-
-		return e.complexity.BugResponse.Success(childComplexity), true
-
-	case "BugsResponse.bugs":
-		if e.complexity.BugsResponse.Bugs == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.Bugs(childComplexity), true
-	case "BugsResponse.hasMore":
-		if e.complexity.BugsResponse.HasMore == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.HasMore(childComplexity), true
-	case "BugsResponse.page":
-		if e.complexity.BugsResponse.Page == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.Page(childComplexity), true
-	case "BugsResponse.size":
-		if e.complexity.BugsResponse.Size == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.Size(childComplexity), true
-	case "BugsResponse.totalCount":
-		if e.complexity.BugsResponse.TotalCount == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.TotalCount(childComplexity), true
-	case "BugsResponse.totalPages":
-		if e.complexity.BugsResponse.TotalPages == nil {
-			break
-		}
-
-		return e.complexity.BugsResponse.TotalPages(childComplexity), true
-
-	case "Comment.comment":
-		if e.complexity.Comment.Comment == nil {
-			break
-		}
-
-		return e.complexity.Comment.Comment(childComplexity), true
-	case "Comment.date":
-		if e.complexity.Comment.Date == nil {
-			break
-		}
-
-		return e.complexity.Comment.Date(childComplexity), true
-	case "Comment.files":
-		if e.complexity.Comment.Files == nil {
-			break
-		}
-
-		return e.complexity.Comment.Files(childComplexity), true
-	case "Comment.user":
-		if e.complexity.Comment.User == nil {
-			break
-		}
-
-		return e.complexity.Comment.User(childComplexity), true
-
-	case "File.file_id":
-		if e.complexity.File.FileID == nil {
-			break
-		}
-
-		return e.complexity.File.FileID(childComplexity), true
-	case "File.full_file_id":
-		if e.complexity.File.FullFileID == nil {
-			break
-		}
-
-		return e.complexity.File.FullFileID(childComplexity), true
-	case "File.preview_data":
-		if e.complexity.File.PreviewData == nil {
-			break
-		}
-
-		return e.complexity.File.PreviewData(childComplexity), true
-
-	case "Mutation.createBug":
-		if e.complexity.Mutation.CreateBug == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createBug_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_tmp_tipicalMutation_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateBug(childComplexity, args["input"].(model.NewBug)), true
+		return e.complexity.Mutation.TmpTipicalMutation(childComplexity, args["input"].(model.GeneralParamsInput)), true
 
-	case "Product.description":
-		if e.complexity.Product.Description == nil {
+	case "Query.tmp_tipicalData":
+		if e.complexity.Query.TmpTipicalData == nil {
 			break
 		}
 
-		return e.complexity.Product.Description(childComplexity), true
-	case "Product.id":
-		if e.complexity.Product.ID == nil {
-			break
-		}
-
-		return e.complexity.Product.ID(childComplexity), true
-	case "Product.name":
-		if e.complexity.Product.Name == nil {
-			break
-		}
-
-		return e.complexity.Product.Name(childComplexity), true
-
-	case "Query.bugs":
-		if e.complexity.Query.Bugs == nil {
-			break
-		}
-
-		args, err := ec.field_Query_bugs_args(ctx, rawArgs)
+		args, err := ec.field_Query_tmp_tipicalData_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Bugs(childComplexity, args["productID"].(int), args["state"].(*model.BugState), args["bugID"].(*int), args["solvedInReleaseID"].(*int), args["page"].(int), args["size"].(int), args["orderBy"].(*model.OrderBy)), true
-
-	case "Release.createdAt":
-		if e.complexity.Release.CreatedAt == nil {
+		return e.complexity.Query.TmpTipicalData(childComplexity, args["params"].(*model.GeneralParamsInput)), true
+	case "Query._service":
+		if e.complexity.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Release.CreatedAt(childComplexity), true
-	case "Release.id":
-		if e.complexity.Release.ID == nil {
+		return e.complexity.Query.__resolve__service(childComplexity), true
+
+	case "TipicalKafkaResponse.eventUuid":
+		if e.complexity.TipicalKafkaResponse.EventUUID == nil {
 			break
 		}
 
-		return e.complexity.Release.ID(childComplexity), true
-	case "Release.name":
-		if e.complexity.Release.Name == nil {
+		return e.complexity.TipicalKafkaResponse.EventUUID(childComplexity), true
+
+	case "TipicalMutationResponse.code":
+		if e.complexity.TipicalMutationResponse.Code == nil {
 			break
 		}
 
-		return e.complexity.Release.Name(childComplexity), true
-	case "Release.product":
-		if e.complexity.Release.Product == nil {
+		return e.complexity.TipicalMutationResponse.Code(childComplexity), true
+	case "TipicalMutationResponse.message":
+		if e.complexity.TipicalMutationResponse.Message == nil {
 			break
 		}
 
-		return e.complexity.Release.Product(childComplexity), true
-
-	case "TipicalResponse.code":
-		if e.complexity.TipicalResponse.Code == nil {
+		return e.complexity.TipicalMutationResponse.Message(childComplexity), true
+	case "TipicalMutationResponse.success":
+		if e.complexity.TipicalMutationResponse.Success == nil {
 			break
 		}
 
-		return e.complexity.TipicalResponse.Code(childComplexity), true
-	case "TipicalResponse.message":
-		if e.complexity.TipicalResponse.Message == nil {
+		return e.complexity.TipicalMutationResponse.Success(childComplexity), true
+
+	case "TipicalQueryResponse.uuid":
+		if e.complexity.TipicalQueryResponse.UUID == nil {
 			break
 		}
 
-		return e.complexity.TipicalResponse.Message(childComplexity), true
-	case "TipicalResponse.success":
-		if e.complexity.TipicalResponse.Success == nil {
+		return e.complexity.TipicalQueryResponse.UUID(childComplexity), true
+
+	case "_Service.sdl":
+		if e.complexity._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity.TipicalResponse.Success(childComplexity), true
-
-	case "User.email":
-		if e.complexity.User.Email == nil {
-			break
-		}
-
-		return e.complexity.User.Email(childComplexity), true
-	case "User.id":
-		if e.complexity.User.ID == nil {
-			break
-		}
-
-		return e.complexity.User.ID(childComplexity), true
-	case "User.name":
-		if e.complexity.User.Name == nil {
-			break
-		}
-
-		return e.complexity.User.Name(childComplexity), true
+		return e.complexity._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -430,7 +180,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputNewBug,
+		ec.unmarshalInputGeneralParamsInput,
 	)
 	first := true
 
@@ -527,7 +277,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "models.graphqls" "mutations.graphqls" "queries.graphqls"
+//go:embed "inputs.graphqls" "mutations.graphqls" "queries.graphqls" "types.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -539,9 +289,70 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
-	{Name: "models.graphqls", Input: sourceData("models.graphqls"), BuiltIn: false},
+	{Name: "inputs.graphqls", Input: sourceData("inputs.graphqls"), BuiltIn: false},
 	{Name: "mutations.graphqls", Input: sourceData("mutations.graphqls"), BuiltIn: false},
 	{Name: "queries.graphqls", Input: sourceData("queries.graphqls"), BuiltIn: false},
+	{Name: "types.graphqls", Input: sourceData("types.graphqls"), BuiltIn: false},
+	{Name: "../../.data/gqlgen/federation/directives.graphql", Input: `
+	directive @authenticated on FIELD_DEFINITION | OBJECT | INTERFACE | SCALAR | ENUM
+	directive @composeDirective(name: String!) repeatable on SCHEMA
+	directive @extends on OBJECT | INTERFACE
+	directive @external on OBJECT | FIELD_DEFINITION
+	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+	directive @inaccessible on
+	  | ARGUMENT_DEFINITION
+	  | ENUM
+	  | ENUM_VALUE
+	  | FIELD_DEFINITION
+	  | INPUT_FIELD_DEFINITION
+	  | INPUT_OBJECT
+	  | INTERFACE
+	  | OBJECT
+	  | SCALAR
+	  | UNION
+	directive @interfaceObject on OBJECT
+	directive @link(import: [String!], url: String!) repeatable on SCHEMA
+	directive @override(from: String!, label: String) on FIELD_DEFINITION
+	directive @policy(policies: [[federation__Policy!]!]!) on
+	  | FIELD_DEFINITION
+	  | OBJECT
+	  | INTERFACE
+	  | SCALAR
+	  | ENUM
+	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
+	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
+	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on
+	  | FIELD_DEFINITION
+	  | OBJECT
+	  | INTERFACE
+	  | SCALAR
+	  | ENUM
+	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
+	directive @tag(name: String!) repeatable on
+	  | ARGUMENT_DEFINITION
+	  | ENUM
+	  | ENUM_VALUE
+	  | FIELD_DEFINITION
+	  | INPUT_FIELD_DEFINITION
+	  | INPUT_OBJECT
+	  | INTERFACE
+	  | OBJECT
+	  | SCALAR
+	  | UNION
+	scalar _Any
+	scalar FieldSet
+	scalar federation__Policy
+	scalar federation__Scope
+`, BuiltIn: true},
+	{Name: "../../.data/gqlgen/federation/entity.graphql", Input: `
+type _Service {
+  sdl: String
+}
+
+extend type Query {
+  _service: _Service!
+}
+`, BuiltIn: true},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -549,10 +360,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createBug_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_tmp_tipicalMutation_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewBug2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐNewBug)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGeneralParamsInput2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐGeneralParamsInput)
 	if err != nil {
 		return nil, err
 	}
@@ -571,44 +382,14 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_bugs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_tmp_tipicalData_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "productID", ec.unmarshalNInt2int)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "params", ec.unmarshalOGeneralParamsInput2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐGeneralParamsInput)
 	if err != nil {
 		return nil, err
 	}
-	args["productID"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "state", ec.unmarshalOBugState2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugState)
-	if err != nil {
-		return nil, err
-	}
-	args["state"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "bugID", ec.unmarshalOInt2ᚖint)
-	if err != nil {
-		return nil, err
-	}
-	args["bugID"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "solvedInReleaseID", ec.unmarshalOInt2ᚖint)
-	if err != nil {
-		return nil, err
-	}
-	args["solvedInReleaseID"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "page", ec.unmarshalNInt2int)
-	if err != nil {
-		return nil, err
-	}
-	args["page"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "size", ec.unmarshalNInt2int)
-	if err != nil {
-		return nil, err
-	}
-	args["size"] = arg5
-	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOOrderBy2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐOrderBy)
-	if err != nil {
-		return nil, err
-	}
-	args["orderBy"] = arg6
+	args["params"] = arg0
 	return args, nil
 }
 
@@ -664,895 +445,24 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Bug_id(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_tmp_tipicalMutation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Bug_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID, nil
-		},
-		nil,
-		ec.marshalNID2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_name(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_name,
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_description(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_description,
-		func(ctx context.Context) (any, error) {
-			return obj.Description, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_updatedAt,
-		func(ctx context.Context) (any, error) {
-			return obj.UpdatedAt, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_state(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_state,
-		func(ctx context.Context) (any, error) {
-			return obj.State, nil
-		},
-		nil,
-		ec.marshalOBugState2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugState,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_state(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type BugState does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_createdForRelease(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_createdForRelease,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedForRelease, nil
-		},
-		nil,
-		ec.marshalORelease2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐRelease,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_createdForRelease(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Release_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Release_name(ctx, field)
-			case "product":
-				return ec.fieldContext_Release_product(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Release_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Release", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_solvedInRelease(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_solvedInRelease,
-		func(ctx context.Context) (any, error) {
-			return obj.SolvedInRelease, nil
-		},
-		nil,
-		ec.marshalORelease2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐRelease,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_solvedInRelease(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Release_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Release_name(ctx, field)
-			case "product":
-				return ec.fieldContext_Release_product(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Release_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Release", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_externalID(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_externalID,
-		func(ctx context.Context) (any, error) {
-			return obj.ExternalID, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_externalID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Bug_files(ctx context.Context, field graphql.CollectedField, obj *model.Bug) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Bug_files,
-		func(ctx context.Context) (any, error) {
-			return obj.Files, nil
-		},
-		nil,
-		ec.marshalOFile2ᚕᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐFileᚄ,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Bug_files(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Bug",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "file_id":
-				return ec.fieldContext_File_file_id(ctx, field)
-			case "full_file_id":
-				return ec.fieldContext_File_full_file_id(ctx, field)
-			case "preview_data":
-				return ec.fieldContext_File_preview_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.BugResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugResponse_code,
-		func(ctx context.Context) (any, error) {
-			return obj.Code, nil
-		},
-		nil,
-		ec.marshalNInt2int,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.BugResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugResponse_success,
-		func(ctx context.Context) (any, error) {
-			return obj.Success, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.BugResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugResponse_message,
-		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugResponse_bug(ctx context.Context, field graphql.CollectedField, obj *model.BugResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugResponse_bug,
-		func(ctx context.Context) (any, error) {
-			return obj.Bug, nil
-		},
-		nil,
-		ec.marshalOBug2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBug,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugResponse_bug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bug_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bug_name(ctx, field)
-			case "description":
-				return ec.fieldContext_Bug_description(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bug_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Bug_updatedAt(ctx, field)
-			case "state":
-				return ec.fieldContext_Bug_state(ctx, field)
-			case "createdForRelease":
-				return ec.fieldContext_Bug_createdForRelease(ctx, field)
-			case "solvedInRelease":
-				return ec.fieldContext_Bug_solvedInRelease(ctx, field)
-			case "externalID":
-				return ec.fieldContext_Bug_externalID(ctx, field)
-			case "files":
-				return ec.fieldContext_Bug_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bug", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_totalCount,
-		func(ctx context.Context) (any, error) {
-			return obj.TotalCount, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_totalPages,
-		func(ctx context.Context) (any, error) {
-			return obj.TotalPages, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_totalPages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_page(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_page,
-		func(ctx context.Context) (any, error) {
-			return obj.Page, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_page(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_size(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_size,
-		func(ctx context.Context) (any, error) {
-			return obj.Size, nil
-		},
-		nil,
-		ec.marshalOInt2ᚖint,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_hasMore(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_hasMore,
-		func(ctx context.Context) (any, error) {
-			return obj.HasMore, nil
-		},
-		nil,
-		ec.marshalOBoolean2ᚖbool,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_hasMore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _BugsResponse_bugs(ctx context.Context, field graphql.CollectedField, obj *model.BugsResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_BugsResponse_bugs,
-		func(ctx context.Context) (any, error) {
-			return obj.Bugs, nil
-		},
-		nil,
-		ec.marshalOBug2ᚕᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugᚄ,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_BugsResponse_bugs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "BugsResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Bug_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Bug_name(ctx, field)
-			case "description":
-				return ec.fieldContext_Bug_description(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Bug_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Bug_updatedAt(ctx, field)
-			case "state":
-				return ec.fieldContext_Bug_state(ctx, field)
-			case "createdForRelease":
-				return ec.fieldContext_Bug_createdForRelease(ctx, field)
-			case "solvedInRelease":
-				return ec.fieldContext_Bug_solvedInRelease(ctx, field)
-			case "externalID":
-				return ec.fieldContext_Bug_externalID(ctx, field)
-			case "files":
-				return ec.fieldContext_Bug_files(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Bug", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Comment_comment(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Comment_comment,
-		func(ctx context.Context) (any, error) {
-			return obj.Comment, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Comment_comment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Comment_date(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Comment_date,
-		func(ctx context.Context) (any, error) {
-			return obj.Date, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Comment_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Comment_user(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Comment_user,
-		func(ctx context.Context) (any, error) {
-			return obj.User, nil
-		},
-		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐUser,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Comment_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "name":
-				return ec.fieldContext_User_name(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Comment_files(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Comment_files,
-		func(ctx context.Context) (any, error) {
-			return obj.Files, nil
-		},
-		nil,
-		ec.marshalOFile2ᚕᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐFileᚄ,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Comment_files(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "file_id":
-				return ec.fieldContext_File_file_id(ctx, field)
-			case "full_file_id":
-				return ec.fieldContext_File_full_file_id(ctx, field)
-			case "preview_data":
-				return ec.fieldContext_File_preview_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_file_id(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_File_file_id,
-		func(ctx context.Context) (any, error) {
-			return obj.FileID, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_File_file_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_full_file_id(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_File_full_file_id,
-		func(ctx context.Context) (any, error) {
-			return obj.FullFileID, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_File_full_file_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _File_preview_data(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_File_preview_data,
-		func(ctx context.Context) (any, error) {
-			return obj.PreviewData, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_File_preview_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "File",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_createBug(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_createBug,
+		ec.fieldContext_Mutation_tmp_tipicalMutation,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateBug(ctx, fc.Args["input"].(model.NewBug))
+			return ec.resolvers.Mutation().TmpTipicalMutation(ctx, fc.Args["input"].(model.GeneralParamsInput))
 		},
 		nil,
-		ec.marshalNBugResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugResponse,
+		ec.marshalNTipicalMutationResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalMutationResponse,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createBug(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_tmp_tipicalMutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1561,15 +471,13 @@ func (ec *executionContext) fieldContext_Mutation_createBug(ctx context.Context,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "code":
-				return ec.fieldContext_BugResponse_code(ctx, field)
+				return ec.fieldContext_TipicalMutationResponse_code(ctx, field)
 			case "success":
-				return ec.fieldContext_BugResponse_success(ctx, field)
+				return ec.fieldContext_TipicalMutationResponse_success(ctx, field)
 			case "message":
-				return ec.fieldContext_BugResponse_message(ctx, field)
-			case "bug":
-				return ec.fieldContext_BugResponse_bug(ctx, field)
+				return ec.fieldContext_TipicalMutationResponse_message(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type BugResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TipicalMutationResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -1579,118 +487,31 @@ func (ec *executionContext) fieldContext_Mutation_createBug(ctx context.Context,
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createBug_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_tmp_tipicalMutation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_tmp_tipicalData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Product_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID, nil
-		},
-		nil,
-		ec.marshalNID2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_name(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_name,
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Product_description(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Product_description,
-		func(ctx context.Context) (any, error) {
-			return obj.Description, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Product_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_bugs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_bugs,
+		ec.fieldContext_Query_tmp_tipicalData,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Bugs(ctx, fc.Args["productID"].(int), fc.Args["state"].(*model.BugState), fc.Args["bugID"].(*int), fc.Args["solvedInReleaseID"].(*int), fc.Args["page"].(int), fc.Args["size"].(int), fc.Args["orderBy"].(*model.OrderBy))
+			return ec.resolvers.Query().TmpTipicalData(ctx, fc.Args["params"].(*model.GeneralParamsInput))
 		},
 		nil,
-		ec.marshalNBugsResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugsResponse,
+		ec.marshalNTipicalQueryResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalQueryResponse,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_bugs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_tmp_tipicalData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1698,20 +519,10 @@ func (ec *executionContext) fieldContext_Query_bugs(ctx context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "totalCount":
-				return ec.fieldContext_BugsResponse_totalCount(ctx, field)
-			case "totalPages":
-				return ec.fieldContext_BugsResponse_totalPages(ctx, field)
-			case "page":
-				return ec.fieldContext_BugsResponse_page(ctx, field)
-			case "size":
-				return ec.fieldContext_BugsResponse_size(ctx, field)
-			case "hasMore":
-				return ec.fieldContext_BugsResponse_hasMore(ctx, field)
-			case "bugs":
-				return ec.fieldContext_BugsResponse_bugs(ctx, field)
+			case "uuid":
+				return ec.fieldContext_TipicalQueryResponse_uuid(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type BugsResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type TipicalQueryResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -1721,9 +532,42 @@ func (ec *executionContext) fieldContext_Query_bugs(ctx context.Context, field g
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_bugs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_tmp_tipicalData_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query__service(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query__service,
+		func(ctx context.Context) (any, error) {
+			return ec.__resolve__service(ctx)
+		},
+		nil,
+		ec.marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query__service(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "sdl":
+				return ec.fieldContext__Service_sdl(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type _Service", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -1836,54 +680,25 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Release_id(ctx context.Context, field graphql.CollectedField, obj *model.Release) (ret graphql.Marshaler) {
+func (ec *executionContext) _TipicalKafkaResponse_eventUuid(ctx context.Context, field graphql.CollectedField, obj *model.TipicalKafkaResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Release_id,
+		ec.fieldContext_TipicalKafkaResponse_eventUuid,
 		func(ctx context.Context) (any, error) {
-			return obj.ID, nil
+			return obj.EventUUID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNString2string,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Release_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TipicalKafkaResponse_eventUuid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Release",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Release_name(ctx context.Context, field graphql.CollectedField, obj *model.Release) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Release_name,
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Release_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Release",
+		Object:     "TipicalKafkaResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1894,78 +709,12 @@ func (ec *executionContext) fieldContext_Release_name(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Release_product(ctx context.Context, field graphql.CollectedField, obj *model.Release) (ret graphql.Marshaler) {
+func (ec *executionContext) _TipicalMutationResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.TipicalMutationResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Release_product,
-		func(ctx context.Context) (any, error) {
-			return obj.Product, nil
-		},
-		nil,
-		ec.marshalOProduct2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐProduct,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Release_product(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Release",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Product_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Product_name(ctx, field)
-			case "description":
-				return ec.fieldContext_Product_description(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Product", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Release_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Release) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Release_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalOString2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Release_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Release",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TipicalResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.TipicalResponse) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_TipicalResponse_code,
+		ec.fieldContext_TipicalMutationResponse_code,
 		func(ctx context.Context) (any, error) {
 			return obj.Code, nil
 		},
@@ -1976,9 +725,9 @@ func (ec *executionContext) _TipicalResponse_code(ctx context.Context, field gra
 	)
 }
 
-func (ec *executionContext) fieldContext_TipicalResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TipicalMutationResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "TipicalResponse",
+		Object:     "TipicalMutationResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1989,12 +738,12 @@ func (ec *executionContext) fieldContext_TipicalResponse_code(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _TipicalResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.TipicalResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TipicalMutationResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.TipicalMutationResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_TipicalResponse_success,
+		ec.fieldContext_TipicalMutationResponse_success,
 		func(ctx context.Context) (any, error) {
 			return obj.Success, nil
 		},
@@ -2005,9 +754,9 @@ func (ec *executionContext) _TipicalResponse_success(ctx context.Context, field 
 	)
 }
 
-func (ec *executionContext) fieldContext_TipicalResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TipicalMutationResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "TipicalResponse",
+		Object:     "TipicalMutationResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2018,12 +767,12 @@ func (ec *executionContext) fieldContext_TipicalResponse_success(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _TipicalResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.TipicalResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TipicalMutationResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.TipicalMutationResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_TipicalResponse_message,
+		ec.fieldContext_TipicalMutationResponse_message,
 		func(ctx context.Context) (any, error) {
 			return obj.Message, nil
 		},
@@ -2034,9 +783,9 @@ func (ec *executionContext) _TipicalResponse_message(ctx context.Context, field 
 	)
 }
 
-func (ec *executionContext) fieldContext_TipicalResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TipicalMutationResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "TipicalResponse",
+		Object:     "TipicalMutationResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2047,43 +796,14 @@ func (ec *executionContext) fieldContext_TipicalResponse_message(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _TipicalQueryResponse_uuid(ctx context.Context, field graphql.CollectedField, obj *model.TipicalQueryResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_id,
+		ec.fieldContext_TipicalQueryResponse_uuid,
 		func(ctx context.Context) (any, error) {
-			return obj.ID, nil
-		},
-		nil,
-		ec.marshalOID2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_User_name,
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
+			return obj.UUID, nil
 		},
 		nil,
 		ec.marshalOString2ᚖstring,
@@ -2092,9 +812,9 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	)
 }
 
-func (ec *executionContext) fieldContext_User_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TipicalQueryResponse_uuid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "User",
+		Object:     "TipicalQueryResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2105,25 +825,25 @@ func (ec *executionContext) fieldContext_User_name(_ context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.Service) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_email,
+		ec.fieldContext__Service_sdl,
 		func(ctx context.Context) (any, error) {
-			return obj.Email, nil
+			return obj.SDL, nil
 		},
 		nil,
-		ec.marshalOString2ᚖstring,
+		ec.marshalOString2string,
 		true,
 		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_User_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext__Service_sdl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "User",
+		Object:     "_Service",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3580,48 +2300,41 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewBug(ctx context.Context, obj any) (model.NewBug, error) {
-	var it model.NewBug
+func (ec *executionContext) unmarshalInputGeneralParamsInput(ctx context.Context, obj any) (model.GeneralParamsInput, error) {
+	var it model.GeneralParamsInput
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "description", "createForReleaseID", "files"}
+	fieldsInOrder := [...]string{"accessToken", "companyUuid", "idmUserUuid"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		case "description":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+		case "accessToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessToken"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Description = data
-		case "createForReleaseID":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createForReleaseID"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			it.AccessToken = data
+		case "companyUuid":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("companyUuid"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.CreateForReleaseID = data
-		case "files":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("files"))
-			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			it.CompanyUUID = data
+		case "idmUserUuid":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idmUserUuid"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Files = data
+			it.IdmUserUUID = data
 		}
 	}
 
@@ -3635,242 +2348,6 @@ func (ec *executionContext) unmarshalInputNewBug(ctx context.Context, obj any) (
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
-
-var bugImplementors = []string{"Bug"}
-
-func (ec *executionContext) _Bug(ctx context.Context, sel ast.SelectionSet, obj *model.Bug) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bugImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Bug")
-		case "id":
-			out.Values[i] = ec._Bug_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Bug_name(ctx, field, obj)
-		case "description":
-			out.Values[i] = ec._Bug_description(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._Bug_createdAt(ctx, field, obj)
-		case "updatedAt":
-			out.Values[i] = ec._Bug_updatedAt(ctx, field, obj)
-		case "state":
-			out.Values[i] = ec._Bug_state(ctx, field, obj)
-		case "createdForRelease":
-			out.Values[i] = ec._Bug_createdForRelease(ctx, field, obj)
-		case "solvedInRelease":
-			out.Values[i] = ec._Bug_solvedInRelease(ctx, field, obj)
-		case "externalID":
-			out.Values[i] = ec._Bug_externalID(ctx, field, obj)
-		case "files":
-			out.Values[i] = ec._Bug_files(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var bugResponseImplementors = []string{"BugResponse"}
-
-func (ec *executionContext) _BugResponse(ctx context.Context, sel ast.SelectionSet, obj *model.BugResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bugResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("BugResponse")
-		case "code":
-			out.Values[i] = ec._BugResponse_code(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "success":
-			out.Values[i] = ec._BugResponse_success(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._BugResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "bug":
-			out.Values[i] = ec._BugResponse_bug(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var bugsResponseImplementors = []string{"BugsResponse"}
-
-func (ec *executionContext) _BugsResponse(ctx context.Context, sel ast.SelectionSet, obj *model.BugsResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, bugsResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("BugsResponse")
-		case "totalCount":
-			out.Values[i] = ec._BugsResponse_totalCount(ctx, field, obj)
-		case "totalPages":
-			out.Values[i] = ec._BugsResponse_totalPages(ctx, field, obj)
-		case "page":
-			out.Values[i] = ec._BugsResponse_page(ctx, field, obj)
-		case "size":
-			out.Values[i] = ec._BugsResponse_size(ctx, field, obj)
-		case "hasMore":
-			out.Values[i] = ec._BugsResponse_hasMore(ctx, field, obj)
-		case "bugs":
-			out.Values[i] = ec._BugsResponse_bugs(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var commentImplementors = []string{"Comment"}
-
-func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, obj *model.Comment) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, commentImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Comment")
-		case "comment":
-			out.Values[i] = ec._Comment_comment(ctx, field, obj)
-		case "date":
-			out.Values[i] = ec._Comment_date(ctx, field, obj)
-		case "user":
-			out.Values[i] = ec._Comment_user(ctx, field, obj)
-		case "files":
-			out.Values[i] = ec._Comment_files(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var fileImplementors = []string{"File"}
-
-func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *model.File) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, fileImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("File")
-		case "file_id":
-			out.Values[i] = ec._File_file_id(ctx, field, obj)
-		case "full_file_id":
-			out.Values[i] = ec._File_full_file_id(ctx, field, obj)
-		case "preview_data":
-			out.Values[i] = ec._File_preview_data(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
 
 var mutationImplementors = []string{"Mutation"}
 
@@ -3891,56 +2368,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createBug":
+		case "tmp_tipicalMutation":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createBug(ctx, field)
+				return ec._Mutation_tmp_tipicalMutation(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var productImplementors = []string{"Product"}
-
-func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *model.Product) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Product")
-		case "id":
-			out.Values[i] = ec._Product_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Product_name(ctx, field, obj)
-		case "description":
-			out.Values[i] = ec._Product_description(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3983,7 +2417,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "bugs":
+		case "tmp_tipicalData":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3992,7 +2426,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_bugs(ctx, field)
+				res = ec._Query_tmp_tipicalData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "_service":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query__service(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -4036,28 +2492,22 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var releaseImplementors = []string{"Release"}
+var tipicalKafkaResponseImplementors = []string{"TipicalKafkaResponse"}
 
-func (ec *executionContext) _Release(ctx context.Context, sel ast.SelectionSet, obj *model.Release) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, releaseImplementors)
+func (ec *executionContext) _TipicalKafkaResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TipicalKafkaResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tipicalKafkaResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Release")
-		case "id":
-			out.Values[i] = ec._Release_id(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("TipicalKafkaResponse")
+		case "eventUuid":
+			out.Values[i] = ec._TipicalKafkaResponse_eventUuid(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "name":
-			out.Values[i] = ec._Release_name(ctx, field, obj)
-		case "product":
-			out.Values[i] = ec._Release_product(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._Release_createdAt(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4081,29 +2531,29 @@ func (ec *executionContext) _Release(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var tipicalResponseImplementors = []string{"TipicalResponse"}
+var tipicalMutationResponseImplementors = []string{"TipicalMutationResponse"}
 
-func (ec *executionContext) _TipicalResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TipicalResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, tipicalResponseImplementors)
+func (ec *executionContext) _TipicalMutationResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TipicalMutationResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tipicalMutationResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("TipicalResponse")
+			out.Values[i] = graphql.MarshalString("TipicalMutationResponse")
 		case "code":
-			out.Values[i] = ec._TipicalResponse_code(ctx, field, obj)
+			out.Values[i] = ec._TipicalMutationResponse_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "success":
-			out.Values[i] = ec._TipicalResponse_success(ctx, field, obj)
+			out.Values[i] = ec._TipicalMutationResponse_success(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "message":
-			out.Values[i] = ec._TipicalResponse_message(ctx, field, obj)
+			out.Values[i] = ec._TipicalMutationResponse_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4130,23 +2580,55 @@ func (ec *executionContext) _TipicalResponse(ctx context.Context, sel ast.Select
 	return out
 }
 
-var userImplementors = []string{"User"}
+var tipicalQueryResponseImplementors = []string{"TipicalQueryResponse"}
 
-func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *model.User) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+func (ec *executionContext) _TipicalQueryResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TipicalQueryResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tipicalQueryResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("User")
-		case "id":
-			out.Values[i] = ec._User_id(ctx, field, obj)
-		case "name":
-			out.Values[i] = ec._User_name(ctx, field, obj)
-		case "email":
-			out.Values[i] = ec._User_email(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("TipicalQueryResponse")
+		case "uuid":
+			out.Values[i] = ec._TipicalQueryResponse_uuid(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var _ServiceImplementors = []string{"_Service"}
+
+func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet, obj *fedruntime.Service) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, _ServiceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("_Service")
+		case "sdl":
+			out.Values[i] = ec.__Service_sdl(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4521,68 +3003,25 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNBug2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBug(ctx context.Context, sel ast.SelectionSet, v *model.Bug) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Bug(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNBugResponse2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugResponse(ctx context.Context, sel ast.SelectionSet, v model.BugResponse) graphql.Marshaler {
-	return ec._BugResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNBugResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugResponse(ctx context.Context, sel ast.SelectionSet, v *model.BugResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._BugResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNBugsResponse2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugsResponse(ctx context.Context, sel ast.SelectionSet, v model.BugsResponse) graphql.Marshaler {
-	return ec._BugsResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNBugsResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugsResponse(ctx context.Context, sel ast.SelectionSet, v *model.BugsResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._BugsResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._File(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNFieldSet2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+func (ec *executionContext) marshalNFieldSet2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
-	res := graphql.MarshalID(v)
+	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNGeneralParamsInput2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐGeneralParamsInput(ctx context.Context, v any) (model.GeneralParamsInput, error) {
+	res, err := ec.unmarshalInputGeneralParamsInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
@@ -4601,11 +3040,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewBug2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐNewBug(ctx context.Context, v any) (model.NewBug, error) {
-	res, err := ec.unmarshalInputNewBug(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4620,6 +3054,38 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNTipicalMutationResponse2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.TipicalMutationResponse) graphql.Marshaler {
+	return ec._TipicalMutationResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTipicalMutationResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalMutationResponse(ctx context.Context, sel ast.SelectionSet, v *model.TipicalMutationResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TipicalMutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTipicalQueryResponse2githubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalQueryResponse(ctx context.Context, sel ast.SelectionSet, v model.TipicalQueryResponse) graphql.Marshaler {
+	return ec._TipicalQueryResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTipicalQueryResponse2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐTipicalQueryResponse(ctx context.Context, sel ast.SelectionSet, v *model.TipicalQueryResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TipicalQueryResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx context.Context, sel ast.SelectionSet, v fedruntime.Service) graphql.Marshaler {
+	return ec.__Service(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4875,6 +3341,158 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalNfederation__Policy2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNfederation__Policy2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNfederation__Policy2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNfederation__Policy2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNfederation__Policy2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNfederation__Policy2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNfederation__Policy2ᚕᚕstringᚄ(ctx context.Context, v any) ([][]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([][]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNfederation__Policy2ᚕstringᚄ(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNfederation__Policy2ᚕᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v [][]string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNfederation__Policy2ᚕstringᚄ(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNfederation__Scope2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNfederation__Scope2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNfederation__Scope2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNfederation__Scope2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNfederation__Scope2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNfederation__Scope2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNfederation__Scope2ᚕᚕstringᚄ(ctx context.Context, v any) ([][]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([][]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNfederation__Scope2ᚕstringᚄ(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNfederation__Scope2ᚕᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v [][]string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNfederation__Scope2ᚕstringᚄ(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4905,187 +3523,24 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOBug2ᚕᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Bug) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNBug2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBug(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalOBug2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBug(ctx context.Context, sel ast.SelectionSet, v *model.Bug) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Bug(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOBugState2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugState(ctx context.Context, v any) (*model.BugState, error) {
+func (ec *executionContext) unmarshalOGeneralParamsInput2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐGeneralParamsInput(ctx context.Context, v any) (*model.GeneralParamsInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(model.BugState)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOBugState2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐBugState(ctx context.Context, sel ast.SelectionSet, v *model.BugState) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
-}
-
-func (ec *executionContext) marshalOFile2ᚕᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.File) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐFile(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalID(v)
+	res, err := ec.unmarshalInputGeneralParamsInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	_ = sel
-	_ = ctx
-	res := graphql.MarshalID(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	_ = sel
-	_ = ctx
-	res := graphql.MarshalInt(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOOrderBy2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐOrderBy(ctx context.Context, v any) (*model.OrderBy, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(model.OrderBy)
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOOrderBy2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐOrderBy(ctx context.Context, sel ast.SelectionSet, v *model.OrderBy) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
-}
-
-func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐProduct(ctx context.Context, sel ast.SelectionSet, v *model.Product) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Product(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalORelease2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐRelease(ctx context.Context, sel ast.SelectionSet, v *model.Release) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Release(ctx, sel, v)
+func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
@@ -5140,13 +3595,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
-}
-
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋtestovolegᚋ5sᚑmicroserviceᚑtemplateᚋgraphql_serviceᚋinternalᚋgraph_modelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

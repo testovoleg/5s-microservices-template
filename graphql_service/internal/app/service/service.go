@@ -3,30 +3,29 @@ package service
 import (
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/config"
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/mutations"
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/queries"
+	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/commands"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 )
 
-type BugsService struct {
-	Mutations *mutations.Mutations
-	Queries   *queries.Queries
+type GraphQLService struct {
+	Commands *commands.Commands
 }
 
-func NewBugsService(
+func NewGraphQLService(
 	log logger.Logger,
 	cfg *config.Config,
 	kafkaProducer kafkaClient.Producer,
 	coreClient coreService.CoreServiceClient,
-) *BugsService {
+) *GraphQLService {
 
-	createBugHandler := mutations.NewCreateBugHandler(log, cfg, kafkaProducer, coreClient)
+	getTipicalDataHandler := commands.NewGetTipicalDataHandler(log, cfg, kafkaProducer, coreClient)
+	postTipicalMutationHandler := commands.NewPostTipicalMutationHandler(log, cfg, kafkaProducer, coreClient)
 
-	getBugsHandler := queries.NewGetBugsHandler(log, cfg, coreClient)
+	commands := commands.NewCommands(
+		getTipicalDataHandler,
+		postTipicalMutationHandler,
+	)
 
-	m := mutations.NewMutations(createBugHandler)
-	q := queries.NewQueries(getBugsHandler)
-
-	return &BugsService{Mutations: m, Queries: q}
+	return &GraphQLService{Commands: commands}
 }

@@ -1,0 +1,259 @@
+// Version: 1.0.29
+// Last changes: Add option CreateRoom & COMPANY channel
+// Last changes: Add Content UTM
+// Last changes: Add Channel MAX_USER
+// Last changes: Add EventType CACHE
+// Last changes: Add Channel MAX
+// Last changes: Add option ParseMode
+// Last changes: Add Channel AVITO
+// Last changes: Add EventType NEW_CHAT
+// Last changes: Add EventType NEW_BOT
+// Last changes: Add EventType DATA_SIGN
+// Last changes: Make Gateway.Channel optional
+// Last changes: Add some variables to buttons
+
+syntax = "proto3";
+
+package kafkaMessages;
+
+option go_package = "./;kafkaMessages";
+
+message Event {
+  string               EventUUID   = 1;
+  Gateway              Gateway     = 2;
+  Direction            Direction   = 3;
+  EventType            Type        = 4;
+  optional Contact     From        = 5;
+  optional Content     Content     = 6;
+  string               CreatedAt   = 7;
+  optional EventStates EventStates = 8;
+  optional RoomOptions RoomOptions = 9;
+  optional TextTyping  TextTyping  = 10;
+  optional AttachFiles AttachFiles = 11;
+  optional Archive     Archive     = 12;
+  optional string      ReplyTo     = 13;
+  optional Cache       Cache       = 14;
+}
+
+message Gateway {
+  string           CompanyUUID = 1;
+  optional Channel Channel     = 2;
+  string           BotUUID     = 3;
+  string           ChatID      = 4;
+  optional string  AccessToken = 5;
+}
+
+enum EventType {
+  UNKNOWN      = 0;
+  MESSAGE      = 1;
+  CALLBACK     = 2;
+  EVT_STATE    = 3;
+  ROOM_OPTIONS = 4;
+  TEXT_TYPING  = 5;; // start, end; client or user
+  ATTACH_FILES = 6;
+  ARCHIVE      = 7;
+  NEW_BOT      = 8;
+  NEW_CHAT     = 9;
+  MESSAGE_EDIT = 10;
+  DATA_SIGN    = 11;
+  CACHE        = 12;
+}
+
+enum Direction {
+  INCOMING  = 0;
+  OUTCOMING = 1;
+}
+
+message Contact {
+  string ID        = 1;
+  string Phone     = 2;
+  string FirstName = 3;
+  string LastName  = 4;
+  string FullName  = 5;
+  File   Photo     = 6;
+  bool   IsBot     = 7;
+}
+
+message Content {
+  EventBody       Body          = 1;
+  ReplyMenu       ReplyMenu     = 2;
+  ChatMenu        ChatMenu      = 3;
+  Contact         Contact       = 4;
+  EventOptions    Options       = 5;
+  repeated File   Files         = 6;
+  EventLocation   Location      = 7;
+  CallbackQuery   CallbackQuery = 8;
+  optional string MsgID         = 9;
+  optional string MsgIDEdited   = 10;
+  repeated UTM    UTM           = 11;
+}
+
+message EventBody {
+  string Text           = 1;
+  string Formatted_Text = 2;
+}
+
+message ReplyMenu {
+  repeated ButtonRow       Keyboard        = 1;
+  bool                     OneTimeKeyboard = 2;
+  bool                     ResizeKeyboard  = 3;
+  repeated ButtonInlineRow KeyboardInline  = 4;
+  bool                     RemoveKeyboard  = 5;
+}
+
+message ChatMenu {
+  ChatButton       ChatButton = 1;
+  repeated Command Commands   = 2;
+}
+
+message EventLocation {
+  string Address   = 1;
+  string Title     = 2;
+  float  Latitude  = 3;
+  float  Longitude = 4;
+}
+
+message EventOptions {
+  bool   DisableNotification = 1;
+  string ParseMode           = 2;
+}
+
+message CallbackQuery {
+  string ID        = 1;
+  string EventUUID = 2;
+  string Data      = 3;
+}
+
+enum FileType {
+  SOMETHING = 0;
+  PHOTO     = 1;
+  IMAGE     = 2;
+  DOC       = 3;
+  AUDIO     = 4;
+  VIDEO     = 5;
+}
+
+message File {
+  string         ID        = 1;
+  FileType       Type      = 2;
+  int64          Size      = 3;
+  bool           IsPreview = 4;
+  string         Filename  = 5;
+  string         MatrixUri = 6;
+  int32          Duration  = 7;
+  string         Bucket    = 8;
+  optional int32 Width     = 9;
+  optional int32 Height    = 10;
+}
+
+message Button {
+  string Text           = 1;
+  File   Image          = 2;
+  string URL            = 3;
+  bool   RequestContact = 4;
+  string CallbackData   = 5;
+  string Type           = 6;
+}
+
+message ButtonRow { repeated Button Buttons = 1; }
+
+message ButtonInline {
+  string Text         = 1;
+  File   Image        = 2;
+  string URL          = 3;
+  string CallbackData = 4;
+  string WebAppURL    = 5;
+  string Type         = 6;
+}
+
+message ButtonInlineRow { repeated ButtonInline Buttons = 1; }
+
+message Command {
+  string Command     = 1;
+  string Description = 2;
+}
+
+message ChatButton {
+  string Text = 1;
+  string URL  = 2;
+}
+
+enum Channel {
+  EMPTY_CHANNEL = 0;
+  TELEGRAM      = 1;
+  VK            = 2;
+  WABA          = 3;
+  WEB           = 4;
+  WHATSAPP      = 5;
+  AVITO         = 6;
+  MAX           = 7;
+  MAX_USER      = 8;
+  COMPANY       = 9;
+}
+
+enum EventState {
+  UNKNOWN_STATE = 0;
+  CREATED       = 1;
+  SENT          = 2;
+  RECEIVED      = 3;
+  READ          = 4;
+  ERROR         = 5;
+}
+
+message SetEventState {
+  string     EventUUID = 1;
+  EventState State     = 2;
+  string     UserUUID  = 3;
+}
+
+message EventStates { repeated SetEventState SetEventStates = 1; }
+
+message RoomOptions {
+  optional string Name          = 1;
+  optional string FileID        = 2;
+  repeated string UsersAdd      = 3;
+  repeated string UsersDel      = 4;
+  optional string UserUUID      = 5;
+  optional string RoomUUID      = 6;
+  optional bool   AddToAllRooms = 7;
+  optional bool   UpdateMyRooms = 8;
+  optional bool   UpdateRoom    = 9;
+  optional bool   CreateRoom    = 10;
+}
+
+message TextTyping {}
+
+message AttachFiles {
+  AttachFilesAction Action   = 1;
+  optional string   TaskName = 2;
+  optional string   TaskID   = 3;
+  optional File     File     = 4;
+}
+
+enum AttachFilesAction {
+  EMPTY_ACTION_ATTACH_FILES = 0;
+  TASK_ADD                  = 1;
+  TASK_DONE                 = 2;
+}
+
+message Archive { ArchiveAction Action = 1; }
+
+enum ArchiveAction {
+  EMPTY_ACTION_ARCHIVE = 0;
+  MOVE_TO_ARCHIVE      = 1;
+  RETURN_FROM_ARCHIVE  = 2;
+}
+
+message Cache { repeated CacheChanges Changes = 1; }
+
+message CacheChanges {
+  string          Section = 1;
+  optional string UserID  = 2;
+  optional string CarID   = 3;
+  optional string Connect = 4;
+}
+
+message UTM {
+  string Type  = 1;
+  string Value = 2;
+}

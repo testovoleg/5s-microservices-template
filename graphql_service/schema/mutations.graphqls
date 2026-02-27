@@ -1,25 +1,7 @@
-input NewBug {
-  name: String!
-  description: String
-  createForReleaseID: String!
-  "files ID"
-  files: [String!]
-}
+
 
 type Mutation {
-  "Create new bug"
-  createBug(input: NewBug!): BugResponse!
+  "This is an example mutation"
+  tmp_tipicalMutation(input: GeneralParamsInput!): TipicalMutationResponse!
 }
 
-type TipicalResponse {
-  code: Int!
-  success: Boolean!
-  message: String!
-}
-
-type BugResponse {
-  code: Int!
-  success: Boolean!
-  message: String!
-  bug: Bug
-}

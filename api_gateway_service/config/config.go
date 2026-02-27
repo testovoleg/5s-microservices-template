@@ -23,20 +23,22 @@ func init() {
 }
 
 type Config struct {
-	ServiceName string             `mapstructure:"serviceName"`
-	Logger      *logger.Config     `mapstructure:"logger"`
-	KafkaTopics KafkaTopics        `mapstructure:"kafkaTopics"`
-	Http        Http               `mapstructure:"http"`
-	Grpc        Grpc               `mapstructure:"grpc"`
-	Kafka       *kafka.Config      `mapstructure:"kafka"`
-	Probes      probes.Config      `mapstructure:"probes"`
-	Resources   Resources          `mapstructure:"resources"`
-	OTL         *tracing.OTLConfig `mapstructure:"otl"`
+	ServiceName  string             `mapstructure:"serviceName"`
+	Logger       *logger.Config     `mapstructure:"logger"`
+	KafkaTopics  KafkaTopics        `mapstructure:"kafkaTopics"`
+	Http         Http               `mapstructure:"http"`
+	Grpc         Grpc               `mapstructure:"grpc"`
+	Kafka        *kafka.Config      `mapstructure:"kafka"`
+	Probes       probes.Config      `mapstructure:"probes"`
+	Resources    Resources          `mapstructure:"resources"`
+	OTL          *tracing.OTLConfig `mapstructure:"otl"`
+	DevelopeMode bool               `mapstructure:"developeMode"`
 }
 
 type Http struct {
 	Port                string   `mapstructure:"port"`
 	Development         bool     `mapstructure:"development"`
+	Title               string   `mapstructure:"title"`
 	BasePath            string   `mapstructure:"basePath"`
 	V1Path              string   `mapstructure:"v1Path"`
 	DebugHeaders        bool     `mapstructure:"debugHeaders"`
@@ -50,13 +52,10 @@ type Grpc struct {
 }
 
 type KafkaTopics struct {
-	ProductCreate kafka.TopicConfig `mapstructure:"productCreate"`
-	ProductUpdate kafka.TopicConfig `mapstructure:"productUpdate"`
-	ProductDelete kafka.TopicConfig `mapstructure:"productDelete"`
+	WebhookExample kafka.TopicConfig `mapstructure:"webhookExample"`
 }
 
 type Resources struct {
-	REDOCLY_JSON string `mapstructure:"redocly_json"`
 }
 
 func InitConfig() (*Config, error) {
@@ -86,12 +85,21 @@ func InitConfig() (*Config, error) {
 		return nil, errors.Wrap(err, "viper.Unmarshal")
 	}
 
+	utils.CheckKafkaGroup(&cfg.Kafka.GroupID, constants.ShortMicroserviceName)
+	utils.CheckHttpTitle(&cfg.Http.Title, constants.ShortMicroserviceName)
+	utils.CheckOTLName(&cfg.OTL.ServiceName, constants.GATEWAY, constants.ShortMicroserviceName)
+
 	utils.CheckEnvStr(&cfg.Http.Port, constants.HttpPort)
 	utils.CheckEnvStr(&cfg.OTL.Endpoint, constants.OTLEndpoint)
 	utils.CheckEnvStr(&cfg.Grpc.CoreServicePort, constants.CoreServicePort)
 	utils.CheckEnvArrStr(&cfg.Kafka.Brokers, constants.KafkaBrokers)
 	utils.CheckEnvStr(&cfg.Http.BasePath, constants.HttpBasePath)
-	utils.CheckEnvStr(&cfg.Resources.REDOCLY_JSON, constants.RedoclyJSON)
+
+	utils.CheckEnvBool(&cfg.DevelopeMode, constants.DevelopeMode)
+
+	if cfg.DevelopeMode {
+		cfg.KafkaTopics.WebhookExample.TopicName += "Dev"
+	}
 
 	return cfg, nil
 }

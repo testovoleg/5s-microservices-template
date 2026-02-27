@@ -46,7 +46,7 @@ func (s *server) mapRoutes() {
 	s.echo.Use(middleware.BodyLimit(bodyLimit))
 
 	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "https://studio.apollographql.com", "https://bugboard.5systems.ru", "https://delta.5systems.ru"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001", "https://studio.apollographql.com", "https://delta2.5-systems.ru"},
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
 	}))

@@ -8,8 +8,8 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/service"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 )
 
 const (
@@ -20,11 +20,11 @@ type coreMessageProcessor struct {
 	log     logger.Logger
 	cfg     *config.Config
 	v       *validator.Validate
-	ps      *service.Service
-	metrics *metrics.CoreServiceMetrics
+	ps      *service.CoreService
+	metrics *metrics.MetricsManager
 }
 
-func NewCoreMessageProcessor(log logger.Logger, cfg *config.Config, v *validator.Validate, ps *service.Service, metrics *metrics.CoreServiceMetrics) *coreMessageProcessor {
+func NewCoreMessageProcessor(log logger.Logger, cfg *config.Config, v *validator.Validate, ps *service.CoreService, metrics *metrics.MetricsManager) *coreMessageProcessor {
 	return &coreMessageProcessor{log: log, cfg: cfg, v: v, ps: ps, metrics: metrics}
 }
 
@@ -47,12 +47,8 @@ func (s *coreMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Rea
 		s.logProcessMessage(m, workerID)
 
 		switch m.Topic {
-		case s.cfg.KafkaTopics.ProductCreated.TopicName:
-			s.processProductCreated(ctx, r, m)
-		case s.cfg.KafkaTopics.ProductUpdated.TopicName:
-			s.processProductUpdated(ctx, r, m)
-		case s.cfg.KafkaTopics.ProductDeleted.TopicName:
-			s.processProductDeleted(ctx, r, m)
+		case s.cfg.KafkaTopics.WebhookExample.TopicName:
+			s.processWebhookExample(ctx, r, m)
 		}
 	}
 }

@@ -15,10 +15,10 @@ import (
 	readerKafka "github.com/testovoleg/5s-microservice-template/core_service/internal/app/delivery/kafka"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/service"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	redisClient "github.com/testovoleg/5s-microservice-template/pkg/redis"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
@@ -31,8 +31,8 @@ type server struct {
 	kafkaConn      *kafka.Conn
 	im             interceptors.InterceptorManager
 	redisClient    redis.UniversalClient
-	svc            *service.Service
-	metrics        *metrics.CoreServiceMetrics
+	svc            *service.CoreService
+	m              *metrics.MetricsManager
 	keycloakClient *gocloak.GoCloak
 }
 
@@ -45,21 +45,26 @@ func (s *server) Run() error {
 	defer cancel()
 
 	s.im = interceptors.NewInterceptorManager(s.log)
-	s.metrics = metrics.NewCoreServiceMetrics(s.cfg)
+	s.m = metrics.NewMetricsManager(s.log, s.cfg.ServiceName, s.cfg.Probes.PrometheusPath, s.cfg.Probes.PrometheusPort)
 
 	s.redisClient = redisClient.NewUniversalRedisClient(s.cfg.Redis)
 	defer s.redisClient.Close() // nolint: errcheck
 	s.log.Infof("Redis connected: %+v", s.redisClient.PoolStats())
 
+	kafkaProducer := kafkaClient.NewProducer(s.log, s.cfg.Kafka.Brokers)
+	defer kafkaProducer.Close()
+
 	s.keycloakClient = gocloak.NewClient(s.cfg.Keycloak.Host)
 
+	idmRepo := repository.NewIDMRepository(s.log, s.cfg, s.keycloakClient)
 	redisRepo := repository.NewRedisRepository(s.log, s.cfg, s.redisClient)
-	cloakRepo := repository.NewIDMRepository(s.log, s.cfg, s.keycloakClient)
+	adminRepo := repository.NewAdminRepository(s.log, s.cfg)
+	storageRepo := repository.NewStorageRepository(s.log, s.cfg)
 
-	s.svc = service.NewAppService(s.log, s.cfg, redisRepo, cloakRepo)
+	s.svc = service.NewCoreService(s.log, s.cfg, idmRepo, adminRepo, redisRepo, kafkaProducer, storageRepo)
 
 	s.log.Info("Starting Reader Kafka consumers")
-	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.metrics)
+	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.m)
 	cg := kafkaClient.NewConsumerGroup(s.cfg.Kafka.Brokers, s.cfg.Kafka.GroupID, s.log)
 	go cg.ConsumeTopic(ctx, s.getConsumerGroupTopics(), readerKafka.PoolSize, coreMessageProcessor.ProcessMessages)
 	if err := s.connectKafkaBrokers(ctx); err != nil {
@@ -67,8 +72,12 @@ func (s *server) Run() error {
 	}
 	defer s.kafkaConn.Close() // nolint: errcheck
 
+	if s.cfg.Kafka.InitTopics {
+		s.initKafkaTopics(ctx)
+	}
+
 	s.runHealthCheck(ctx)
-	s.runMetrics(cancel)
+	s.m.NewServer(cancel, stackSize)
 
 	if s.cfg.OTL.Enable {
 		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)

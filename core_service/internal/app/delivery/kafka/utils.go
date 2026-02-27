@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/segmentio/kafka-go"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 )
 
 func (s *coreMessageProcessor) commitMessage(ctx context.Context, r *kafka.Reader, m kafka.Message) {
-	s.metrics.SuccessKafkaMessages.Inc()
+	s.metrics.Get("Success", metrics.KAFKA).Inc()
+
 	s.log.KafkaLogCommittedMessage(m.Topic, m.Partition, m.Offset)
 
 	if err := r.CommitMessages(ctx, m); err != nil {
@@ -20,7 +22,8 @@ func (s *coreMessageProcessor) logProcessMessage(m kafka.Message, workerID int) 
 }
 
 func (s *coreMessageProcessor) commitErrMessage(ctx context.Context, r *kafka.Reader, m kafka.Message) {
-	s.metrics.ErrorKafkaMessages.Inc()
+	s.metrics.Get("Error", metrics.KAFKA).Inc()
+
 	s.log.KafkaLogCommittedMessage(m.Topic, m.Partition, m.Offset)
 	if err := r.CommitMessages(ctx, m); err != nil {
 		s.log.WarnMsg("commitMessage", err)

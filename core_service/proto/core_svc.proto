@@ -4,10 +4,19 @@ package coreService;
 
 option go_package = "./;coreService";
 
+import "google/protobuf/empty.proto";
 import "core_messages.proto";
 
-service coreService {
-  rpc InvoiceHandlersList(InvoiceHandlersListReq) returns (InvoiceHandlersListRes);
-  rpc UpdateProduct(UpdateProductReq) returns (UpdateProductRes);
-  rpc DeleteProductByID(DeleteProductByIdReq) returns (DeleteProductByIdRes);
+// CoreService provides API management operations.
+service CoreService {
+  // AddApi adds a new API with the given parameters
+  rpc AddApi(AddApiReq) returns (Api);
+  // GetApi retrieves APIs based on the given parameters
+  rpc GetApi(GetApiReq) returns (GetApiRes);
+  // GetFullApi retrieves full API details
+  rpc GetFullApi(GetFullApiReq) returns (ApiFull);
+  // UpdateApi updates an existing API with the given parameters
+  rpc UpdateApi(UpdateApiReq) returns (Api);
+  // DeleteApi deletes an API with the given parameters
+  rpc DeleteApi(DeleteApiReq) returns (google.protobuf.Empty);
 }

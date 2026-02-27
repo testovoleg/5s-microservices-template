@@ -2,14 +2,14 @@ package server
 
 import (
 	"context"
+	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/heptiolabs/healthcheck"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/segmentio/kafka-go"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 )
@@ -36,11 +36,46 @@ func (s *server) connectKafkaBrokers(ctx context.Context) error {
 	return nil
 }
 
+func (s *server) initKafkaTopics(ctx context.Context) {
+	controller, err := s.kafkaConn.Controller()
+	if err != nil {
+		s.log.WarnMsg("kafkaConn.Controller", err)
+		return
+	}
+
+	controllerURI := net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port))
+	s.log.Infof("kafka controller uri: %s", controllerURI)
+
+	conn, err := kafka.DialContext(ctx, "tcp", controllerURI)
+	if err != nil {
+		s.log.WarnMsg("initKafkaTopics.DialContext", err)
+		return
+	}
+	defer conn.Close() // nolint: errcheck
+
+	s.log.Infof("established new kafka controller connection: %s", controllerURI)
+
+	webhookTopic := kafka.TopicConfig{
+		Topic:             s.cfg.KafkaTopics.WebhookExample.TopicName,
+		NumPartitions:     s.cfg.KafkaTopics.WebhookExample.Partitions,
+		ReplicationFactor: s.cfg.KafkaTopics.WebhookExample.ReplicationFactor,
+	}
+
+	if err := conn.CreateTopics(
+		webhookTopic,
+	); err != nil {
+		s.log.WarnMsg("kafkaConn.CreateTopics", err)
+		return
+	}
+
+	s.log.Infof("kafka topics created or already exists: %+v", []kafka.TopicConfig{
+		webhookTopic,
+	})
+}
+
 func (s *server) getConsumerGroupTopics() []string {
 	return []string{
-		s.cfg.KafkaTopics.ProductCreated.TopicName,
-		s.cfg.KafkaTopics.ProductUpdated.TopicName,
-		s.cfg.KafkaTopics.ProductDeleted.TopicName,
+		s.cfg.KafkaTopics.WebhookExample.TopicName,
 	}
 }
 
@@ -67,23 +102,6 @@ func (s *server) runHealthCheck(ctx context.Context) {
 		s.log.Infof("Core microservice Kubernetes probes listening on port: %s", s.cfg.Probes.Port)
 		if err := http.ListenAndServe(s.cfg.Probes.Port, health); err != nil {
 			s.log.WarnMsg("ListenAndServe", err)
-		}
-	}()
-}
-
-func (s *server) runMetrics(cancel context.CancelFunc) {
-	metricsServer := echo.New()
-	go func() {
-		metricsServer.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
-			StackSize:         stackSize,
-			DisablePrintStack: true,
-			DisableStackAll:   true,
-		}))
-		metricsServer.GET(s.cfg.Probes.PrometheusPath, echo.WrapHandler(promhttp.Handler()))
-		s.log.Infof("Metrics server is running on port: %s", s.cfg.Probes.PrometheusPort)
-		if err := metricsServer.Start(s.cfg.Probes.PrometheusPort); err != nil {
-			s.log.Errorf("metricsServer.Start: %v", err)
-			cancel()
 		}
 	}()
 }

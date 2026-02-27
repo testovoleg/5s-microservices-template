@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/postgres"
@@ -45,11 +46,7 @@ type GRPC struct {
 }
 
 type KafkaTopics struct {
-	ProductCreated kafkaClient.TopicConfig `mapstructure:"productCreated"`
-	ProductUpdated kafkaClient.TopicConfig `mapstructure:"productUpdated"`
-	ProductDeleted kafkaClient.TopicConfig `mapstructure:"productDeleted"`
-
-	//ProductCreatedDev kafkaClient.TopicConfig `mapstructure:"productCreatedDev"`
+	WebhookExample kafka.TopicConfig `mapstructure:"webhookExample"`
 }
 
 type ServiceSettings struct {
@@ -64,12 +61,14 @@ type Keycloak struct {
 }
 
 type API struct {
-	AdminApiUrl   string `mapstructure:"adminApiUrl"`
-	AuthApiUrl    string `mapstructure:"authApiUrl"`
-	ExportApiUrl  string `mapstructure:"exportApiUrl"`
-	StorageApiUrl string `mapstructure:"storageApiUrl"`
-	ApiUsername   string `mapstructure:"apiUsername"`
-	ApiPassword   string `mapstructure:"apiPassword"`
+	AdminApiUrl        string `mapstructure:"adminApiUrl"`
+	AuthApiUrl         string `mapstructure:"authApiUrl"`
+	ExportApiUrl       string `mapstructure:"exportApiUrl"`
+	StorageApiUrl      string `mapstructure:"storageApiUrl"`
+	ApiUsername        string `mapstructure:"apiUsername"`
+	ApiPassword        string `mapstructure:"apiPassword"`
+	PropertyKeyAPIData string `mapstructure:"propertyKeyAPIData"`
+	StorageBucket      string `mapstructure:"storageBucket"`
 }
 
 func InitConfig() (*Config, error) {
@@ -99,6 +98,9 @@ func InitConfig() (*Config, error) {
 		return nil, errors.Wrap(err, "viper.Unmarshal")
 	}
 
+	utils.CheckKafkaGroup(&cfg.Kafka.GroupID, constants.ShortMicroserviceName)
+	utils.CheckOTLName(&cfg.OTL.ServiceName, constants.GATEWAY, constants.ShortMicroserviceName)
+
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
 	utils.CheckEnvStr(&cfg.Postgresql.Host, constants.PostgresqlHost)
 	utils.CheckEnvStr(&cfg.Postgresql.Port, constants.PostgresqlPort)
@@ -120,13 +122,10 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvStr(&cfg.API.ApiUsername, constants.APIUsername)
 	utils.CheckEnvStr(&cfg.API.ApiPassword, constants.APIPassword)
 
-	var developeMode string
-	utils.CheckEnvStr(&developeMode, constants.DevelopeMode)
-	cfg.DevelopeMode = developeMode != ""
+	utils.CheckEnvBool(&cfg.DevelopeMode, constants.DevelopeMode)
 
 	if cfg.DevelopeMode {
-		// if develope mode change kafka topics
-		//cfg.KafkaTopics.ProductCreated = cfg.KafkaTopics.ProductCreatedDev
+		cfg.KafkaTopics.WebhookExample.TopicName += "Dev"
 	}
 
 	return cfg, nil

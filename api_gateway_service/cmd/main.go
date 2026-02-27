@@ -19,6 +19,13 @@ import (
 // @in header
 // @name Authorization
 // @description Bearer token. Example: 'Bearer xxxxxxxxxxxxxxxx'
+
+//	@tag.name			1. Администрирование
+//	@tag.name			2. Данные
+//	@tag.name			3. Уведомления
+
+// @x-tagGroups [{"name": "", "tags": ["1. Администрирование", "2. Данные", "3. Уведомления"]}]
+
 func main() {
 	flag.Parse()
 

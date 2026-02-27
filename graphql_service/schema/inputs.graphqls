@@ -1,0 +1,6 @@
+
+input GeneralParamsInput {
+	accessToken: String
+	companyUuid: String
+	idmUserUuid: String
+}

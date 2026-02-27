@@ -1,13 +1,56 @@
 definitions:
-  dto.InvoiceHandlerDto:
+  dto.AddApiReqDto:
     properties:
       description:
         type: string
-      id:
+      title:
+        type: string
+      token:
+        type: string
+    type: object
+  dto.ApiDto:
+    properties:
+      api_uuid:
+        type: string
+      description:
         type: string
       title:
         type: string
-      version:
+      token:
+        type: boolean
+    type: object
+  dto.ApiFullDto:
+    properties:
+      api_uuid:
+        type: string
+      description:
+        type: string
+      subscriptions:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      token:
+        type: string
+    type: object
+  dto.UpdateApiReqDto:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+      token:
+        type: string
+    type: object
+  httpErrors.RestError:
+    properties:
+      error:
+        type: string
+      message: {}
+      status:
+        type: integer
+      timestamp:
         type: string
     type: object
 info:
@@ -16,11 +59,16 @@ info:
     name: Oleg Testov
     url: https://github.com/testovoleg
 paths:
-  /invoice/handler/list:
+  /admin/api:
     get:
       consumes:
       - application/json
-      description: List of current invoice handlers
+      description: Получение списка интеграций по компании
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
       produces:
       - application/json
       responses:
@@ -28,11 +76,215 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.InvoiceHandlerDto'
+              $ref: '#/definitions/dto.ApiDto'
             type: array
-      summary: List of current invoice handlers
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Получить список интеграций
       tags:
-      - Invoices
+      - 1. Администрирование
+    post:
+      consumes:
+      - application/json
+      description: Добавление новой интеграции
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
+      - description: Тело запроса
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddApiReqDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ApiDto'
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Добавить новую интеграцию
+      tags:
+      - 1. Администрирование
+  /admin/api/{API_UUID}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление интеграции
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
+      - description: Идентификатор интеграции
+        in: path
+        name: API_UUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Удалить интеграцию
+      tags:
+      - 1. Администрирование
+    get:
+      consumes:
+      - application/json
+      description: Получение подробных данных по интеграции
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
+      - description: Идентификатор интеграции
+        in: path
+        name: API_UUID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ApiFullDto'
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Получить данные по интеграции
+      tags:
+      - 1. Администрирование
+    patch:
+      consumes:
+      - application/json
+      description: Обновление данных интеграции
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
+      - description: Идентификатор интеграции
+        in: path
+        name: API_UUID
+        required: true
+        type: string
+      - description: Тело запроса
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateApiReqDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ApiDto'
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Обновить интеграцию
+      tags:
+      - 1. Администрирование
+  /example:
+    post:
+      consumes:
+      - application/json
+      description: Пример запроса для получения данных
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        type: string
+      - description: Идентификатор интеграции
+        in: query
+        name: api_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Авторизационные данные неверны или устарели
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      summary: Получить данные по запросу
+      tags:
+      - 2. Данные
+  /webhook:
+    post:
+      consumes:
+      - application/json
+      description: Вызывается внешним сервисом для уведомления о событиях, на которые
+        осуществлена подписка
+      parameters:
+      - description: Тело уведомления
+        in: body
+        name: input
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Уведомление
+      tags:
+      - 3. Уведомления
 securityDefinitions:
   BearerToken:
     description: 'Bearer token. Example: ''Bearer xxxxxxxxxxxxxxxx'''
@@ -40,3 +292,13 @@ securityDefinitions:
     name: Authorization
     type: apiKey
 swagger: "2.0"
+tags:
+- name: 1. Администрирование
+- name: 2. Данные
+- name: 3. Уведомления
+x-tagGroups:
+- name: ""
+  tags:
+  - 1. Администрирование
+  - 2. Данные
+  - 3. Уведомления

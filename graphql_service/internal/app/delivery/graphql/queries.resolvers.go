@@ -6,33 +6,44 @@ package graph_resolvers
 
 import (
 	"context"
-	"strconv"
+	"errors"
 
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/queries"
+	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/commands"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	graph "github.com/testovoleg/5s-microservice-template/graphql_service/schema"
+	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
-	"github.com/testovoleg/5s-microservice-template/pkg/utils"
+	"go.opentelemetry.io/otel/codes"
 )
 
-// Bugs is the resolver for the bugs field.
-func (r *queryResolver) Bugs(ctx context.Context, productID int, state *model.BugState, bugID *int, solvedInReleaseID *int, page int, size int, orderBy *model.OrderBy) (*model.BugsResponse, error) {
-	r.metrics.GetBugsGraphQLQueries.Inc()
+// TmpTipicalData is the resolver for the tmp_tipicalData field.
+func (r *queryResolver) TmpTipicalData(ctx context.Context, params *model.GeneralParamsInput) (*model.TipicalQueryResponse, error) {
+	r.metrics.Get("TipicalData", metrics.GRAPHQL).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "queryResolver.Bugs")
+	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "queryResolver.CarsList")
 	defer span.End()
 
-	pq := utils.NewPaginationFromQueryParams(strconv.Itoa(size), strconv.Itoa(page))
-	query := queries.NewGetBugsQuery(pq, productID, state, bugID, solvedInReleaseID)
+	token, ok := ctx.Value(constants.ContextKeyToken).(string)
+	if !ok {
+		return nil, errors.New("can't find token")
+	}
 
-	response, err := r.bs.Queries.GetBugs.Handle(ctx, query)
+	params.AccessToken = &token
+
+	command := &commands.GetTipicalDataCommand{Params: params}
+
+	response, err := r.bs.Commands.GetTipicalData.Handle(ctx, command)
 	if err != nil {
-		r.log.WarnMsg("queryResolver.Bugs", err)
-		r.metrics.ErrorHttpRequests.Inc()
+		r.log.WarnMsg("queryResolver.CarsList", err)
+		r.metrics.Get("Error", metrics.GRAPHQL).Inc()
+		span.SetStatus(codes.Error, "operation in gql failed")
+		span.RecordError(err)
 		return nil, err
 	}
 
-	r.metrics.SuccessHttpRequests.Inc()
+	r.metrics.Get("Success", metrics.GRAPHQL).Inc()
+	span.SetStatus(codes.Ok, "operation in gql complete")
 	return response, nil
 }
 

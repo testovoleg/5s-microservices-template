@@ -46,7 +46,7 @@ func (s *server) newCoreGrpcServer() (func() error, *grpc.Server, error) {
 		),
 	)
 
-	coreGrpcService := coreGrpc.NewCoreGrpcService(s.log, s.cfg, s.v, s.svc, s.metrics)
+	coreGrpcService := coreGrpc.NewCoreGrpcService(s.log, s.cfg, s.v, s.svc, s.m)
 	coreService.RegisterCoreServiceServer(grpcServer, coreGrpcService)
 	grpc_prometheus.Register(grpcServer)
 

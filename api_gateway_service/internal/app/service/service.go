@@ -8,17 +8,33 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 )
 
-type Service struct {
+type GatewayService struct {
 	Commands *commands.Commands
 }
 
-func NewAppService(log logger.Logger, cfg *config.Config, kafkaProducer kafkaClient.Producer, csClient coreService.CoreServiceClient) *Service {
+func NewGatewayService(
+	log logger.Logger, cfg *config.Config,
+	kafkaProducer kafkaClient.Producer,
+	coreClient coreService.CoreServiceClient,
+) *GatewayService {
 
-	invoiceHandlersList := commands.NewInvoiceHandlersListHandler(log, cfg, csClient)
-	updateProductHandler := commands.NewUpdateProductHandler(log, cfg, kafkaProducer)
-	deleteProductHandler := commands.NewDeleteProductHandler(log, cfg, kafkaProducer)
+	addApiHandler := commands.NewAddApiHandler(log, cfg, coreClient)
+	getApiHandler := commands.NewGetApiHandler(log, cfg, coreClient)
+	getFullApiHandler := commands.NewGetFullApiHandler(log, cfg, coreClient)
+	updateApiHandler := commands.NewUpdateApiHandler(log, cfg, coreClient)
+	deleteApiHandler := commands.NewDeleteApiHandler(log, cfg, coreClient)
 
-	commands := commands.NewCommands(invoiceHandlersList, updateProductHandler, deleteProductHandler)
+	webhookHandler := commands.NewWebhookHandler(log, cfg, kafkaProducer)
 
-	return &Service{Commands: commands}
+	commands := commands.NewCommands(
+		addApiHandler,
+		getApiHandler,
+		getFullApiHandler,
+		updateApiHandler,
+		deleteApiHandler,
+
+		webhookHandler,
+	)
+
+	return &GatewayService{Commands: commands}
 }

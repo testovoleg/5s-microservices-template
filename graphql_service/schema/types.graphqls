@@ -1,0 +1,13 @@
+type TipicalMutationResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
+type TipicalQueryResponse  {
+	uuid: String
+}
+
+type TipicalKafkaResponse  {
+	eventUuid: String!
+}

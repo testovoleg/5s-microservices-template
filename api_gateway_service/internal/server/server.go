@@ -12,12 +12,13 @@ import (
 	v1 "github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/delivery/http/v1"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/service"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/client"
-	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/metrics"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/middlewares"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
+	"github.com/testovoleg/5s-microservice-template/docs"
 	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
 	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
 )
@@ -29,8 +30,9 @@ type server struct {
 	mw   middlewares.MiddlewareManager
 	im   interceptors.InterceptorManager
 	echo *echo.Echo
-	svc  *service.Service
-	m    *metrics.ApiGatewayMetrics
+	svc  *service.GatewayService
+	m    *metrics.MetricsManager
+	rdcl *docs.Redocly
 }
 
 func NewServer(log logger.Logger, cfg *config.Config) *server {
@@ -43,21 +45,23 @@ func (s *server) Run() error {
 
 	s.mw = middlewares.NewMiddlewareManager(s.log, s.cfg)
 	s.im = interceptors.NewInterceptorManager(s.log)
-	s.m = metrics.NewApiGatewayMetrics(s.cfg)
+	s.m = metrics.NewMetricsManager(s.log, s.cfg.ServiceName, s.cfg.Probes.PrometheusPath, s.cfg.Probes.PrometheusPort)
 
-	coreServiceConn, err := client.NewcoreServiceConn(ctx, s.cfg, s.im)
+	s.rdcl = docs.NewRedoclyHtml(s.cfg.Http.Title, s.cfg.Http.BasePath)
+
+	coreServiceConn, err := client.NewCoreServiceConn(ctx, s.cfg, s.im)
 	if err != nil {
 		return err
 	}
 	defer coreServiceConn.Close() // nolint: errcheck
-	csClient := coreService.NewCoreServiceClient(coreServiceConn)
+	coreClient := coreService.NewCoreServiceClient(coreServiceConn)
 
 	kafkaProducer := kafka.NewProducer(s.log, s.cfg.Kafka.Brokers)
 	defer kafkaProducer.Close() // nolint: errcheck
 
-	s.svc = service.NewAppService(s.log, s.cfg, kafkaProducer, csClient)
+	s.svc = service.NewGatewayService(s.log, s.cfg, kafkaProducer, coreClient)
 
-	appHandlers := v1.NewAppHandlers(s.echo.Group(s.cfg.Http.V1Path), s.log, s.mw, s.cfg, s.svc, s.v, s.m)
+	appHandlers := v1.NewAppHandlers(s.echo.Group(s.cfg.Http.V1Path), s.log, s.mw, s.cfg, s.svc, s.v, s.m, s.rdcl)
 	appHandlers.MapRoutes()
 
 	go func() {
@@ -68,8 +72,8 @@ func (s *server) Run() error {
 	}()
 	s.log.Infof("API Gateway is listening on PORT: %s", s.cfg.Http.Port)
 
-	s.runMetrics(cancel)
 	s.runHealthCheck(ctx)
+	s.m.NewServer(cancel, stackSize)
 
 	if s.cfg.OTL.Enable {
 		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)

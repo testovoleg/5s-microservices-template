@@ -23,24 +23,11 @@ postgres:
   sslMode: false
 kafka:
   brokers: ["localhost:9092"]
-  groupID: writer_microservice_consumer
+  groupID: microservice_consumer
   initTopics: true
 kafkaTopics:
-  productCreated:
-    topicName: product_created
-    partitions: 1
-    replicationFactor: 1
-  productUpdated:
-    topicName: product_updated
-    partitions: 1
-    replicationFactor: 1
-  productDeleted:
-    topicName: product_deleted
-    partitions: 1
-    replicationFactor: 1
-
-  productCreatedDev:
-    topicName: product_createdDev
+  webhookExample:
+    topicName: webhookExample
     partitions: 1
     replicationFactor: 1
 redis:
@@ -64,4 +51,7 @@ keycloak:
   authApiUrl: "https://api.5systems.ru/auth/v1"
   exportApiUrl: "https://api.5systems.ru/export/v1"
   storageApiUrl: "https://api.5systems.ru/storage/v1"
+  propertyKeyAPIData: "TemplateAPI"
+  storageBucket: "chats"
+
 

@@ -6,41 +6,49 @@ package graph_resolvers
 
 import (
 	"context"
+	"errors"
 
-	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/mutations"
+	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/app/commands"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	graph "github.com/testovoleg/5s-microservice-template/graphql_service/schema"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
-// CreateBug is the resolver for the createBug field.
-func (r *mutationResolver) CreateBug(ctx context.Context, input model.NewBug) (*model.BugResponse, error) {
-	r.metrics.CreateBugGraphQLQueries.Inc()
+// TmpTipicalMutation is the resolver for the tmp_tipicalMutation field.
+func (r *mutationResolver) TmpTipicalMutation(ctx context.Context, input model.GeneralParamsInput) (*model.TipicalMutationResponse, error) {
+	r.metrics.Get("TipicalMutation", metrics.GRAPHQL).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "mutationResolver.CreateBug")
+	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "mutationResolver.TipicalMutation")
 	defer span.End()
 
-	token := ctx.Value(constants.ContextKeyToken).(string)
+	token, ok := ctx.Value(constants.ContextKeyToken).(string)
+	if !ok {
+		return nil, errors.New("can't find token")
+	}
 
-	response, err := r.bs.Mutations.CreateBug.Handle(ctx, mutations.NewCreateBugCommand(token, &input))
+	input.AccessToken = &token
+
+	command := &commands.PostTipicalMutationCommand{Params: &input}
+
+	err := r.bs.Commands.PostTipicalMutation.Handle(ctx, command)
 	if err != nil {
-		r.log.WarnMsg("mutationResolver.CreateBug", err)
-		r.metrics.ErrorHttpRequests.Inc()
-		return &model.BugResponse{
+		r.log.WarnMsg("mutationResolver.TipicalMutation", err)
+		r.metrics.Get("Error", metrics.GRAPHQL).Inc()
+
+		return &model.TipicalMutationResponse{
 			Code:    400,
 			Success: false,
 			Message: err.Error(),
-			Bug:     nil,
 		}, nil
 	}
 
-	r.metrics.SuccessHttpRequests.Inc()
-	return &model.BugResponse{
+	r.metrics.Get("Success", metrics.GRAPHQL).Inc()
+	return &model.TipicalMutationResponse{
 		Code:    200,
 		Success: true,
 		Message: "",
-		Bug:     response,
 	}, nil
 }
 

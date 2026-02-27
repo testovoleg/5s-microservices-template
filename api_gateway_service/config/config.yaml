@@ -24,28 +24,18 @@ logger:
   encoder: json
 kafka:
   brokers: [ "localhost:9092" ]
-  groupID: api_gateway_consumer
+  groupID: microservice_consumer
   initTopics: true
 kafkaTopics:
-  productCreate:
-    topicName: product_create
-    partitions: 10
-    replicationFactor: 1
-  productUpdate:
-    topicName: product_update
-    partitions: 10
-    replicationFactor: 1
-  productDelete:
-    topicName: product_delete
-    partitions: 10
+  webhookExample:
+    topicName: webhookExample
+    partitions: 1
     replicationFactor: 1
 redis:
   addr: "localhost:6379"
   password: ""
   db: 0
   poolSize: 300
-resources:
-  redocly_json: http://localhost:5001/v1/swagger/doc.json
 otl:
   enable: true
   serviceName: api_gateway_service
