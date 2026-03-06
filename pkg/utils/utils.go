@@ -1,10 +1,8 @@
 package utils
 
 import (
-	"context"
 	"slices"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/google/uuid"
@@ -12,20 +10,6 @@ import (
 
 func GenerateUuid() string {
 	return uuid.New().String()
-}
-
-func Delay(ctx context.Context, d time.Duration) error {
-	select {
-	case <-time.After(d):
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
-	//how to use
-	// if err := utils.Delay(ctx, 6*time.Second); err != nil {
-	// 	c.log.Info(err)
-	// }
 }
 
 func RemoveStringDublicates(in []string) []string {
