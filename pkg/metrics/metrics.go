@@ -85,8 +85,22 @@ func (m *MetricsManager) Get(operation string, transport TransportType) *MetricC
 	}
 
 	counter := m.NewCounter(name, help)
+
+	err := prometheus.Register(counter.Counter)
+	if err != nil {
+		if are, ok := err.(prometheus.AlreadyRegisteredError); ok {
+			if existingCounter, ok := are.ExistingCollector.(prometheus.Counter); ok {
+				counter.Counter = existingCounter
+				m.log.Debugf("Metric '%s' already registered, reusing existing", name)
+			} else {
+				m.log.Warnf("Existing metric '%s' is not a Counter type", name)
+			}
+		} else {
+			m.log.Errorf("Failed to register metric '%s': %v", name, err)
+		}
+	}
+
 	m.Counters = append(m.Counters, counter)
-	prometheus.MustRegister(counter.Counter)
 
 	return counter
 }
