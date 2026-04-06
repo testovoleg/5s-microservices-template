@@ -42,7 +42,7 @@ func (c *getFullApiHandler) Handle(ctx context.Context, command *GetFullApiComma
 	ctx, span := tracing.StartSpan(ctx, "getFullApiHandler.Handle")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
 	if err != nil {
 		return nil, err
 	}

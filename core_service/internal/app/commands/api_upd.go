@@ -44,7 +44,7 @@ func (c *updateApiHandler) Handle(ctx context.Context, command *UpdateApiCommand
 	ctx, span := tracing.StartSpan(ctx, "updateApiHandler.Handle")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
 	if err != nil {
 		return nil, err
 	}

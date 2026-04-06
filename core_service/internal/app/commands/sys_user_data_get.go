@@ -13,7 +13,7 @@ import (
 
 func getUserData(
 	ctx context.Context,
-	log logger.Logger, cloakRepo repository.IDMRepository, adminRepo repository.AdminRepository, redisRepo repository.CacheRepository,
+	log logger.Logger, cloakRepo repository.IDMRepository, adminRepo repository.AdminRepository,
 	params *models.ApiParams,
 ) (*models.User, *models.Company, error) {
 	ctx, span := tracing.StartSpan(ctx, "getUserDataCmdHandler.Handle")
@@ -29,6 +29,9 @@ func getUserData(
 	}
 	if u == nil {
 		return nil, nil, errors.New("can't get user by token")
+	}
+	if u.Company == nil {
+		return nil, nil, errors.New("user has no associated company")
 	}
 
 	utils.Attr(span, "token_idm_user_uuid", u.Id)
@@ -55,10 +58,11 @@ func getUserData(
 		}
 		company.Uuid = params.CompanyUuid
 	} else {
-		if u.Company == nil {
-			return nil, nil, errors.New("user has no associated company")
-		}
 		company.Uuid = u.Company.Uuid
+	}
+
+	if u.Company.Uuid != company.Uuid && !isAdmin && !IsSuperuser {
+		return nil, nil, errors.New("interaction with a foreign company is possible only for administrators")
 	}
 
 	utils.Attr(span, "company_uuid", company.Uuid)

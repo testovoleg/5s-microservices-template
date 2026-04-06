@@ -49,7 +49,7 @@ func (c *addApiHandler) Handle(ctx context.Context, command *AddApiCommand) (*mo
 	ctx, span := tracing.StartSpan(ctx, "addApiHandler.Handle")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
 	if err != nil {
 		return nil, err
 	}

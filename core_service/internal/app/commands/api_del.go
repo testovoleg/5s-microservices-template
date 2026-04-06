@@ -45,7 +45,7 @@ func (c *deleteApiHandler) Handle(ctx context.Context, command *DeleteApiCommand
 	ctx, span := tracing.StartSpan(ctx, "deleteApiHandler.Handle")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
 	if err != nil {
 		return err
 	}
