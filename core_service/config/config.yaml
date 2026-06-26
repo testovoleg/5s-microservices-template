@@ -36,7 +36,7 @@ redis:
   db: 0
   poolSize: 300
 serviceSettings:
-  redisMicroservicePrefixKey: "reader:product"
+  redisMicroservicePrefixKey: ""
 otl:
   enable: true
   serviceName: core_service

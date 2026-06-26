@@ -5,43 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/testovoleg/5s-microservice-template/core_service/config"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
-	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
-type UpdateApiCmdHandler interface {
-	Handle(ctx context.Context, command *UpdateApiCommand) (*models.Api, error)
-}
-
-type updateApiHandler struct {
-	log       logger.Logger
-	cfg       *config.Config
-	cloakRepo repository.IDMRepository
-	adminRepo repository.AdminRepository
-	redisRepo repository.CacheRepository
-}
-
-func NewUpdateApiHandler(
-	log logger.Logger,
-	cfg *config.Config,
-	cloakRepo repository.IDMRepository,
-	adminRepo repository.AdminRepository,
-	redisRepo repository.CacheRepository,
-) *updateApiHandler {
-	return &updateApiHandler{
-		log:       log,
-		cfg:       cfg,
-		cloakRepo: cloakRepo,
-		adminRepo: adminRepo,
-		redisRepo: redisRepo,
-	}
-}
-
-func (c *updateApiHandler) Handle(ctx context.Context, command *UpdateApiCommand) (*models.Api, error) {
-	ctx, span := tracing.StartSpan(ctx, "updateApiHandler.Handle")
+func (c *apiMethodsHandler) UpdateApi(ctx context.Context, command *UpdateApiCommand) (*models.Api, error) {
+	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.UpdateApi")
 	defer span.End()
 
 	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
@@ -74,7 +43,7 @@ func (c *updateApiHandler) Handle(ctx context.Context, command *UpdateApiCommand
 	return api, nil
 }
 
-func (c *updateApiHandler) updateApi(list []*models.Api, update *models.UpdateApi, apiUuid string) (api *models.Api, updated bool) {
+func (c *apiMethodsHandler) updateApi(list []*models.Api, update *models.UpdateApi, apiUuid string) (api *models.Api, updated bool) {
 	setValue := func(exist, data *string) {
 		if data != nil && *data != "string" {
 			exist = data

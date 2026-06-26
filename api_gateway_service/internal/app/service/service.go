@@ -18,22 +18,14 @@ func NewGatewayService(
 	coreClient coreService.CoreServiceClient,
 ) *GatewayService {
 
-	addApiHandler := commands.NewAddApiHandler(log, cfg, coreClient)
-	getApiHandler := commands.NewGetApiHandler(log, cfg, coreClient)
-	getFullApiHandler := commands.NewGetFullApiHandler(log, cfg, coreClient)
-	updateApiHandler := commands.NewUpdateApiHandler(log, cfg, coreClient)
-	deleteApiHandler := commands.NewDeleteApiHandler(log, cfg, coreClient)
+	apiMethodsHandler := commands.NewApiMethodsHandler(log, cfg, coreClient)
 
-	webhookHandler := commands.NewWebhookHandler(log, cfg, kafkaProducer)
+	webhookMethodsHandler := commands.NewWebhookMethodsHandler(log, cfg, kafkaProducer)
 
 	commands := commands.NewCommands(
-		addApiHandler,
-		getApiHandler,
-		getFullApiHandler,
-		updateApiHandler,
-		deleteApiHandler,
+		apiMethodsHandler,
 
-		webhookHandler,
+		webhookMethodsHandler,
 	)
 
 	return &GatewayService{Commands: commands}

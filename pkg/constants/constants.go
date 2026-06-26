@@ -70,8 +70,9 @@ const (
 	Search = "search"
 	ID     = "id"
 
-	ContextKeyCookie = "cookie"
-	ContextKeyToken  = "token"
+	ContextKeyCookie  = "cookie"
+	ContextKeyToken   = "token"
+	ContextKeyWebhook = "webhook"
 
 	AdminAPIURL = "ADMIN_API_URL"
 	AuthAPIURL  = "AUTH_API_URL"

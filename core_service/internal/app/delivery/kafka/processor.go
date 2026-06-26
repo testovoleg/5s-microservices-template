@@ -43,9 +43,9 @@ func (s *coreMessageProcessor) processWebhookExample(ctx context.Context, r *kaf
 	}
 
 	if err := retry.Do(func() error {
-		return s.ps.Commands.Webhook.Handle(ctx, command)
+		return s.ps.Commands.WebhookMethods.Webhook(ctx, command)
 	}, append(retryOptions, retry.Context(ctx))...); err != nil {
-		s.log.WarnMsg("Webhook.Handle", err)
+		s.log.WarnMsg("WebhookMethods.Webhook", err)
 		s.commitErrMessage(ctx, r, m)
 		return
 	}

@@ -3,43 +3,12 @@ package commands
 import (
 	"context"
 
-	"github.com/testovoleg/5s-microservice-template/core_service/config"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
-	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
-type GetFullApiCmdHandler interface {
-	Handle(ctx context.Context, command *GetFullApiCommand) (*models.ApiFull, error)
-}
-
-type getFullApiHandler struct {
-	log       logger.Logger
-	cfg       *config.Config
-	cloakRepo repository.IDMRepository
-	adminRepo repository.AdminRepository
-	redisRepo repository.CacheRepository
-}
-
-func NewGetFullApiHandler(
-	log logger.Logger,
-	cfg *config.Config,
-	cloakRepo repository.IDMRepository,
-	adminRepo repository.AdminRepository,
-	redisRepo repository.CacheRepository,
-) *getFullApiHandler {
-	return &getFullApiHandler{
-		log:       log,
-		cfg:       cfg,
-		cloakRepo: cloakRepo,
-		adminRepo: adminRepo,
-		redisRepo: redisRepo,
-	}
-}
-
-func (c *getFullApiHandler) Handle(ctx context.Context, command *GetFullApiCommand) (*models.ApiFull, error) {
-	ctx, span := tracing.StartSpan(ctx, "getFullApiHandler.Handle")
+func (c *apiMethodsHandler) GetFullApi(ctx context.Context, command *GetFullApiCommand) (*models.ApiFull, error) {
+	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.GetFullApi")
 	defer span.End()
 
 	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
@@ -47,7 +16,7 @@ func (c *getFullApiHandler) Handle(ctx context.Context, command *GetFullApiComma
 		return nil, err
 	}
 
-	api, err := getApiData(ctx, c.log, c.adminRepo, c.redisRepo, &models.ApiParams{AccessToken: command.Params.AccessToken, CompanyUuid: company.Uuid, ApiUuid: command.Params.ApiUuid})
+	api, err := getApiData(ctx, c.adminRepo, c.redisRepo, &models.ApiParams{AccessToken: command.Params.AccessToken, CompanyUuid: company.Uuid, ApiUuid: command.Params.ApiUuid})
 	if err != nil {
 		return nil, err
 	}

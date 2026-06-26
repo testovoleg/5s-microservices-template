@@ -24,9 +24,9 @@ func (s *grpcService) AddApi(ctx context.Context, req *coreService.AddApiReq) (*
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
-	res, err := s.svc.Commands.AddApi.Handle(ctx, command)
+	res, err := s.svc.Commands.ApiMethods.AddApi(ctx, command)
 	if err != nil {
-		s.log.WarnMsg("AddApi.Handle", err)
+		s.log.WarnMsg("ApiMethods.AddApi", err)
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
@@ -46,9 +46,9 @@ func (s *grpcService) GetApi(ctx context.Context, req *coreService.GetApiReq) (*
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
-	res, err := s.svc.Commands.GetApi.Handle(ctx, command)
+	res, err := s.svc.Commands.ApiMethods.GetApi(ctx, command)
 	if err != nil {
-		s.log.WarnMsg("GetApi.Handle", err)
+		s.log.WarnMsg("ApiMethods.GetApi", err)
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
@@ -68,9 +68,9 @@ func (s *grpcService) GetFullApi(ctx context.Context, req *coreService.GetFullAp
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
-	res, err := s.svc.Commands.GetFullApi.Handle(ctx, command)
+	res, err := s.svc.Commands.ApiMethods.GetFullApi(ctx, command)
 	if err != nil {
-		s.log.WarnMsg("GetFullApi.Handle", err)
+		s.log.WarnMsg("ApiMethods.GetFullAp", err)
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
@@ -90,9 +90,9 @@ func (s *grpcService) UpdateApi(ctx context.Context, req *coreService.UpdateApiR
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
-	res, err := s.svc.Commands.UpdateApi.Handle(ctx, command)
+	res, err := s.svc.Commands.ApiMethods.UpdateApi(ctx, command)
 	if err != nil {
-		s.log.WarnMsg("UpdateApi.Handle", err)
+		s.log.WarnMsg("ApiMethods.UpdateApi", err)
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
@@ -112,9 +112,9 @@ func (s *grpcService) DeleteApi(ctx context.Context, req *coreService.DeleteApiR
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 
-	err := s.svc.Commands.DeleteApi.Handle(ctx, command)
+	err := s.svc.Commands.ApiMethods.DeleteApi(ctx, command)
 	if err != nil {
-		s.log.WarnMsg("DeleteApi.Handle", err)
+		s.log.WarnMsg("ApiMethods.DeleteApi", err)
 		return nil, s.errResponse(codes.InvalidArgument, err)
 	}
 

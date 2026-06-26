@@ -31,7 +31,6 @@ func (h *appHandlers) Webhook() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.Webhook")
 		defer span.End()
 
-		//test webhook
 		var bodyBytes []byte
 		if c.Request().Body != nil {
 			bodyBytes, _ = io.ReadAll(c.Request().Body)
@@ -39,7 +38,6 @@ func (h *appHandlers) Webhook() echo.HandlerFunc {
 		// span.SetAttributes(attribute.String("reqDto", string(bodyBytes)))
 		// Restore the io.ReadCloser to its original state
 		c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-		//test webhook
 		defer c.Request().Body.Close()
 
 		secretToken := c.Request().Header.Get(constants.HeaderSecretToken)
@@ -53,8 +51,8 @@ func (h *appHandlers) Webhook() echo.HandlerFunc {
 			pattern := regexp.MustCompile(`(.+)_(.+)`)
 			finded := pattern.FindStringSubmatch(secretToken)
 			if len(finded) == 0 {
-				desc := "CompanyUuid_ApiUuid not found in secret token"
-				return h.traceWebhookErr(c, span, desc, errors.New(desc))
+				msg := "CompanyUuid_ApiUuid not found in secret token"
+				return h.traceWebhookErr(c, span, msg, errors.New(msg))
 			}
 
 			companyUuid = finded[1]
@@ -64,11 +62,11 @@ func (h *appHandlers) Webhook() echo.HandlerFunc {
 		}
 
 		if companyUuid == "" || apiUuid == "" {
-			desc := "COMPANY_UUID or API_UUID is empty"
-			return h.traceWebhookErr(c, span, desc, errors.New(desc))
+			msg := "COMPANY_UUID or API_UUID is empty"
+			return h.traceWebhookErr(c, span, msg, errors.New(msg))
 		}
 
-		err := h.svc.Commands.Webhook.Handle(ctx, mappers.NewWebhookCommand(companyUuid, apiUuid, bodyBytes))
+		err := h.svc.Commands.WebhookMethods.Webhook(ctx, mappers.NewWebhookCommand(companyUuid, apiUuid, bodyBytes))
 		if err != nil {
 			return h.traceWebhookErr(c, span, "Webhook", err)
 		}

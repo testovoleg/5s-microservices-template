@@ -3,13 +3,23 @@ package utils
 import (
 	"slices"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func GenerateUuid() string {
 	return uuid.New().String()
+}
+
+func CurrentTime() time.Time {
+	return time.Now()
+}
+
+func CurrentTimestamppb() *timestamppb.Timestamp {
+	return timestamppb.New(CurrentTime())
 }
 
 func RemoveStringDublicates(in []string) []string {

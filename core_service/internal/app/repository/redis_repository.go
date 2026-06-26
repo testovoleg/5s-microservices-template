@@ -57,12 +57,11 @@ func (r *redisRepository) GetAdminToken(ctx context.Context) (string, error) {
 		defer span.End()
 	}
 
-	token := r.redisClient.Get(ctx, r.getRedisAdminTokenKey()).Val()
-	if token == "" {
-		return "", errors.New("redisClient.Get")
+	if token := r.redisClient.Get(ctx, r.getRedisAdminTokenKey()).Val(); token != "" {
+		return token, nil
 	}
 
-	return token, nil
+	return "", errors.New("redisClient.Get")
 }
 
 func (r *redisRepository) PutApiList(ctx context.Context, companyUuid string, apiList []*models.Api) error {

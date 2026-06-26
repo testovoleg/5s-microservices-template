@@ -8,53 +8,14 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/testovoleg/5s-microservice-template/core_service/config"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
-	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
-	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 	kafkaMessages "github.com/testovoleg/5s-microservice-template/proto/kafka"
 )
 
-type WebhookCmdHandler interface {
-	Handle(ctx context.Context, command *WebhookCommand) error
-}
-
-type webhookHandler struct {
-	log           logger.Logger
-	cfg           *config.Config
-	kafkaProducer kafkaClient.Producer
-	redisRepo     repository.CacheRepository
-	adminRepo     repository.AdminRepository
-	storageRepo   repository.StorageRepository
-	cloakRepo     repository.IDMRepository
-}
-
-func NewWebhookHandler(
-	log logger.Logger,
-	cfg *config.Config,
-	kafkaProducer kafkaClient.Producer,
-	redisRepo repository.CacheRepository,
-	adminRepo repository.AdminRepository,
-	storageRepo repository.StorageRepository,
-	cloakRepo repository.IDMRepository,
-
-) *webhookHandler {
-	return &webhookHandler{
-		log:           log,
-		cfg:           cfg,
-		kafkaProducer: kafkaProducer,
-		redisRepo:     redisRepo,
-		adminRepo:     adminRepo,
-		storageRepo:   storageRepo,
-		cloakRepo:     cloakRepo,
-	}
-}
-
-func (c *webhookHandler) Handle(ctx context.Context, command *WebhookCommand) error {
-	ctx, span := tracing.StartSpan(ctx, "webhookHandler.Handle")
+func (c *webhookMethodsHandler) Webhook(ctx context.Context, command *WebhookCommand) error {
+	ctx, span := tracing.StartSpan(ctx, "webhookMethodsHandler.Webhook")
 	defer span.End()
 
 	if !c.isValidCommand(command) {
@@ -71,7 +32,7 @@ func (c *webhookHandler) Handle(ctx context.Context, command *WebhookCommand) er
 		return err
 	}
 
-	api, err := getApiData(ctx, c.log, c.adminRepo, c.redisRepo, &models.ApiParams{
+	api, err := getApiData(ctx, c.adminRepo, c.redisRepo, &models.ApiParams{
 		AccessToken: adminToken, CompanyUuid: company.Uuid, ApiUuid: params.ApiUuid,
 	})
 	if err != nil {
@@ -105,11 +66,11 @@ func (c *webhookHandler) Handle(ctx context.Context, command *WebhookCommand) er
 	return nil
 }
 
-func (c *webhookHandler) isValidCommand(command *WebhookCommand) bool {
+func (c *webhookMethodsHandler) isValidCommand(command *WebhookCommand) bool {
 	return command != nil && command.Payload != nil && command.Payload.Params != nil && command.Payload.Body != nil
 }
 
-func (c *webhookHandler) createKafkaEvent(ctx context.Context, api *models.Api, companyUuid, adminToken string, msg models.WebhookMessage) (*kafkaMessages.Event, error) {
+func (c *webhookMethodsHandler) createKafkaEvent(ctx context.Context, api *models.Api, companyUuid, adminToken string, msg models.WebhookMessage) (*kafkaMessages.Event, error) {
 	out := &kafkaMessages.Event{
 		EventUUID: utils.GenerateUuid(),
 		Type:      kafkaMessages.EventType_MESSAGE,

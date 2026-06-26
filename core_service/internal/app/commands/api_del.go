@@ -5,44 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/testovoleg/5s-microservice-template/core_service/config"
-	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/repository"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
-	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
 
-type DeleteApiCmdHandler interface {
-	Handle(ctx context.Context, command *DeleteApiCommand) error
-}
-
-type deleteApiHandler struct {
-	log       logger.Logger
-	cfg       *config.Config
-	cloakRepo repository.IDMRepository
-	adminRepo repository.AdminRepository
-	redisRepo repository.CacheRepository
-}
-
-func NewDeleteApiHandler(
-	log logger.Logger,
-	cfg *config.Config,
-	cloakRepo repository.IDMRepository,
-	adminRepo repository.AdminRepository,
-	redisRepo repository.CacheRepository,
-
-) *deleteApiHandler {
-	return &deleteApiHandler{
-		log:       log,
-		cfg:       cfg,
-		cloakRepo: cloakRepo,
-		adminRepo: adminRepo,
-		redisRepo: redisRepo,
-	}
-}
-
-func (c *deleteApiHandler) Handle(ctx context.Context, command *DeleteApiCommand) error {
-	ctx, span := tracing.StartSpan(ctx, "deleteApiHandler.Handle")
+func (c *apiMethodsHandler) DeleteApi(ctx context.Context, command *DeleteApiCommand) error {
+	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.DeleteApi")
 	defer span.End()
 
 	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
@@ -75,7 +43,7 @@ func (c *deleteApiHandler) Handle(ctx context.Context, command *DeleteApiCommand
 	return nil
 }
 
-func (c *deleteApiHandler) filterApiList(list []*models.Api, apiUuid string) (res []*models.Api, deleted bool) {
+func (c *apiMethodsHandler) filterApiList(list []*models.Api, apiUuid string) (res []*models.Api, deleted bool) {
 	for _, api := range list {
 		if api.Uuid == apiUuid {
 			deleted = true

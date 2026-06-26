@@ -55,7 +55,7 @@ func (h *appHandlers) AddApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.AddApi.Handle(ctx, mappers.NewAddApiCommand(token, companyUuid, reqDto))
+		res, err := h.svc.Commands.ApiMethods.AddApi(ctx, mappers.NewAddApiCommand(token, companyUuid, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "AddApi", err)
 		}
@@ -102,7 +102,7 @@ func (h *appHandlers) GetApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.GetApi.Handle(ctx, mappers.NewGetApiCommand(token, reqDto))
+		res, err := h.svc.Commands.ApiMethods.GetApi(ctx, mappers.NewGetApiCommand(token, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "GetApi", err)
 		}
@@ -151,7 +151,7 @@ func (h *appHandlers) GetFullDataApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.GetFullApi.Handle(ctx, mappers.NewGetFullApiCommand(token, reqDto))
+		res, err := h.svc.Commands.ApiMethods.GetFullApi(ctx, mappers.NewGetFullApiCommand(token, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "GetFullDataApi", err)
 		}
@@ -206,7 +206,7 @@ func (h *appHandlers) UpdateApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.UpdateApi.Handle(ctx, mappers.NewUpdateApiCommand(token, companyUuid, apiUuid, reqDto))
+		res, err := h.svc.Commands.ApiMethods.UpdateApi(ctx, mappers.NewUpdateApiCommand(token, companyUuid, apiUuid, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "UpdateApi", err)
 		}
@@ -254,7 +254,7 @@ func (h *appHandlers) DeleteApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		err := h.svc.Commands.DeleteApi.Handle(ctx, mappers.NewDeleteApiCommand(token, reqDto))
+		err := h.svc.Commands.ApiMethods.DeleteApi(ctx, mappers.NewDeleteApiCommand(token, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "DeleteApi", err)
 		}

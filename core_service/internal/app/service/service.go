@@ -22,22 +22,14 @@ func NewCoreService(
 	storageRepo repository.StorageRepository,
 ) *CoreService {
 
-	addApiHandler := commands.NewAddApiHandler(log, cfg, cloakRepo, adminRepo, redisRepo, kafkaProducer)
-	getApiHandler := commands.NewGetApiHandler(log, cfg, cloakRepo, adminRepo, redisRepo)
-	getFullApiHandler := commands.NewGetFullApiHandler(log, cfg, cloakRepo, adminRepo, redisRepo)
-	updateApiHandler := commands.NewUpdateApiHandler(log, cfg, cloakRepo, adminRepo, redisRepo)
-	deleteApiHandler := commands.NewDeleteApiHandler(log, cfg, cloakRepo, adminRepo, redisRepo)
+	apiMethodsHandler := commands.NewApiMethodsHandler(log, cfg, cloakRepo, adminRepo, redisRepo, kafkaProducer)
 
-	webhookHandler := commands.NewWebhookHandler(log, cfg, kafkaProducer, redisRepo, adminRepo, storageRepo, cloakRepo)
+	webhookMethodsHandler := commands.NewWebhookMethodsHandler(log, cfg, kafkaProducer, redisRepo, adminRepo, storageRepo, cloakRepo)
 
 	commands := commands.NewCommands(
-		addApiHandler,
-		getApiHandler,
-		getFullApiHandler,
-		updateApiHandler,
-		deleteApiHandler,
+		apiMethodsHandler,
 
-		webhookHandler,
+		webhookMethodsHandler,
 	)
 
 	return &CoreService{Commands: commands}

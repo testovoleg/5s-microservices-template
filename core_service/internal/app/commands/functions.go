@@ -11,6 +11,69 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
+func getAdminToken(
+	ctx context.Context,
+	cloakRepo repository.IDMRepository, redisRepo repository.CacheRepository,
+) (string, error) {
+	ctx, span := tracing.StartSpan(ctx, "getApiCmdHandler.Handle")
+	defer span.End()
+
+	adminToken, err := redisRepo.GetAdminToken(ctx)
+	if err != nil {
+		adminToken, err = cloakRepo.GetAdminToken(ctx)
+		if err != nil {
+			return "", errors.Wrap(err, "cloakRepo.GetAdminToken")
+		}
+
+		if adminToken == "" {
+			return "", errors.New("can't get admin token from auth api")
+		}
+
+		redisRepo.PutAdminToken(ctx, adminToken)
+
+		utils.Attr(span, "admin_token_from", "auth_api")
+		return adminToken, nil
+	}
+
+	utils.Attr(span, "admin_token_from", "redis")
+	return adminToken, nil
+}
+
+func getApiData(
+	ctx context.Context,
+	adminRepo repository.AdminRepository, redisRepo repository.CacheRepository,
+	params *models.ApiParams,
+) (*models.Api, error) {
+	ctx, span := tracing.StartSpan(ctx, "getApiCmdHandler.Handle")
+	defer span.End()
+
+	if params == nil || params.AccessToken == "" || params.CompanyUuid == "" || params.ApiUuid == "" {
+		return nil, errors.New("invalid input")
+	}
+
+	utils.Attr(span, "api_uuid", params.ApiUuid)
+
+	api, err := redisRepo.GetApi(ctx, params.CompanyUuid, params.ApiUuid)
+	if err == nil && api != nil {
+		return api, nil
+	}
+
+	listApi, err := adminRepo.GetProperty(ctx, params.AccessToken, params.CompanyUuid)
+	if err != nil {
+		return nil, errors.Wrap(err, "adminRepo.GetProperty")
+	}
+
+	redisRepo.PutApiList(ctx, params.CompanyUuid, listApi)
+
+	for _, a := range listApi {
+		if a.Uuid == params.ApiUuid {
+			return a, nil
+		}
+	}
+
+	return nil, errors.New("api with this uuid not found")
+}
+
 func getUserData(
 	ctx context.Context,
 	log logger.Logger, cloakRepo repository.IDMRepository, adminRepo repository.AdminRepository,

@@ -3,7 +3,7 @@ resources:
   graphql_query: http://localhost:5010/graphql/query
   api_accounts: https://api.5systems.ru/accounts/v1
 grpc:
-  coreServicePort: :5001
+  coreServicePort: :5002
 http:
   port: :5010
   development: true
