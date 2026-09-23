@@ -46,6 +46,24 @@ services:
       - ./.data/microservices_pgdata:/var/lib/postgresql/data
     networks: [ "microservices" ]
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./.data/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - microservices_postgesql
+    networks: [ "microservices" ]
+
   redis:
     image: redis/redis-stack:latest
     restart: always
@@ -117,6 +135,7 @@ services:
 
 volumes:
   mongodb_data_container:
+  pgadmin_data:
 
 networks:
   microservices:
