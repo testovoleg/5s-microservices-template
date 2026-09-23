@@ -73,22 +73,6 @@ services:
       - "8801:8001"
     networks: [ "microservices" ]
 
-  redisinsight:
-    image: redis/redisinsight:latest
-    container_name: redisinsight_container
-    restart: always
-    environment:
-      RI_REDIS_HOST: microservices_redis
-      RI_REDIS_PORT: 6379
-      RI_REDIS_ALIAS: microservices_redis
-    ports:
-      - "5540:5540"
-    volumes:
-      - redisinsight_data:/data
-    depends_on:
-      - redis
-    networks: [ "microservices" ]
-
   zoo1:
     image: confluentinc/cp-zookeeper:7.3.2
     restart: always
