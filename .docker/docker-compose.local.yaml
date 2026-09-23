@@ -73,6 +73,22 @@ services:
       - "8801:8001"
     networks: [ "microservices" ]
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight_container
+    restart: always
+    environment:
+      RI_REDIS_HOST: microservices_redis
+      RI_REDIS_PORT: 6379
+      RI_REDIS_ALIAS: microservices_redis
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+    networks: [ "microservices" ]
+
   zoo1:
     image: confluentinc/cp-zookeeper:7.3.2
     restart: always
@@ -101,6 +117,20 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     depends_on:
       - zoo1
+    networks: [ "microservices" ]
+
+  kafka-ui:
+    image: kafbat/kafka-ui:latest
+    container_name: kafka_ui_container
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:29092
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka1
     networks: [ "microservices" ]
 
   mongodb:
@@ -136,6 +166,7 @@ services:
 volumes:
   mongodb_data_container:
   pgadmin_data:
+  redisinsight_data:
 
 networks:
   microservices:
