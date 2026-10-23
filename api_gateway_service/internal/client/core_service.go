@@ -21,7 +21,7 @@ const (
 func NewCoreServiceConn(ctx context.Context, cfg *config.Config, im interceptors.InterceptorManager) (*grpc.ClientConn, error) {
 	opts := []grpc_retry.CallOption{
 		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(backoffLinear)),
-		grpc_retry.WithCodes(codes.NotFound, codes.Aborted),
+		grpc_retry.WithCodes(codes.Aborted, codes.Unavailable),
 		grpc_retry.WithMax(backoffRetries),
 	}
 
@@ -29,6 +29,8 @@ func NewCoreServiceConn(ctx context.Context, cfg *config.Config, im interceptors
 		cfg.Grpc.CoreServicePort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
+			interceptors.TracingClientInterceptor(),
+			interceptors.ClientTimeoutInterceptor(interceptors.DefaultGRPCClientTimeout),
 			im.ClientRequestLoggerInterceptor(),
 			grpc_retry.UnaryClientInterceptor(opts...),
 		),

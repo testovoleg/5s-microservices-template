@@ -21,6 +21,8 @@ postgres:
   password: postgres
   dbName: products
   sslMode: false
+  # Пул соединений одного пода (env POSTGRES_MAX_CONNS). При N подах в Postgres уходит до N × maxConns.
+  maxConns: 15
 kafka:
   brokers: ["localhost:9092"]
   groupID: microservice_consumer
@@ -45,7 +47,7 @@ keycloak:
   host: http://localhost:8080
   realm: 5SYSTEMS
   clientID: api-accounts
-  clientSecret: amg8vpkpsEZcnAGiR1ZaisYtk5vQCsXo
+  clientSecret: secret
 5sApi:
   adminApiUrl: "https://api.5systems.ru/admin/v1"
   authApiUrl: "https://api.5systems.ru/auth/v1"

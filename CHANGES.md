@@ -89,3 +89,49 @@ Dockerfile каждого контейнера
 
 ## Измененния 
 Описаны в [changelogs/8_x_traceid_gw.md](changelogs/8_x_traceid_gw.md)
+
+# 9. Observability / bootstrap / proto / GQL commons в шаблоне
+Пакет улучшений шаблона: TRACEID в access-логах всех процессов (для Loki→Tempo), порядок Echo middleware, gRPC child-spans, health на probes.port, `attrErr` в commands, `make init_project`, proto через `*.proto`, общие GQL input/types.
+
+## Причины изменений
+Единый DX при создании сервиса из шаблона и одинаковая наблюдаемость GW/GQL/Core без ручной донастройки TRACEID.
+
+## Что изменять
+См. список файлов и шагов переноса в changelog.
+
+## Изменения
+Описаны в [changelogs/9_template_observability_bootstrap.md](changelogs/9_template_observability_bootstrap.md)
+
+# 10. Bulk-батчи и переполнение очереди трассировки
+На большом батче SDK молча дропает спаны из очереди `BatchSpanProcessor`; чаще всего пропадает
+родитель цикла, а дети остаются «сиротами» в Tempo. В шаблоне увеличены лимиты очереди и
+добавлен `tracing.WithBulkTracing` для будущих bulk-циклов.
+
+## Причины изменений
+Единое дерево parent/child в Tempo даже при обработке больших батчей.
+
+## Что изменять
+`pkg/tracing/opentelemetry.go`, `pkg/tracing/utils.go`. В конкретном сервисе — обернуть bulk-цикл
+в `tracing.WithBulkTracing`.
+
+## Изменения
+Описаны в [changelogs/10_bulk_tracing_span_overflow.md](changelogs/10_bulk_tracing_span_overflow.md)
+
+# 11. Перенос общих улучшений из 5s-vin-decoder
+`.gitattributes` (LF), Makefile (`MIGRATE_PATH`, `migrate_check`, `test`, `fmt`), Kafka keyed
+publish + `keyAwareBalancer`, `logger.InfofTrace`, `postgres.MaxConns`, `utils.TTLCache`,
+`jobs.RunPeriodic`, graceful drain Kafka-воркеров, `kafkaTopic` с дефолтами, readiness Kafka со
+свежим соединением, фикс Keycloak introspect (gocloak шлёт не тот `token_type_hint`),
+`adminRepository.GetCompanyList`, `http.bodyLimit`, Swagger UI без curl-сниппета для больших тел.
+
+## Причины изменений
+Проблемы, пойманные под нагрузкой и в Kubernetes на `5s-vin-decoder`: обрыв пулов под живыми
+воркерами при выключении пода, «залипший» readiness после переезда брокера, `active:false` на
+валидные токены, 2M-лимит тела на bulk-импортах; плюс DX — Swagger, не падающий на больших
+телах, и проверка миграций.
+
+## Что изменять
+См. список файлов в changelog.
+
+## Изменения
+Описаны в [changelogs/11_vin_decoder_backport.md](changelogs/11_vin_decoder_backport.md)

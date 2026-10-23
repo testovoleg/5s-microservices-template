@@ -34,6 +34,34 @@ definitions:
       token:
         type: string
     type: object
+  dto.EventDto:
+    properties:
+      description:
+        description: Описание (например, текст ошибки)
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/dto.EventStatusDto'
+        description: Статус ивента
+      timestamp:
+        description: Время последнего обновления статуса
+        type: string
+      uuid:
+        description: Идентификатор ивента
+        type: string
+    type: object
+  dto.EventStatusDto:
+    enum:
+    - НЕТ_ДАННЫХ
+    - СОЗДАН
+    - ЗАВЕРШЕН
+    - ОШИБКА
+    type: string
+    x-enum-varnames:
+    - EVENT_STATUS_UNKNOWN
+    - EVENT_STATUS_CREATED
+    - EVENT_STATUS_FINISHED
+    - EVENT_STATUS_ERROR
   dto.UpdateApiReqDto:
     properties:
       description:
@@ -233,6 +261,42 @@ paths:
       summary: Обновить интеграцию
       tags:
       - 1. Администрирование
+  /common/event:
+    get:
+      consumes:
+      - application/json
+      description: Получение статуса асинхронного ивента по его идентификатору
+      parameters:
+      - description: Идентификатор компании
+        in: query
+        name: company_uuid
+        required: true
+        type: string
+      - description: Идентификатор ивента
+        in: query
+        name: event_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EventDto'
+        "401":
+          description: Авторизационные данные неверны
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      security:
+      - BearerToken: []
+      summary: Получить статус ивента
+      tags:
+      - 4. Общее
   /example:
     post:
       consumes:
@@ -296,9 +360,11 @@ tags:
 - name: 1. Администрирование
 - name: 2. Данные
 - name: 3. Уведомления
+- name: 4. Общее
 x-tagGroups:
 - name: ""
   tags:
   - 1. Администрирование
   - 2. Данные
   - 3. Уведомления
+  - 4. Общее

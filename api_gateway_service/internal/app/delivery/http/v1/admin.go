@@ -3,7 +3,6 @@ package v1
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/dto"
@@ -32,17 +31,13 @@ func (h *appHandlers) AddApi() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.AddApi")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
-		}
-
-		companyUuid := c.QueryParam("company_uuid")
-		if companyUuid == "" {
+		params := bindApiParams(c, token)
+		if params.CompanyUuid == "" {
 			return h.traceErr(c, span, "params", errors.New("company_uuid is empty"))
 		}
 
@@ -55,7 +50,7 @@ func (h *appHandlers) AddApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.ApiMethods.AddApi(ctx, mappers.NewAddApiCommand(token, companyUuid, reqDto))
+		res, err := h.svc.Commands.ApiMethods.AddApi(ctx, mappers.NewAddApiCommand(params, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "AddApi", err)
 		}
@@ -84,14 +79,12 @@ func (h *appHandlers) GetApi() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.GetApi")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
-		}
+		params := bindApiParams(c, token)
 
 		reqDto := &dto.GetApiReqDto{}
 		if err := c.Bind(reqDto); err != nil {
@@ -102,7 +95,11 @@ func (h *appHandlers) GetApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.ApiMethods.GetApi(ctx, mappers.NewGetApiCommand(token, reqDto))
+		if params.CompanyUuid == "" {
+			params.CompanyUuid = reqDto.CompanyUuid
+		}
+
+		res, err := h.svc.Commands.ApiMethods.GetApi(ctx, mappers.NewGetApiCommand(params))
 		if err != nil {
 			return h.traceErr(c, span, "GetApi", err)
 		}
@@ -133,14 +130,12 @@ func (h *appHandlers) GetFullDataApi() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.GetFullDataApi")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
-		}
+		params := bindApiParams(c, token)
 
 		reqDto := &dto.GetFullApiReqDto{}
 		if err := c.Bind(reqDto); err != nil {
@@ -151,7 +146,14 @@ func (h *appHandlers) GetFullDataApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.ApiMethods.GetFullApi(ctx, mappers.NewGetFullApiCommand(token, reqDto))
+		if params.CompanyUuid == "" {
+			params.CompanyUuid = reqDto.CompanyUuid
+		}
+		if params.ApiUuid == "" {
+			params.ApiUuid = reqDto.ApiUuid
+		}
+
+		res, err := h.svc.Commands.ApiMethods.GetFullApi(ctx, mappers.NewGetFullApiCommand(params))
 		if err != nil {
 			return h.traceErr(c, span, "GetFullDataApi", err)
 		}
@@ -182,18 +184,13 @@ func (h *appHandlers) UpdateApi() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.UpdateApi")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
-		}
-
-		companyUuid := c.QueryParam("company_uuid")
-		apiUuid := c.Param("API_UUID")
-		if companyUuid == "" || apiUuid == "" {
+		params := bindApiParams(c, token)
+		if params.CompanyUuid == "" || params.ApiUuid == "" {
 			return h.traceErr(c, span, "params", errors.New("company_uuid or API_UUID is empty"))
 		}
 
@@ -206,7 +203,7 @@ func (h *appHandlers) UpdateApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		res, err := h.svc.Commands.ApiMethods.UpdateApi(ctx, mappers.NewUpdateApiCommand(token, companyUuid, apiUuid, reqDto))
+		res, err := h.svc.Commands.ApiMethods.UpdateApi(ctx, mappers.NewUpdateApiCommand(params, reqDto))
 		if err != nil {
 			return h.traceErr(c, span, "UpdateApi", err)
 		}
@@ -236,14 +233,12 @@ func (h *appHandlers) DeleteApi() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.DeleteApi")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
-		}
+		params := bindApiParams(c, token)
 
 		reqDto := &dto.DeleteApiReqDto{}
 		if err := c.Bind(reqDto); err != nil {
@@ -254,7 +249,14 @@ func (h *appHandlers) DeleteApi() echo.HandlerFunc {
 			return h.traceErr(c, span, "validate", err)
 		}
 
-		err := h.svc.Commands.ApiMethods.DeleteApi(ctx, mappers.NewDeleteApiCommand(token, reqDto))
+		if params.CompanyUuid == "" {
+			params.CompanyUuid = reqDto.CompanyUuid
+		}
+		if params.ApiUuid == "" {
+			params.ApiUuid = reqDto.ApiUuid
+		}
+
+		err = h.svc.Commands.ApiMethods.DeleteApi(ctx, mappers.NewDeleteApiCommand(params))
 		if err != nil {
 			return h.traceErr(c, span, "DeleteApi", err)
 		}

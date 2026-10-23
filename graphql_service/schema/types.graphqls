@@ -1,13 +1,48 @@
+type TipicalResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
 type TipicalMutationResponse {
   code: Int!
   success: Boolean!
   message: String!
 }
 
-type TipicalQueryResponse  {
-	uuid: String
+type TipicalQueryResponse {
+  uuid: String
 }
 
-type TipicalKafkaResponse  {
-	eventUuid: String!
+type TipicalKafkaResponse {
+  eventUuid: String!
+}
+
+type TipicalEvent {
+  uuid: String
+  description: String
+  timestamp: String
+  status: String
+}
+
+type TipicalPaginationInfo {
+  totalCount: Int!
+  totalPages: Int!
+  page: Int!
+  size: Int!
+  hasMore: Boolean!
+}
+
+type PresignURL {
+  fileID: String
+  url: String
+  method: String
+  xAmxTagging: String
+}
+
+type PresignURLRes {
+  fileID: String
+  url: String
+  method: String
+  xAmxTagging: String
 }

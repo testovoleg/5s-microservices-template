@@ -15,7 +15,7 @@ import (
 func (s *grpcService) AddApi(ctx context.Context, req *coreService.AddApiReq) (*coreService.Api, error) {
 	s.metrics.Get("AddApi", metrics.GRPC).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.AddApi")
+	ctx, span := tracing.StartSpan(ctx, "grpcService.AddApi")
 	defer span.End()
 
 	command := mappers.NewAddApiCommandFromGrpcMessage(req)
@@ -37,7 +37,7 @@ func (s *grpcService) AddApi(ctx context.Context, req *coreService.AddApiReq) (*
 func (s *grpcService) GetApi(ctx context.Context, req *coreService.GetApiReq) (*coreService.GetApiRes, error) {
 	s.metrics.Get("GetApi", metrics.GRPC).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.GetApi")
+	ctx, span := tracing.StartSpan(ctx, "grpcService.GetApi")
 	defer span.End()
 
 	command := mappers.NewGetApiCommandFromGrpcMessage(req)
@@ -59,7 +59,7 @@ func (s *grpcService) GetApi(ctx context.Context, req *coreService.GetApiReq) (*
 func (s *grpcService) GetFullApi(ctx context.Context, req *coreService.GetFullApiReq) (*coreService.ApiFull, error) {
 	s.metrics.Get("GetFullApi", metrics.GRPC).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.GetFullApi")
+	ctx, span := tracing.StartSpan(ctx, "grpcService.GetFullApi")
 	defer span.End()
 
 	command := mappers.NewGetFullApiCommandFromGrpcMessage(req)
@@ -81,7 +81,7 @@ func (s *grpcService) GetFullApi(ctx context.Context, req *coreService.GetFullAp
 func (s *grpcService) UpdateApi(ctx context.Context, req *coreService.UpdateApiReq) (*coreService.Api, error) {
 	s.metrics.Get("UpdateApi", metrics.GRPC).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.UpdateApi")
+	ctx, span := tracing.StartSpan(ctx, "grpcService.UpdateApi")
 	defer span.End()
 
 	command := mappers.NewUpdateApiCommandFromGrpcMessage(req)
@@ -103,7 +103,7 @@ func (s *grpcService) UpdateApi(ctx context.Context, req *coreService.UpdateApiR
 func (s *grpcService) DeleteApi(ctx context.Context, req *coreService.DeleteApiReq) (*emptypb.Empty, error) {
 	s.metrics.Get("DeleteApi", metrics.GRPC).Inc()
 
-	ctx, span := tracing.StartGrpcServerTracerSpan(ctx, "grpcService.DeleteApi")
+	ctx, span := tracing.StartSpan(ctx, "grpcService.DeleteApi")
 	defer span.End()
 
 	command := mappers.NewDeleteApiCommandFromGrpcMessage(req)

@@ -25,14 +25,15 @@ var File_core_svc_proto protoreflect.FileDescriptor
 
 const file_core_svc_proto_rawDesc = "" +
 	"\n" +
-	"\x0ecore_svc.proto\x12\vcoreService\x1a\x1bgoogle/protobuf/empty.proto\x1a\x13core_messages.proto2\xb5\x02\n" +
+	"\x0ecore_svc.proto\x12\vcoreService\x1a\x1bgoogle/protobuf/empty.proto\x1a\x0ecore_api.proto\x1a\x10core_event.proto2\xf5\x02\n" +
 	"\vCoreService\x122\n" +
 	"\x06AddApi\x12\x16.coreService.AddApiReq\x1a\x10.coreService.Api\x128\n" +
 	"\x06GetApi\x12\x16.coreService.GetApiReq\x1a\x16.coreService.GetApiRes\x12>\n" +
 	"\n" +
 	"GetFullApi\x12\x1a.coreService.GetFullApiReq\x1a\x14.coreService.ApiFull\x128\n" +
 	"\tUpdateApi\x12\x19.coreService.UpdateApiReq\x1a\x10.coreService.Api\x12>\n" +
-	"\tDeleteApi\x12\x19.coreService.DeleteApiReq\x1a\x16.google.protobuf.EmptyB\x10Z\x0e./;coreServiceb\x06proto3"
+	"\tDeleteApi\x12\x19.coreService.DeleteApiReq\x1a\x16.google.protobuf.Empty\x12>\n" +
+	"\bEventGet\x12\x18.coreService.EventGetReq\x1a\x18.coreService.EventGetResB\x10Z\x0e./;coreServiceb\x06proto3"
 
 var file_core_svc_proto_goTypes = []any{
 	(*AddApiReq)(nil),     // 0: coreService.AddApiReq
@@ -40,27 +41,31 @@ var file_core_svc_proto_goTypes = []any{
 	(*GetFullApiReq)(nil), // 2: coreService.GetFullApiReq
 	(*UpdateApiReq)(nil),  // 3: coreService.UpdateApiReq
 	(*DeleteApiReq)(nil),  // 4: coreService.DeleteApiReq
-	(*Api)(nil),           // 5: coreService.Api
-	(*GetApiRes)(nil),     // 6: coreService.GetApiRes
-	(*ApiFull)(nil),       // 7: coreService.ApiFull
-	(*emptypb.Empty)(nil), // 8: google.protobuf.Empty
+	(*EventGetReq)(nil),   // 5: coreService.EventGetReq
+	(*Api)(nil),           // 6: coreService.Api
+	(*GetApiRes)(nil),     // 7: coreService.GetApiRes
+	(*ApiFull)(nil),       // 8: coreService.ApiFull
+	(*emptypb.Empty)(nil), // 9: google.protobuf.Empty
+	(*EventGetRes)(nil),   // 10: coreService.EventGetRes
 }
 var file_core_svc_proto_depIdxs = []int32{
-	0, // 0: coreService.CoreService.AddApi:input_type -> coreService.AddApiReq
-	1, // 1: coreService.CoreService.GetApi:input_type -> coreService.GetApiReq
-	2, // 2: coreService.CoreService.GetFullApi:input_type -> coreService.GetFullApiReq
-	3, // 3: coreService.CoreService.UpdateApi:input_type -> coreService.UpdateApiReq
-	4, // 4: coreService.CoreService.DeleteApi:input_type -> coreService.DeleteApiReq
-	5, // 5: coreService.CoreService.AddApi:output_type -> coreService.Api
-	6, // 6: coreService.CoreService.GetApi:output_type -> coreService.GetApiRes
-	7, // 7: coreService.CoreService.GetFullApi:output_type -> coreService.ApiFull
-	5, // 8: coreService.CoreService.UpdateApi:output_type -> coreService.Api
-	8, // 9: coreService.CoreService.DeleteApi:output_type -> google.protobuf.Empty
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: coreService.CoreService.AddApi:input_type -> coreService.AddApiReq
+	1,  // 1: coreService.CoreService.GetApi:input_type -> coreService.GetApiReq
+	2,  // 2: coreService.CoreService.GetFullApi:input_type -> coreService.GetFullApiReq
+	3,  // 3: coreService.CoreService.UpdateApi:input_type -> coreService.UpdateApiReq
+	4,  // 4: coreService.CoreService.DeleteApi:input_type -> coreService.DeleteApiReq
+	5,  // 5: coreService.CoreService.EventGet:input_type -> coreService.EventGetReq
+	6,  // 6: coreService.CoreService.AddApi:output_type -> coreService.Api
+	7,  // 7: coreService.CoreService.GetApi:output_type -> coreService.GetApiRes
+	8,  // 8: coreService.CoreService.GetFullApi:output_type -> coreService.ApiFull
+	6,  // 9: coreService.CoreService.UpdateApi:output_type -> coreService.Api
+	9,  // 10: coreService.CoreService.DeleteApi:output_type -> google.protobuf.Empty
+	10, // 11: coreService.CoreService.EventGet:output_type -> coreService.EventGetRes
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_core_svc_proto_init() }
@@ -68,7 +73,8 @@ func file_core_svc_proto_init() {
 	if File_core_svc_proto != nil {
 		return
 	}
-	file_core_messages_proto_init()
+	file_core_api_proto_init()
+	file_core_event_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

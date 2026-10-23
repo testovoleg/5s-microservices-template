@@ -41,12 +41,9 @@ func (c *getTipicalDataHandler) Handle(ctx context.Context, command *GetTipicalD
 	ctx, span := tracing.StartSpan(ctx, "getTipicalDataHandler.Handle")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
-	// res, err := c.coreClient.GetApi(ctx, model.GetApiToGrpcMessage(command.Params, command.Dto))
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Tipical stub: wire a real core RPC here. Params mapping is shared (ApiParams).
+	params := model.GeneralParamsInputToGrpc(command.Params)
+	_ = params
 
-	// return model.ApiFromGrpc(res), nil
 	return &model.TipicalQueryResponse{UUID: utils.StrPtr(utils.GenerateUuid())}, nil
 }

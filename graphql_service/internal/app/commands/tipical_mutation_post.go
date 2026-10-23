@@ -5,6 +5,7 @@ import (
 
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/graphql_service/config"
+	model "github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model"
 	kafkaClient "github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
@@ -39,11 +40,9 @@ func (c *postTipicalMutationHandler) Handle(ctx context.Context, command *PostTi
 	ctx, span := tracing.StartSpan(ctx, "postTipicalMutationHandler.Handle")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
-	// err := c.coreClient.DeleteApi(ctx, model.DeleteApiToGrpcMessage(command.Params))
-	// if err != nil {
-	// 	return err
-	// }
+	// Tipical stub: wire a real core RPC here. Params mapping is shared (ApiParams).
+	params := model.GeneralParamsInputToGrpc(command.Params)
+	_ = params
 
 	return nil
 }

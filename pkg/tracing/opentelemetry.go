@@ -81,6 +81,16 @@ func newTraceProvider(ctx context.Context, endpoint string, res *resource.Resour
 		trace.WithBatcher(
 			exporter,
 			trace.WithBatchTimeout(time.Second),
+			// Defaults (queue=2048, batch=512) overflow easily under bursty bulk-loop
+			// tracing: the SDK silently drops spans once the queue is full, and a loop's
+			// outer span — which always ends (and is enqueued) after all its children —
+			// is disproportionately likely to be the one dropped, leaving orphaned
+			// children with no parent in Tempo.
+			// Bumped well above what a single request should ever legitimately need;
+			// pkg/tracing.WithBulkTracing is the primary defense for truly large batches,
+			// this is the safety margin for everything else.
+			trace.WithMaxQueueSize(20000),
+			trace.WithMaxExportBatchSize(2000),
 		),
 		trace.WithResource(res),
 	)

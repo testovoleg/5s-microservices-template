@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package coreService;
+
+option go_package = "./;coreService";
+
+import "core_api.proto";
+
+// Event is an async operation status stored in Redis (CREATED/FINISHED/ERROR).
+message Event {
+  string uuid        = 1;
+  string description = 2;
+  string timestamp   = 3;
+  string status      = 4;
+}
+
+message EventGetReq {
+  ApiParams params     = 1;
+  string    event_uuid = 2;
+}
+
+message EventGetRes { Event data = 1; }

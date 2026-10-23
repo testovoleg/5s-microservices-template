@@ -12,6 +12,7 @@ func ApiParamsToGrpcMessage(in *ApiParamsDto) *coreService.ApiParams {
 		AccessToken: in.AccessToken,
 		CompanyUuid: in.CompanyUuid,
 		ApiUuid:     in.ApiUuid,
+		IdmUserUuid: in.IdmUserUuid,
 	}
 }
 
@@ -48,5 +49,12 @@ func UpdateApiToGrpcMessage(p *ApiParamsDto, in *UpdateApiReqDto) *coreService.U
 func DeleteApiToGrpcMessage(p *ApiParamsDto) *coreService.DeleteApiReq {
 	return &coreService.DeleteApiReq{
 		Params: ApiParamsToGrpcMessage(p),
+	}
+}
+
+func EventGetReqDtoToGrpcMessage(p *ApiParamsDto, in *EventGetReqDto) *coreService.EventGetReq {
+	return &coreService.EventGetReq{
+		Params:    ApiParamsToGrpcMessage(p),
+		EventUuid: in.EventUuid,
 	}
 }

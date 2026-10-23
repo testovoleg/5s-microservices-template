@@ -1,25 +1,26 @@
 package repository
 
 import (
-	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
-	"io"
 	"net/http"
+	"net/url"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/testovoleg/5s-microservice-template/core_service/config"
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/models"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	httpErrors "github.com/testovoleg/5s-microservice-template/pkg/http_errors"
+	httpUtils "github.com/testovoleg/5s-microservice-template/pkg/http_utils"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
-	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
 type idmRepository struct {
@@ -33,20 +34,17 @@ func NewIDMRepository(log logger.Logger, cfg *config.Config, keycloakClient *goc
 }
 
 func (p *idmRepository) UserData(ctx context.Context, accessToken string) (*models.User, error) {
-	if trace.SpanContextFromContext(ctx).IsValid() {
-		var span trace.Span
-		ctx, span = tracing.StartSpan(ctx, "idmRepository.UserData")
-		defer span.End()
-	}
+	ctx, span := tracing.StartSpan(ctx, "idmRepository.UserData")
+	defer span.End()
 	if user, err := p.decodeExtToken(ctx, accessToken); err == nil {
 		return user, nil
 	}
 
-	result, err := p.client.RetrospectToken(ctx, accessToken, p.cfg.Keycloak.ClientID, p.cfg.Keycloak.ClientSecret, p.cfg.Keycloak.Realm)
+	active, err := p.introspectAccessToken(ctx, accessToken)
 	if err != nil {
 		return nil, errors.New("Invalid token")
 	}
-	if !*result.Active {
+	if !active {
 		return nil, errors.New("Invalid or expired token")
 	}
 
@@ -58,15 +56,72 @@ func (p *idmRepository) UserData(ctx context.Context, accessToken string) (*mode
 	return user, nil
 }
 
-func (p *idmRepository) DecodeToken(ctx context.Context, accessToken string) (*models.User, error) {
-	if trace.SpanContextFromContext(ctx).IsValid() {
-		var span trace.Span
-		ctx, span = tracing.StartSpan(ctx, "idmRepository.DecodeToken")
-		defer span.End()
+// introspectAccessToken calls Keycloak's introspect endpoint for a regular OAuth2 access token.
+// gocloak's RetrospectToken hardcodes token_type_hint=requesting_party_token (UMA RPT), which makes
+// Keycloak report active:false for plain access tokens — introspect manually with the right hint.
+func (p *idmRepository) introspectAccessToken(ctx context.Context, accessToken string) (bool, error) {
+	tokenURL := strings.TrimRight(p.cfg.Keycloak.Host, "/") +
+		"/realms/" + p.cfg.Keycloak.Realm + "/protocol/openid-connect/token/introspect"
+
+	form := url.Values{
+		"token":           {accessToken},
+		"token_type_hint": {"access_token"},
 	}
+	body, err := httpUtils.SendHTTPRequest(ctx, http.MethodPost, tokenURL, []byte(form.Encode()), httpUtils.SendOpts{
+		BasicUser:     p.cfg.Keycloak.ClientID,
+		BasicPassword: p.cfg.Keycloak.ClientSecret,
+		ContentType:   "application/x-www-form-urlencoded",
+		ErrorPrefix:   "Keycloak introspect",
+	})
+	if err != nil {
+		return false, err
+	}
+
+	var result struct {
+		Active bool `json:"active"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return false, err
+	}
+	if !result.Active {
+		p.log.Warnf("Keycloak introspect inactive: url=%s raw=%s claims=%s", tokenURL, string(body), unverifiedTokenClaims(accessToken))
+	}
+	return result.Active, nil
+}
+
+// unverifiedTokenClaims decodes a JWT payload WITHOUT verifying the signature — diagnostics only,
+// to compare iss/azp/sid/exp against the realm/client used for introspection.
+func unverifiedTokenClaims(token string) string {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return "not a JWT"
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return "decode error: " + err.Error()
+	}
+	var claims struct {
+		Iss string `json:"iss"`
+		Azp string `json:"azp"`
+		Sid string `json:"sid"`
+		Exp int64  `json:"exp"`
+		Iat int64  `json:"iat"`
+		Aud any    `json:"aud"`
+	}
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return "unmarshal error: " + err.Error()
+	}
+	b, _ := json.Marshal(claims)
+	return string(b)
+}
+
+func (p *idmRepository) DecodeToken(ctx context.Context, accessToken string) (*models.User, error) {
+	ctx, span := tracing.StartSpan(ctx, "idmRepository.DecodeToken")
+	defer span.End()
+
 	tokenData, claims, err := p.client.DecodeAccessToken(ctx, accessToken, p.cfg.Keycloak.Realm)
 	if err != nil {
-		return nil, errors.Wrap(err, "Decode token failed")
+		return nil, httpErrors.ErrorWrap(err, span, "Decode token failed")
 	}
 	if !tokenData.Valid {
 		return nil, errors.New("Invalid token")
@@ -194,55 +249,27 @@ func (r *idmRepository) GetAdminToken(ctx context.Context) (string, error) {
 	ctx, span := tracing.StartSpan(ctx, "idmRepository.GetAdminToken")
 	defer span.End()
 
-	client := http.Client{
-		Timeout: 30 * time.Second,
-	}
 	requestURL := r.cfg.API.AuthApiUrl + "/oidc/login"
 
-	reqBody := map[string]interface{}{}
-	reqBody["username"] = r.cfg.API.ApiUsername
-	reqBody["password"] = r.cfg.API.ApiPassword
-
-	jsonBody, err := json.Marshal(reqBody)
+	jsonBody, err := json.Marshal(models.OidcLoginReq{
+		Username: r.cfg.API.ApiUsername,
+		Password: r.cfg.API.ApiPassword,
+	})
 	if err != nil {
-		return "", errors.Wrap(err, "json.Marshal")
+		return "", httpErrors.ErrorWrap(err, span, "json.Marshal")
 	}
-	bodyReader := bytes.NewReader(jsonBody)
 
-	req, err := http.NewRequest(http.MethodPost, requestURL, bodyReader)
+	b, err := httpUtils.SendHTTPRequest(ctx, http.MethodPost, requestURL, jsonBody, httpUtils.SendOpts{
+		Timeout:     30 * time.Second,
+		ErrorPrefix: "Error was during on Admin API",
+	})
 	if err != nil {
-		return "", errors.Wrap(err, "http.NewRequest")
+		return "", err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	tracingHeaders, _ := tracing.InjectTextMapCarrier(ctx)
-	for i, k := range tracingHeaders {
-		req.Header.Set(i, k)
-	}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return "", errors.Wrap(err, "client.Do")
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return "", utils.NewError(res, span, "Error was during on Admin API")
-	}
-
-	b, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
-	if err != nil {
-		return "", errors.Wrap(err, "io.ReadAll")
-	}
-
-	type ResponseBody struct {
-		AccessToken string `json:"access_token"`
-	}
-	var body ResponseBody
-
-	err = json.Unmarshal(b, &body)
-	if err != nil {
-		return "", errors.Wrap(err, "json.Unmarshal")
+	var body models.OidcLoginRes
+	if err = json.Unmarshal(b, &body); err != nil {
+		return "", httpErrors.ErrorWrap(err, span, "json.Unmarshal")
 	}
 
 	return body.AccessToken, nil
@@ -327,56 +354,30 @@ func (p *idmRepository) decodeExtToken(ctx context.Context, accessToken string) 
 }
 
 func (p *idmRepository) getExtUser(ctx context.Context, token, key string) (*models.User, error) {
-	if trace.SpanContextFromContext(ctx).IsValid() {
-		var span trace.Span
-		ctx, span = tracing.StartSpan(ctx, "idmRepository.getExtUser")
-		defer span.End()
-	}
-	client := http.Client{
-		Timeout: 30 * time.Second,
-	}
+	ctx, span := tracing.StartSpan(ctx, "idmRepository.getExtUser")
+	defer span.End()
+
 	requestURL := p.cfg.API.AuthApiUrl + "/ext/self-data"
 
-	req_token := token
+	reqToken := token
 	if key != "" {
-		req_token = req_token + ":" + key
+		reqToken = reqToken + ":" + key
 	}
 
-	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	status, b, err := httpUtils.SendHTTPRequestRaw(ctx, http.MethodGet, requestURL, nil, httpUtils.SendOpts{
+		BearerToken: reqToken,
+		Timeout:     30 * time.Second,
+	})
 	if err != nil {
-		return nil, errors.Wrap(err, "http.NewRequest")
+		return nil, err
 	}
-
-	req.Header.Set("Authorization", "Bearer "+req_token)
-	tracingHeaders, _ := tracing.InjectTextMapCarrier(ctx)
-	for i, k := range tracingHeaders {
-		req.Header.Set(i, k)
-	}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "client.Do")
-	}
-
-	if res.StatusCode != http.StatusOK {
+	if status != http.StatusOK {
 		return nil, errors.New("Error was during on get self-data token. The token may have expired")
 	}
 
-	b, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
-	if err != nil {
-		return nil, errors.Wrap(err, "ioutil.ReadAll")
-	}
-
-	type ResponseBody struct {
-		UserId      string `json:"client_id"`
-		CompanyUuid string `json:"company_uuid"`
-	}
-	var body ResponseBody
-
-	err = json.Unmarshal(b, &body)
-	if err != nil {
-		return nil, errors.Wrap(err, "json.Unmarshal(")
+	var body models.ExtSelfDataRes
+	if err = json.Unmarshal(b, &body); err != nil {
+		return nil, httpErrors.ErrorWrap(err, span, "json.Unmarshal(")
 	}
 
 	user := &models.User{

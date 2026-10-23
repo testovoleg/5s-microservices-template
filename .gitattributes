@@ -1,0 +1,11 @@
+# Go и SQL всегда с LF: gofmt пишет LF, а autocrlf=true на Windows иначе превращает
+# каждый форматированный файл в дифф из всех строк.
+*.go   text eol=lf
+*.sql  text eol=lf
+*.proto text eol=lf
+*.md   text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+Makefile text eol=lf
+# bash падает на \r в скриптах (make init_project из Git Bash).
+*.sh   text eol=lf

@@ -45,6 +45,8 @@ type Http struct {
 	HttpClientDebug     bool     `mapstructure:"httpClientDebug"`
 	DebugErrorsResponse bool     `mapstructure:"debugErrorsResponse"`
 	IgnoreLogUrls       []string `mapstructure:"ignoreLogUrls"`
+	// BodyLimit caps request body size (echo BodyLimit syntax, e.g. "20M"); empty → 2M.
+	BodyLimit string `mapstructure:"bodyLimit"`
 }
 
 type Grpc struct {

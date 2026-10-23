@@ -11,7 +11,6 @@ func (c *apiMethodsHandler) AddApi(ctx context.Context, command *AddApiCommand) 
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.AddApi")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	res, err := c.coreClient.AddApi(ctx, dto.AddApiToGrpcMessage(command.Params, command.Dto))
 	if err != nil {
 		return nil, err
@@ -24,7 +23,6 @@ func (c *apiMethodsHandler) GetApi(ctx context.Context, command *GetApiCommand) 
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.GetApi")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	res, err := c.coreClient.GetApi(ctx, dto.GetApiToGrpcMessage(command.Params))
 	if err != nil {
 		return nil, err
@@ -37,7 +35,6 @@ func (c *apiMethodsHandler) GetFullApi(ctx context.Context, command *GetFullApiC
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.GetFullApi")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	res, err := c.coreClient.GetFullApi(ctx, dto.GetFullApiToGrpcMessage(command.Params))
 	if err != nil {
 		return nil, err
@@ -50,7 +47,6 @@ func (c *apiMethodsHandler) UpdateApi(ctx context.Context, command *UpdateApiCom
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.UpdateApi")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	res, err := c.coreClient.UpdateApi(ctx, dto.UpdateApiToGrpcMessage(command.Params, command.Dto))
 	if err != nil {
 		return nil, err
@@ -63,7 +59,6 @@ func (c *apiMethodsHandler) DeleteApi(ctx context.Context, command *DeleteApiCom
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.DeleteApi")
 	defer span.End()
 
-	ctx = tracing.InjectTextMapCarrierToGrpcMetaData(ctx, span.SpanContext())
 	_, err := c.coreClient.DeleteApi(ctx, dto.DeleteApiToGrpcMessage(command.Params))
 	if err != nil {
 		return err

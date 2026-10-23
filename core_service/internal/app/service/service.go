@@ -23,12 +23,12 @@ func NewCoreService(
 ) *CoreService {
 
 	apiMethodsHandler := commands.NewApiMethodsHandler(log, cfg, cloakRepo, adminRepo, redisRepo, kafkaProducer)
-
+	commonMethodsHandler := commands.NewCommonMethodsHandler(log, cfg, cloakRepo, adminRepo, redisRepo)
 	webhookMethodsHandler := commands.NewWebhookMethodsHandler(log, cfg, kafkaProducer, redisRepo, adminRepo, storageRepo, cloakRepo)
 
 	commands := commands.NewCommands(
 		apiMethodsHandler,
-
+		commonMethodsHandler,
 		webhookMethodsHandler,
 	)
 

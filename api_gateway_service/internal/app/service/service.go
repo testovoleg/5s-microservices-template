@@ -19,12 +19,12 @@ func NewGatewayService(
 ) *GatewayService {
 
 	apiMethodsHandler := commands.NewApiMethodsHandler(log, cfg, coreClient)
-
+	commonMethodsHandler := commands.NewCommonMethodsHandler(log, cfg, coreClient)
 	webhookMethodsHandler := commands.NewWebhookMethodsHandler(log, cfg, kafkaProducer)
 
 	commands := commands.NewCommands(
 		apiMethodsHandler,
-
+		commonMethodsHandler,
 		webhookMethodsHandler,
 	)
 

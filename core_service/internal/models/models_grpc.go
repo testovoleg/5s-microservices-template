@@ -35,10 +35,11 @@ func ApiFullToGrpcMessage(in *ApiFull) *coreService.ApiFull {
 	}
 
 	res := &coreService.ApiFull{
-		Uuid:        in.Uuid,
-		Title:       in.Title,
-		Description: in.Description,
-		Token:       in.Token,
+		Uuid:          in.Uuid,
+		Title:         in.Title,
+		Description:   in.Description,
+		Token:         in.Token,
+		Subscriptions: in.Subscriptions,
 	}
 
 	return res
@@ -54,5 +55,17 @@ func PresignUrlToGrpcMessage(in *PresignUrl) *coreService.PresignUrlRes {
 		Url:         in.Url,
 		Method:      in.Method,
 		XAmxTagging: in.XAmzTagging,
+	}
+}
+
+func EventToGrpcMessage(in *Event) *coreService.Event {
+	if in == nil {
+		return nil
+	}
+	return &coreService.Event{
+		Uuid:        in.Uuid,
+		Description: in.Description,
+		Timestamp:   in.Timestamp,
+		Status:      string(in.Status),
 	}
 }

@@ -20,10 +20,12 @@ func NewGraphQLService(
 ) *GraphQLService {
 
 	getTipicalDataHandler := commands.NewGetTipicalDataHandler(log, cfg, kafkaProducer, coreClient)
+	eventGetHandler := commands.NewEventGetHandler(log, cfg, coreClient)
 	postTipicalMutationHandler := commands.NewPostTipicalMutationHandler(log, cfg, kafkaProducer, coreClient)
 
 	commands := commands.NewCommands(
 		getTipicalDataHandler,
+		eventGetHandler,
 		postTipicalMutationHandler,
 	)
 

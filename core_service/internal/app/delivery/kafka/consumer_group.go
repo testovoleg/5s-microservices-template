@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/go-playground/validator"
 	"github.com/segmentio/kafka-go"
@@ -10,6 +11,8 @@ import (
 	"github.com/testovoleg/5s-microservice-template/core_service/internal/app/service"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
+	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
+	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
 const (
@@ -44,11 +47,20 @@ func (s *coreMessageProcessor) ProcessMessages(ctx context.Context, r *kafka.Rea
 			continue
 		}
 
-		s.logProcessMessage(m, workerID)
+		msgCtx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "coreMessageProcessor.ProcessMessages")
+		// The producer's span/trace may have already finished by the time we get here (fire-and-forget),
+		// so record the produce->consume gap explicitly on the span - this is what makes the causal
+		// order readable in Tempo even though this span shares the producer's (possibly long-closed) trace.
+		utils.Attr(span,
+			"kafka.produced_at", m.Time.UTC().Format(time.RFC3339Nano),
+			"kafka.consume_delay", time.Since(m.Time).String(),
+		)
+		s.logProcessMessage(msgCtx, m, workerID)
 
 		switch m.Topic {
 		case s.cfg.KafkaTopics.WebhookExample.TopicName:
-			s.processWebhookExample(ctx, r, m)
+			s.processWebhookExample(msgCtx, r, m)
 		}
+		span.End()
 	}
 }

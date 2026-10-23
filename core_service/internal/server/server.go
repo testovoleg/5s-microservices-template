@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/go-playground/validator"
@@ -23,6 +24,10 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
 )
+
+// consumerDrainTimeout — сколько ждать остановки Kafka-воркеров при выключении;
+// должно быть меньше terminationGracePeriodSeconds пода.
+const consumerDrainTimeout = 30 * time.Second
 
 type server struct {
 	log            logger.Logger
@@ -63,10 +68,16 @@ func (s *server) Run() error {
 
 	s.svc = service.NewCoreService(s.log, s.cfg, idmRepo, adminRepo, redisRepo, kafkaProducer, storageRepo)
 
-	s.log.Info("Starting Reader Kafka consumers")
-	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.m)
-	cg := kafkaClient.NewConsumerGroup(s.cfg.Kafka.Brokers, s.cfg.Kafka.GroupID, s.log)
-	go cg.ConsumeTopic(ctx, s.getConsumerGroupTopics(), readerKafka.PoolSize, coreMessageProcessor.ProcessMessages)
+	var otlShutdown func(context.Context) error
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
+		if err != nil {
+			return err
+		}
+		otlShutdown = shutdown
+		otel.SetTracerProvider(provider)
+	}
+
 	if err := s.connectKafkaBrokers(ctx); err != nil {
 		return errors.Wrap(err, "s.connectKafkaBrokers")
 	}
@@ -76,18 +87,17 @@ func (s *server) Run() error {
 		s.initKafkaTopics(ctx)
 	}
 
+	s.log.Info("Starting Reader Kafka consumers")
+	coreMessageProcessor := readerKafka.NewCoreMessageProcessor(s.log, s.cfg, s.v, s.svc, s.m)
+	cg := kafkaClient.NewConsumerGroup(s.cfg.Kafka.Brokers, s.cfg.Kafka.GroupID, s.log)
+	consumerDone := make(chan struct{})
+	go func() {
+		defer close(consumerDone)
+		cg.ConsumeTopic(ctx, s.getConsumerGroupTopics(), readerKafka.PoolSize, coreMessageProcessor.ProcessMessages)
+	}()
+
 	s.runHealthCheck(ctx)
 	s.m.NewServer(cancel, stackSize)
-
-	if s.cfg.OTL.Enable {
-		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = shutdown(ctx) }()
-
-		otel.SetTracerProvider(provider)
-	}
 
 	closeGrpcServer, grpcServer, err := s.newCoreGrpcServer()
 	if err != nil {
@@ -97,5 +107,23 @@ func (s *server) Run() error {
 
 	<-ctx.Done()
 	grpcServer.GracefulStop()
+	// Дождаться воркеров Kafka до закрытия пулов: ConsumeTopic закрывает Reader
+	// (LeaveGroup → быстрый ребаланс на другие поды), а незакоммиченные сообщения
+	// переиграются там. Иначе defer'ы выше рвали бы Redis/Postgres под живыми воркерами.
+	select {
+	case <-consumerDone:
+	case <-time.After(consumerDrainTimeout):
+		s.log.Warnf("kafka consumer did not stop within %s, closing anyway", consumerDrainTimeout)
+	}
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+	if err := s.m.Shutdown(shutdownCtx); err != nil {
+		s.log.WarnMsg("metrics.Shutdown", err)
+	}
+	if otlShutdown != nil {
+		if err := otlShutdown(shutdownCtx); err != nil {
+			s.log.WarnMsg("otl.Shutdown", err)
+		}
+	}
 	return nil
 }

@@ -5,8 +5,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
@@ -22,6 +24,13 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
+)
+
+const (
+	shutdownTimeout = 10 * time.Second
+	// graphqlComplexityLimit rejects queries whose calculated field complexity exceeds this value
+	// (DoS protection; raise if legitimate nested/list queries start failing).
+	graphqlComplexityLimit = 1500
 )
 
 type server struct {
@@ -48,6 +57,16 @@ func (s *server) Run() error {
 	s.im = interceptors.NewInterceptorManager(s.log)
 	s.m = metrics.NewMetricsManager(s.log, s.cfg.ServiceName, s.cfg.Probes.PrometheusPath, s.cfg.Probes.PrometheusPort)
 
+	var otlShutdown func(context.Context) error
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
+		if err != nil {
+			return err
+		}
+		otlShutdown = shutdown
+		otel.SetTracerProvider(provider)
+	}
+
 	coreServiceConn, err := client.NewCoreServiceConn(ctx, s.cfg, s.im)
 	if err != nil {
 		return err
@@ -63,6 +82,7 @@ func (s *server) Run() error {
 	resolverHandlers := graph_resolvers.NewResolverHandlers(s.log, s.mw, s.cfg, s.bs, s.v, s.m)
 
 	s.gql = handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolverHandlers}))
+	s.gql.Use(extension.FixedComplexityLimit(graphqlComplexityLimit))
 
 	go func() {
 		if err := s.runGraphQLServer(); err != nil {
@@ -75,19 +95,20 @@ func (s *server) Run() error {
 	s.runHealthCheck(ctx)
 	s.m.NewServer(cancel, stackSize)
 
-	if s.cfg.OTL.Enable {
-		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = shutdown(ctx) }()
-
-		otel.SetTracerProvider(provider)
-	}
-
 	<-ctx.Done()
-	if err := s.echo.Server.Shutdown(ctx); err != nil {
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer shutdownCancel()
+
+	if err := s.echo.Server.Shutdown(shutdownCtx); err != nil {
 		s.log.WarnMsg("echo.Server.Shutdown", err)
+	}
+	if err := s.m.Shutdown(shutdownCtx); err != nil {
+		s.log.WarnMsg("metrics.Shutdown", err)
+	}
+	if otlShutdown != nil {
+		if err := otlShutdown(shutdownCtx); err != nil {
+			s.log.WarnMsg("otl.Shutdown", err)
+		}
 	}
 
 	return nil

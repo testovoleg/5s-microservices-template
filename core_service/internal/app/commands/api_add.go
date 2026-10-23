@@ -14,28 +14,28 @@ func (c *apiMethodsHandler) AddApi(ctx context.Context, command *AddApiCommand) 
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.AddApi")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
 	if err != nil {
-		return nil, err
+		return nil, attrErr(span, command.Params, command.Data, err)
 	}
 
 	listApi, err := c.adminRepo.GetProperty(ctx, command.Params.AccessToken, company.Uuid)
 	if err != nil {
-		return nil, errors.Wrap(err, "adminRepo.GetProperty")
+		return nil, attrErr(span, command.Params, command.Data, errors.Wrap(err, "adminRepo.GetProperty"))
 	}
 
 	c.redisRepo.PutApiList(ctx, company.Uuid, listApi)
 
 	api, err := c.createApi(command)
 	if err != nil {
-		return nil, errors.Wrap(err, "handle.createApi")
+		return nil, attrErr(span, command.Params, command.Data, errors.Wrap(err, "handle.createApi"))
 	}
 
 	listApi = append(listApi, api)
 
 	err = c.adminRepo.AddProperty(ctx, command.Params.AccessToken, company.Uuid, listApi)
 	if err != nil {
-		return nil, errors.Wrap(err, "adminRepo.AddProperty")
+		return nil, attrErr(span, command.Params, command.Data, errors.Wrap(err, "adminRepo.AddProperty"))
 	}
 
 	c.redisRepo.PutApiList(ctx, company.Uuid, listApi)

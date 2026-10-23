@@ -5,12 +5,12 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/mappers"
 	"github.com/testovoleg/5s-microservice-template/pkg/constants"
+	httpUtils "github.com/testovoleg/5s-microservice-template/pkg/http_utils"
 	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 )
@@ -40,25 +40,18 @@ func (h *appHandlers) Webhook() echo.HandlerFunc {
 		c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		defer c.Request().Body.Close()
 
-		secretToken := c.Request().Header.Get(constants.HeaderSecretToken)
-		if strings.HasPrefix(strings.ToLower(secretToken), "bearer ") {
-			secretToken = secretToken[7:]
-		}
+		secretToken := httpUtils.StripBearer(c.Request().Header.Get(constants.HeaderSecretToken))
 
 		companyUuid := ""
 		apiUuid := ""
 		if secretToken != "" {
-			pattern := regexp.MustCompile(`(.+)_(.+)`)
-			finded := pattern.FindStringSubmatch(secretToken)
-			if len(finded) == 0 {
+			left, right, ok := strings.Cut(secretToken, "_")
+			if !ok {
 				msg := "CompanyUuid_ApiUuid not found in secret token"
 				return h.traceWebhookErr(c, span, msg, errors.New(msg))
 			}
-
-			companyUuid = finded[1]
-			if len(finded) >= 2 {
-				apiUuid = finded[2]
-			}
+			companyUuid = left
+			apiUuid = right
 		}
 
 		if companyUuid == "" || apiUuid == "" {

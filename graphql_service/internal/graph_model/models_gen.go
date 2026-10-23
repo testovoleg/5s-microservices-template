@@ -2,16 +2,35 @@
 
 package model
 
-type GeneralParamsInput struct {
-	AccessToken *string `json:"accessToken,omitempty"`
-	CompanyUUID *string `json:"companyUuid,omitempty"`
-	IdmUserUUID *string `json:"idmUserUuid,omitempty"`
-}
-
 type Mutation struct {
 }
 
+type PresignURL struct {
+	FileID      *string `json:"fileID,omitempty"`
+	URL         *string `json:"url,omitempty"`
+	Method      *string `json:"method,omitempty"`
+	XAmxTagging *string `json:"xAmxTagging,omitempty"`
+}
+
+type PresignURLRes struct {
+	FileID      *string `json:"fileID,omitempty"`
+	URL         *string `json:"url,omitempty"`
+	Method      *string `json:"method,omitempty"`
+	XAmxTagging *string `json:"xAmxTagging,omitempty"`
+}
+
 type Query struct {
+}
+
+type TipicalEvent struct {
+	UUID        *string `json:"uuid,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Timestamp   *string `json:"timestamp,omitempty"`
+	Status      *string `json:"status,omitempty"`
+}
+
+type TipicalEventGetInput struct {
+	EventUUID string `json:"eventUuid"`
 }
 
 type TipicalKafkaResponse struct {
@@ -24,6 +43,25 @@ type TipicalMutationResponse struct {
 	Message string `json:"message"`
 }
 
+type TipicalPaginationInfo struct {
+	TotalCount int  `json:"totalCount"`
+	TotalPages int  `json:"totalPages"`
+	Page       int  `json:"page"`
+	Size       int  `json:"size"`
+	HasMore    bool `json:"hasMore"`
+}
+
+type TipicalPaginationInput struct {
+	Page *int `json:"page,omitempty"`
+	Size *int `json:"size,omitempty"`
+}
+
 type TipicalQueryResponse struct {
 	UUID *string `json:"uuid,omitempty"`
+}
+
+type TipicalResponse struct {
+	Code    int    `json:"code"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }

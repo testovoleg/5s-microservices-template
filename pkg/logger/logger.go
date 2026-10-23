@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -40,10 +41,11 @@ type Logger interface {
 	Printf(template string, args ...interface{})
 	WithName(name string)
 	HttpMiddlewareAccessLogger(method string, uri string, status int, size int64, time time.Duration, traceID string)
-	GrpcMiddlewareAccessLogger(method string, time time.Duration, metaData map[string][]string, err error)
-	GrpcClientInterceptorLogger(method string, req interface{}, reply interface{}, time time.Duration, metaData map[string][]string, err error)
-	KafkaProcessMessage(topic string, partition int, message string, workerID int, offset int64, time time.Time)
-	KafkaLogCommittedMessage(topic string, partition int, offset int64)
+	GrpcMiddlewareAccessLogger(method string, time time.Duration, metaData map[string][]string, err error, traceID string)
+	GrpcClientInterceptorLogger(method string, req interface{}, reply interface{}, time time.Duration, metaData map[string][]string, err error, traceID string)
+	KafkaProcessMessage(topic string, partition int, message string, workerID int, offset int64, time time.Time, traceID string)
+	InfofTrace(traceID string, template string, args ...interface{})
+	KafkaLogCommittedMessage(topic string, partition int, offset int64, traceID string)
 }
 
 // Application logger
@@ -230,29 +232,31 @@ func (l *appLogger) HttpMiddlewareAccessLogger(method, uri string, status int, s
 	)
 }
 
-func (l *appLogger) GrpcMiddlewareAccessLogger(method string, time time.Duration, metaData map[string][]string, err error) {
+func (l *appLogger) GrpcMiddlewareAccessLogger(method string, time time.Duration, metaData map[string][]string, err error, traceID string) {
 	l.logger.Info(
 		constants.GRPC,
 		zap.String(constants.METHOD, method),
 		zap.Duration(constants.TIME, time),
 		zap.Any(constants.METADATA, metaData),
 		zap.Error(err),
+		zap.String(constants.TRACEID, traceID),
 	)
 }
 
-func (l *appLogger) GrpcClientInterceptorLogger(method string, req, reply interface{}, time time.Duration, metaData map[string][]string, err error) {
+func (l *appLogger) GrpcClientInterceptorLogger(method string, req, reply interface{}, time time.Duration, metaData map[string][]string, err error, traceID string) {
 	l.logger.Info(
 		constants.GRPC,
 		zap.String(constants.METHOD, method),
-		zap.Any(constants.REQUEST, req),
-		zap.Any(constants.REPLY, reply),
+		zap.String(constants.REQUEST, fmt.Sprintf("%T", req)),
+		zap.String(constants.REPLY, fmt.Sprintf("%T", reply)),
 		zap.Duration(constants.TIME, time),
 		zap.Any(constants.METADATA, metaData),
 		zap.Error(err),
+		zap.String(constants.TRACEID, traceID),
 	)
 }
 
-func (l *appLogger) KafkaProcessMessage(topic string, partition int, message string, workerID int, offset int64, time time.Time) {
+func (l *appLogger) KafkaProcessMessage(topic string, partition int, message string, workerID int, offset int64, time time.Time, traceID string) {
 	l.logger.Debug(
 		"Processing Kafka message",
 		zap.String(constants.Topic, topic),
@@ -261,14 +265,22 @@ func (l *appLogger) KafkaProcessMessage(topic string, partition int, message str
 		zap.Int(constants.WorkerID, workerID),
 		zap.Int64(constants.Offset, offset),
 		zap.Time(constants.Time, time),
+		zap.String(constants.TRACEID, traceID),
 	)
 }
 
-func (l *appLogger) KafkaLogCommittedMessage(topic string, partition int, offset int64) {
+// InfofTrace — Infof с полем TRACEID, чтобы строку можно было сопоставить с
+// KafkaProcessMessage/KafkaLogCommittedMessage того же сообщения (Loki → Tempo).
+func (l *appLogger) InfofTrace(traceID string, template string, args ...interface{}) {
+	l.logger.Info(fmt.Sprintf(template, args...), zap.String(constants.TRACEID, traceID))
+}
+
+func (l *appLogger) KafkaLogCommittedMessage(topic string, partition int, offset int64, traceID string) {
 	l.logger.Info(
 		"Committed Kafka message",
 		zap.String(constants.Topic, topic),
 		zap.Int(constants.Partition, partition),
 		zap.Int64(constants.Offset, offset),
+		zap.String(constants.TRACEID, traceID),
 	)
 }

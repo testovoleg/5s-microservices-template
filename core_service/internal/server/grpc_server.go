@@ -56,13 +56,10 @@ func (s *server) newCoreGrpcServer() (func() error, *grpc.Server, error) {
 
 	go func() {
 		s.log.Infof("Core gRPC server is listening on port: %s", s.cfg.GRPC.Port)
-		// start serving grpc
 		err := grpcServer.Serve(l)
-		s.log.Warn(err)
-		// wait 3 second, when grpc is ended to server. Is needed for log other fatals, if exists
-		time.Sleep(time.Second * 3)
-		// and crash error
-		s.log.Fatal(err)
+		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			s.log.Errorf("grpcServer.Serve: %v", err)
+		}
 	}()
 
 	return l.Close, grpcServer, nil

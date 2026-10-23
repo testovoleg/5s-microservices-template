@@ -25,6 +25,7 @@ const (
 	CoreService_GetFullApi_FullMethodName = "/coreService.CoreService/GetFullApi"
 	CoreService_UpdateApi_FullMethodName  = "/coreService.CoreService/UpdateApi"
 	CoreService_DeleteApi_FullMethodName  = "/coreService.CoreService/DeleteApi"
+	CoreService_EventGet_FullMethodName   = "/coreService.CoreService/EventGet"
 )
 
 // CoreServiceClient is the client API for CoreService service.
@@ -43,6 +44,8 @@ type CoreServiceClient interface {
 	UpdateApi(ctx context.Context, in *UpdateApiReq, opts ...grpc.CallOption) (*Api, error)
 	// DeleteApi deletes an API with the given parameters
 	DeleteApi(ctx context.Context, in *DeleteApiReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// EventGet returns async event status from Redis
+	EventGet(ctx context.Context, in *EventGetReq, opts ...grpc.CallOption) (*EventGetRes, error)
 }
 
 type coreServiceClient struct {
@@ -103,6 +106,16 @@ func (c *coreServiceClient) DeleteApi(ctx context.Context, in *DeleteApiReq, opt
 	return out, nil
 }
 
+func (c *coreServiceClient) EventGet(ctx context.Context, in *EventGetReq, opts ...grpc.CallOption) (*EventGetRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EventGetRes)
+	err := c.cc.Invoke(ctx, CoreService_EventGet_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CoreServiceServer is the server API for CoreService service.
 // All implementations should embed UnimplementedCoreServiceServer
 // for forward compatibility.
@@ -119,6 +132,8 @@ type CoreServiceServer interface {
 	UpdateApi(context.Context, *UpdateApiReq) (*Api, error)
 	// DeleteApi deletes an API with the given parameters
 	DeleteApi(context.Context, *DeleteApiReq) (*emptypb.Empty, error)
+	// EventGet returns async event status from Redis
+	EventGet(context.Context, *EventGetReq) (*EventGetRes, error)
 }
 
 // UnimplementedCoreServiceServer should be embedded to have
@@ -142,6 +157,9 @@ func (UnimplementedCoreServiceServer) UpdateApi(context.Context, *UpdateApiReq) 
 }
 func (UnimplementedCoreServiceServer) DeleteApi(context.Context, *DeleteApiReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteApi not implemented")
+}
+func (UnimplementedCoreServiceServer) EventGet(context.Context, *EventGetReq) (*EventGetRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EventGet not implemented")
 }
 func (UnimplementedCoreServiceServer) testEmbeddedByValue() {}
 
@@ -253,6 +271,24 @@ func _CoreService_DeleteApi_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CoreService_EventGet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EventGetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CoreServiceServer).EventGet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CoreService_EventGet_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CoreServiceServer).EventGet(ctx, req.(*EventGetReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CoreService_ServiceDesc is the grpc.ServiceDesc for CoreService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -279,6 +315,10 @@ var CoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteApi",
 			Handler:    _CoreService_DeleteApi_Handler,
+		},
+		{
+			MethodName: "EventGet",
+			Handler:    _CoreService_EventGet_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

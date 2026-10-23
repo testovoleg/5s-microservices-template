@@ -1,4 +1,5 @@
 type Query {
   "Get list of bugs with pagination"
   tmp_tipicalData(params: GeneralParamsInput): TipicalQueryResponse!
+  tmp_eventGet(params: GeneralParamsInput!, input: TipicalEventGetInput!): TipicalEvent!
 }

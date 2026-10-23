@@ -9,7 +9,9 @@ http:
   debugHeaders: false
   httpClientDebug: false
   debugErrorsResponse: true
-  ignoreLogUrls: [ "metrics" ]
+  ignoreLogUrls: [ "metrics", "/ready", "/live", "/health" ]
+  # Предел тела запроса (echo BodyLimit: "2M", "20M"); пусто → 2M.
+  bodyLimit: 2M
 probes:
   readinessPath: /ready
   livenessPath: /live

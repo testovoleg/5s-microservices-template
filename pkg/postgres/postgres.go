@@ -16,6 +16,9 @@ type Config struct {
 	DBName   string `yaml:"dbName"`
 	SSLMode  bool   `yaml:"sslMode"`
 	Password string `yaml:"password"`
+	// MaxConns — размер пула соединений одного процесса (0 → 15). В Kubernetes суммарно
+	// по всем подам не должен превышать max_connections Postgres с запасом.
+	MaxConns int `yaml:"maxConns" mapstructure:"maxConns"`
 }
 
 const (
@@ -43,6 +46,9 @@ func NewPgxConn(cfg *Config) (*pgxpool.Pool, error) {
 	}
 
 	poolCfg.MaxConns = maxConn
+	if cfg.MaxConns > 0 {
+		poolCfg.MaxConns = int32(cfg.MaxConns)
+	}
 	poolCfg.HealthCheckPeriod = healthCheckPeriod
 	poolCfg.MaxConnIdleTime = maxConnIdleTime
 	poolCfg.MaxConnLifetime = maxConnLifetime

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{.AppName}} — Swagger UI</title>
+  <link rel="stylesheet" type="text/css" href="./swagger-ui.css">
+  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32"/>
+  <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16"/>
+  <style>
+    html { box-sizing: border-box; overflow-y: scroll; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin: 0; background: #fafafa; }
+    /* "Available authorizations" dialog: default max-height (540px) clips the auth list on
+       smaller windows — let it use most of the viewport height and scroll within itself. */
+    .swagger-ui .dialog-ux .modal-ux {
+      max-height: 85vh;
+    }
+    .swagger-ui .dialog-ux .modal-ux-content {
+      max-height: calc(85vh - 60px); /* minus modal-ux-header height */
+    }
+  </style>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="./swagger-ui-bundle.js"></script>
+<script src="./swagger-ui-standalone-preset.js"></script>
+<script>
+window.onload = function () {
+  // Large request bodies (bulk imports): swagger-ui renders the "Curl" section by feeding the
+  // request body into its syntax highlighter, which throws "Maximum call stack size exceeded" on
+  // big JSON (the "curl" component reads props.request.get("body")). Simplest fix: skip building
+  // the curl snippet for large bodies and show a short placeholder — purely cosmetic, doesn't
+  // affect the real request.
+  var LARGE_CURL_BODY_MAX_CHARS = 50000;
+  function curlPlaceholderForLargeBodyPlugin() {
+    return {
+      wrapComponents: {
+        curl: function (Original, system) {
+          return function (props) {
+            var body = props.request && typeof props.request.get === "function" ? props.request.get("body") : null;
+            var size = typeof body === "string" ? body.length : (body ? JSON.stringify(body).length : 0);
+            if (size <= LARGE_CURL_BODY_MAX_CHARS) {
+              return system.React.createElement(Original, props);
+            }
+            return system.React.createElement("div", { className: "curl-command" },
+              system.React.createElement("h4", null, "Curl"),
+              system.React.createElement("div", null, "Тело запроса слишком большое для отображения (" + size + " симв.).")
+            );
+          };
+        }
+      }
+    };
+  }
+  window.ui = SwaggerUIBundle({
+    urls: [
+      { name: "doc.json", url: "doc.json" }
+    ],
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    docExpansion: "list",
+    persistAuthorization: true,
+    validatorUrl: null,
+    presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl,
+      curlPlaceholderForLargeBodyPlugin
+    ],
+    layout: "StandaloneLayout"
+  });
+};
+</script>
+</body>
+</html>

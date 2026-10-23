@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,7 @@ import (
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/middlewares"
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
 	"github.com/testovoleg/5s-microservice-template/docs"
+	httpUtils "github.com/testovoleg/5s-microservice-template/pkg/http_utils"
 	"github.com/testovoleg/5s-microservice-template/pkg/interceptors"
 	"github.com/testovoleg/5s-microservice-template/pkg/kafka"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
@@ -22,6 +24,8 @@ import (
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
 	"go.opentelemetry.io/otel"
 )
+
+const shutdownTimeout = 10 * time.Second
 
 type server struct {
 	log  logger.Logger
@@ -36,7 +40,9 @@ type server struct {
 }
 
 func NewServer(log logger.Logger, cfg *config.Config) *server {
-	return &server{log: log, cfg: cfg, echo: echo.New(), v: validator.New()}
+	e := echo.New()
+	e.Binder = &httpUtils.QueryAwareBinder{}
+	return &server{log: log, cfg: cfg, echo: e, v: validator.New()}
 }
 
 func (s *server) Run() error {
@@ -48,6 +54,16 @@ func (s *server) Run() error {
 	s.m = metrics.NewMetricsManager(s.log, s.cfg.ServiceName, s.cfg.Probes.PrometheusPath, s.cfg.Probes.PrometheusPort)
 
 	s.rdcl = docs.NewRedoclyHtml(s.cfg.Http.Title, s.cfg.Http.BasePath)
+
+	var otlShutdown func(context.Context) error
+	if s.cfg.OTL.Enable {
+		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
+		if err != nil {
+			return err
+		}
+		otlShutdown = shutdown
+		otel.SetTracerProvider(provider)
+	}
 
 	coreServiceConn, err := client.NewCoreServiceConn(ctx, s.cfg, s.im)
 	if err != nil {
@@ -75,19 +91,20 @@ func (s *server) Run() error {
 	s.runHealthCheck(ctx)
 	s.m.NewServer(cancel, stackSize)
 
-	if s.cfg.OTL.Enable {
-		provider, shutdown, err := tracing.NewOTLTracer(ctx, s.cfg.OTL)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = shutdown(ctx) }()
-
-		otel.SetTracerProvider(provider)
-	}
-
 	<-ctx.Done()
-	if err := s.echo.Server.Shutdown(ctx); err != nil {
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer shutdownCancel()
+
+	if err := s.echo.Server.Shutdown(shutdownCtx); err != nil {
 		s.log.WarnMsg("echo.Server.Shutdown", err)
+	}
+	if err := s.m.Shutdown(shutdownCtx); err != nil {
+		s.log.WarnMsg("metrics.Shutdown", err)
+	}
+	if otlShutdown != nil {
+		if err := otlShutdown(shutdownCtx); err != nil {
+			s.log.WarnMsg("otl.Shutdown", err)
+		}
 	}
 
 	return nil

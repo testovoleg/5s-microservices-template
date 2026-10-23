@@ -1,8 +1,8 @@
-FROM --platform=linux/amd64 golang:1.24 AS builder
+FROM --platform=linux/amd64 golang:1.25-alpine AS builder
 
 LABEL stage=gobuilder
-ENV CGO_ENABLED 0
-ENV GOOS linux
+ENV CGO_ENABLED=0
+ENV GOOS=linux
 
 WORKDIR /build
 ADD go.mod .
@@ -11,7 +11,7 @@ RUN go mod download
 COPY . .
 RUN go build -ldflags="-s -w" -o /build/graphql graphql_service/cmd/main.go 
 
-FROM alpine
+FROM alpine:latest
 
 RUN apk update --no-cache && apk add --no-cache ca-certificates && apk add mailcap && rm /var/cache/apk/*
 

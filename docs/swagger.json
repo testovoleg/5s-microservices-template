@@ -281,6 +281,62 @@
                 }
             }
         },
+        "/common/event": {
+            "get": {
+                "security": [
+                    {
+                        "BearerToken": []
+                    }
+                ],
+                "description": "Получение статуса асинхронного ивента по его идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "4. Общее"
+                ],
+                "summary": "Получить статус ивента",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Идентификатор компании",
+                        "name": "company_uuid",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Идентификатор ивента",
+                        "name": "event_uuid",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EventDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Авторизационные данные неверны",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
+                    }
+                }
+            }
+        },
         "/example": {
             "post": {
                 "description": "Пример запроса для получения данных",
@@ -415,6 +471,46 @@
                 }
             }
         },
+        "dto.EventDto": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Описание (например, текст ошибки)",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Статус ивента",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.EventStatusDto"
+                        }
+                    ]
+                },
+                "timestamp": {
+                    "description": "Время последнего обновления статуса",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "Идентификатор ивента",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.EventStatusDto": {
+            "type": "string",
+            "enum": [
+                "НЕТ_ДАННЫХ",
+                "СОЗДАН",
+                "ЗАВЕРШЕН",
+                "ОШИБКА"
+            ],
+            "x-enum-varnames": [
+                "EVENT_STATUS_UNKNOWN",
+                "EVENT_STATUS_CREATED",
+                "EVENT_STATUS_FINISHED",
+                "EVENT_STATUS_ERROR"
+            ]
+        },
         "dto.UpdateApiReqDto": {
             "type": "object",
             "properties": {
@@ -462,6 +558,9 @@
         },
         {
             "name": "3. Уведомления"
+        },
+        {
+            "name": "4. Общее"
         }
     ],
     "x-tagGroups": [
@@ -470,7 +569,8 @@
             "tags": [
                 "1. Администрирование",
                 "2. Данные",
-                "3. Уведомления"
+                "3. Уведомления",
+                "4. Общее"
             ]
         }
     ]

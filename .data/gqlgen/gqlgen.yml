@@ -51,6 +51,9 @@ autobind:
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  GeneralParamsInput:
+    model:
+      - github.com/testovoleg/5s-microservice-template/graphql_service/internal/graph_model.GeneralParamsInput
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID

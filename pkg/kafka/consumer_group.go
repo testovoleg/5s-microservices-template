@@ -58,7 +58,7 @@ func (c *consumerGroup) GetNewKafkaReader(kafkaURL []string, groupTopics []strin
 func (c *consumerGroup) GetNewKafkaWriter() *kafka.Writer {
 	w := &kafka.Writer{
 		Addr:         kafka.TCP(c.Brokers...),
-		Balancer:     &kafka.LeastBytes{},
+		Balancer:     &keyAwareBalancer{},
 		RequiredAcks: writerRequiredAcks,
 		MaxAttempts:  writerMaxAttempts,
 		Compression:  compress.Snappy,
@@ -82,7 +82,7 @@ func (c *consumerGroup) ConsumeTopic(ctx context.Context, groupTopics []string, 
 	c.log.Infof("Starting consumer groupID: %s, topic: %+v, pool size: %v", c.GroupID, groupTopics, poolSize)
 
 	wg := &sync.WaitGroup{}
-	for i := 0; i <= poolSize; i++ {
+	for i := 0; i < poolSize; i++ {
 		wg.Add(1)
 		go worker(ctx, r, wg, i)
 	}

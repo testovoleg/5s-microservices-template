@@ -5,7 +5,8 @@ package coreService;
 option go_package = "./;coreService";
 
 import "google/protobuf/empty.proto";
-import "core_messages.proto";
+import "core_api.proto";
+import "core_event.proto";
 
 // CoreService provides API management operations.
 service CoreService {
@@ -19,4 +20,6 @@ service CoreService {
   rpc UpdateApi(UpdateApiReq) returns (Api);
   // DeleteApi deletes an API with the given parameters
   rpc DeleteApi(DeleteApiReq) returns (google.protobuf.Empty);
+  // EventGet returns async event status from Redis
+  rpc EventGet(EventGetReq) returns (EventGetRes);
 }

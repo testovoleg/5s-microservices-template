@@ -2,21 +2,21 @@ package dto
 
 import (
 	coreService "github.com/testovoleg/5s-microservice-template/core_service/proto"
+	"github.com/testovoleg/5s-microservice-template/pkg/utils"
 )
 
 func ListApiDtoFromGrpc(in []*coreService.Api) []*ApiDto {
-	if in == nil {
-		return []*ApiDto{}
-	}
-
 	var list []*ApiDto
 	for _, v := range in {
 		list = append(list, ApiDtoFromGrpc(v))
 	}
-	return list
+	return utils.NonNilSlice(list)
 }
 
 func ApiDtoFromGrpc(in *coreService.Api) *ApiDto {
+	if in == nil {
+		return &ApiDto{}
+	}
 	return &ApiDto{
 		Uuid:        in.GetUuid(),
 		Title:       in.GetTitle(),
@@ -27,13 +27,26 @@ func ApiDtoFromGrpc(in *coreService.Api) *ApiDto {
 
 func ApiFullDtoFromGrpc(in *coreService.ApiFull) *ApiFullDto {
 	if in == nil {
-		return &ApiFullDto{}
+		return &ApiFullDto{Subscriptions: []string{}}
 	}
 
 	return &ApiFullDto{
+		Uuid:          in.GetUuid(),
+		Title:         in.GetTitle(),
+		Description:   in.GetDescription(),
+		Token:         in.GetToken(),
+		Subscriptions: utils.NonNilSlice(in.GetSubscriptions()),
+	}
+}
+
+func EventDtoFromGrpc(in *coreService.Event) *EventDto {
+	if in == nil {
+		return nil
+	}
+	return &EventDto{
 		Uuid:        in.GetUuid(),
-		Title:       in.GetTitle(),
 		Description: in.GetDescription(),
-		Token:       in.GetToken(),
+		Timestamp:   in.GetTimestamp(),
+		Status:      EventStatusDto(in.GetStatus()),
 	}
 }

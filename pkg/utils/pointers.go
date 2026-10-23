@@ -12,6 +12,14 @@ func StrPtr(in string) *string {
 	return &res
 }
 
+// StrPtrNonEmpty returns nil for "" so JSON/GraphQL omit empty optional fields.
+func StrPtrNonEmpty(in string) *string {
+	if in == "" {
+		return nil
+	}
+	return StrPtr(in)
+}
+
 func DerefBool(b *bool) bool {
 	if b != nil {
 		return *b
@@ -50,14 +58,54 @@ func IntPtr(in int) *int {
 	return &res
 }
 
+// IntPtrNonZero returns nil for 0 so JSON/GraphQL omit absent numeric fields.
+func IntPtrNonZero(in int) *int {
+	if in == 0 {
+		return nil
+	}
+	return IntPtr(in)
+}
+
+// Int32PtrNonZero returns nil for 0.
+func Int32PtrNonZero(in int32) *int32 {
+	if in == 0 {
+		return nil
+	}
+	return Int32Ptr(in)
+}
+
 func Int32Ptr(in int32) *int32 {
 	res := in
+	return &res
+}
+
+func Int32PtrToIntPtr(in *int32) *int {
+	if in == nil {
+		return nil
+	}
+	res := int(*in)
+	return &res
+}
+
+func IntPtrToInt32Ptr(in *int) *int32 {
+	if in == nil {
+		return nil
+	}
+	res := int32(*in)
 	return &res
 }
 
 func Float64Ptr(in float64) *float64 {
 	res := in
 	return &res
+}
+
+// Float64PtrNonZero returns nil for 0 so JSON/GraphQL omit absent numeric fields.
+func Float64PtrNonZero(in float64) *float64 {
+	if in == 0 {
+		return nil
+	}
+	return Float64Ptr(in)
 }
 
 func Stringer(str []*string) []string {

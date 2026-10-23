@@ -5,52 +5,35 @@ import (
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/dto"
 )
 
-func NewAddApiCommand(accessToken, companyUuid string, in *dto.AddApiReqDto) *commands.AddApiCommand {
+func NewAddApiCommand(params *dto.ApiParamsDto, in *dto.AddApiReqDto) *commands.AddApiCommand {
 	return &commands.AddApiCommand{
-		Params: &dto.ApiParamsDto{
-			AccessToken: accessToken, CompanyUuid: companyUuid,
-		},
-		Dto: in,
+		Params: params,
+		Dto:    in,
 	}
 }
 
-func NewGetApiCommand(accessToken string, in *dto.GetApiReqDto) *commands.GetApiCommand {
+func NewGetApiCommand(params *dto.ApiParamsDto) *commands.GetApiCommand {
 	return &commands.GetApiCommand{
-		Params: &dto.ApiParamsDto{
-			AccessToken: accessToken,
-			CompanyUuid: in.CompanyUuid,
-		},
+		Params: params,
 	}
 }
 
-func NewGetFullApiCommand(accessToken string, in *dto.GetFullApiReqDto) *commands.GetFullApiCommand {
+func NewGetFullApiCommand(params *dto.ApiParamsDto) *commands.GetFullApiCommand {
 	return &commands.GetFullApiCommand{
-		Params: &dto.ApiParamsDto{
-			AccessToken: accessToken,
-			CompanyUuid: in.CompanyUuid,
-			ApiUuid:     in.ApiUuid,
-		},
+		Params: params,
 	}
 }
 
-func NewUpdateApiCommand(accessToken, companyUuid, apiUuid string, in *dto.UpdateApiReqDto) *commands.UpdateApiCommand {
+func NewUpdateApiCommand(params *dto.ApiParamsDto, in *dto.UpdateApiReqDto) *commands.UpdateApiCommand {
 	return &commands.UpdateApiCommand{
-		Params: &dto.ApiParamsDto{
-			AccessToken: accessToken,
-			CompanyUuid: companyUuid,
-			ApiUuid:     apiUuid,
-		},
-		Dto: in,
+		Params: params,
+		Dto:    in,
 	}
 }
 
-func NewDeleteApiCommand(accessToken string, in *dto.DeleteApiReqDto) *commands.DeleteApiCommand {
+func NewDeleteApiCommand(params *dto.ApiParamsDto) *commands.DeleteApiCommand {
 	return &commands.DeleteApiCommand{
-		Params: &dto.ApiParamsDto{
-			AccessToken: accessToken,
-			CompanyUuid: in.CompanyUuid,
-			ApiUuid:     in.ApiUuid,
-		},
+		Params: params,
 	}
 }
 
@@ -61,5 +44,12 @@ func NewWebhookCommand(companyUuid, apiUuid string, in []byte) *commands.Webhook
 			ApiUuid:     apiUuid,
 		},
 		Payload: in,
+	}
+}
+
+func NewEventGetCommand(params *dto.ApiParamsDto, in *dto.EventGetReqDto) *commands.EventGetCommand {
+	return &commands.EventGetCommand{
+		Params: params,
+		Dto:    in,
 	}
 }

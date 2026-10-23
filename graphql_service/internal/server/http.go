@@ -2,12 +2,14 @@ package server
 
 import (
 	"fmt"
-	"strings"
+	"net/http"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	httpUtils "github.com/testovoleg/5s-microservice-template/pkg/http_utils"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 )
 
 const (
@@ -30,6 +32,8 @@ func (s *server) runGraphQLServer() error {
 }
 
 func (s *server) mapRoutes() {
+	// otelecho must be outermost so access logs see TRACEID from request context.
+	s.echo.Use(otelecho.Middleware(s.cfg.OTL.ServiceName, otelecho.WithSkipper(httpUtils.ProbeSkipper)))
 	s.echo.Use(s.mw.RequestLoggerMiddleware)
 	s.echo.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         stackSize,
@@ -38,16 +42,36 @@ func (s *server) mapRoutes() {
 	}))
 	s.echo.Use(middleware.RequestID())
 	s.echo.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Level: gzipLevel,
-		Skipper: func(c echo.Context) bool {
-			return strings.Contains(c.Request().URL.Path, "swagger")
-		},
+		Level:   gzipLevel,
+		Skipper: httpUtils.PathContainsSkipper("swagger"),
 	}))
 	s.echo.Use(middleware.BodyLimit(bodyLimit))
 
 	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5001", "https://studio.apollographql.com", "https://delta2.5-systems.ru"},
-		AllowHeaders:     []string{"*"},
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"http://localhost:5001",
+			"https://api.5systems.ru",
+			"https://studio.apollographql.com",
+		},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodHead,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodPost,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+			"X-Requested-With",
+			"Apollo-Require-Preflight",
+			"X-Trace-ID",
+		},
 		AllowCredentials: true,
 	}))
 

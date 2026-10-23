@@ -3,19 +3,19 @@ package v1
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/config"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/app/service"
+	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/dto"
 	"github.com/testovoleg/5s-microservice-template/api_gateway_service/internal/middlewares"
 	"github.com/testovoleg/5s-microservice-template/docs"
 	httpErrors "github.com/testovoleg/5s-microservice-template/pkg/http_errors"
+	httpUtils "github.com/testovoleg/5s-microservice-template/pkg/http_utils"
 	"github.com/testovoleg/5s-microservice-template/pkg/logger"
 	"github.com/testovoleg/5s-microservice-template/pkg/metrics"
 	"github.com/testovoleg/5s-microservice-template/pkg/tracing"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -62,21 +62,17 @@ func (h *appHandlers) Example() echo.HandlerFunc {
 		ctx, span := tracing.StartHttpServerTracerSpan(c, "appHandlers.Example")
 		defer span.End()
 
-		token := c.Request().Header.Get("Authorization")
-		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
-			token = token[7:]
-		}
-		if token == "" {
-			return h.traceErr(c, span, "security", errors.New("invalid token"))
+		token, err := extractBearerToken(c)
+		if err != nil {
+			return h.traceErr(c, span, "security", err)
 		}
 
-		companyUuid := c.QueryParam("company_uuid")
-		apiUuid := c.QueryParam("api_uuid")
-		if companyUuid == "" || apiUuid == "" {
+		params := bindApiParams(c, token)
+		if params.CompanyUuid == "" || params.ApiUuid == "" {
 			return h.traceErr(c, span, "params", errors.New("company_uuid or api_uuid is empty"))
 		}
 
-		// _, err := h.svc.Commands.Example.Handle(ctx, mappers.NewExampleCommand(token, companyUuid, apiUuid))
+		// _, err := h.svc.Commands.Example.Handle(ctx, mappers.NewExampleCommand(params))
 		// if err != nil {
 		// 	return h.traceErr(c, span, "SendMessage", err)
 		// }
@@ -88,18 +84,38 @@ func (h *appHandlers) Example() echo.HandlerFunc {
 	}
 }
 
+func extractBearerToken(c echo.Context) (string, error) {
+	token := httpUtils.StripBearer(c.Request().Header.Get("Authorization"))
+	if token == "" {
+		return "", errors.New("invalid token")
+	}
+	return token, nil
+}
+
+func bindApiParams(c echo.Context, token string) *dto.ApiParamsDto {
+	// Path (/admin/api/:API_UUID) важнее query: иначе ?api_uuid= подменил бы интеграцию из пути.
+	apiUuid := c.Param("API_UUID")
+	if apiUuid == "" {
+		apiUuid = c.QueryParam("api_uuid")
+	}
+	return &dto.ApiParamsDto{
+		AccessToken: token,
+		CompanyUuid: c.QueryParam("company_uuid"),
+		ApiUuid:     apiUuid,
+		IdmUserUuid: c.QueryParam("idm_user_uuid"),
+	}
+}
+
 func (h *appHandlers) traceWebhookErr(c echo.Context, span trace.Span, title string, err error) error {
 	h.log.WarnMsg(title, err)
-	span.SetStatus(codes.Error, "operation in api_gateway failed")
-	span.RecordError(err)
+	_ = tracing.TraceErr(span, "operation in api_gateway failed", err)
 	h.metrics.Get("WebhookError", metrics.HTTP).Inc()
 	return c.NoContent(http.StatusOK)
 }
 
 func (h *appHandlers) traceErr(c echo.Context, span trace.Span, title string, err error) error {
 	h.log.WarnMsg(title, err)
-	span.SetStatus(codes.Error, "operation in api_gateway failed")
-	span.RecordError(err)
+	_ = tracing.TraceErr(span, "operation in api_gateway failed", err)
 	h.metrics.Get("Error", metrics.HTTP).Inc()
 	return httpErrors.ErrorCtxResponse(c, err, h.cfg.Http.DebugErrorsResponse)
 }

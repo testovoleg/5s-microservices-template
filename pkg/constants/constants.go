@@ -19,6 +19,7 @@ const (
 	PostgresqlUser       = "POSTGRES_USER"
 	PostgresqlPassword   = "POSTGRES_PASSWORD"
 	PostgresqlDatabase   = "POSTGRES_DATABASE"
+	PostgresqlMaxConns   = "POSTGRES_MAX_CONNS"
 	KeycloakHost         = "KEYCLOAK_HOST"
 	KeycloakRealm        = "KEYCLOAK_REALM"
 	KeycloakClientId     = "KEYCLOAK_CLIENTID"
@@ -78,6 +79,9 @@ const (
 	AuthAPIURL  = "AUTH_API_URL"
 	APIUsername = "API_USERNAME"
 	APIPassword = "API_PASSWORD"
+
+	// UniversalAPI is Admin property key for company connection credentials (ApiData).
+	UniversalAPI = "UniversalAPI"
 
 	HttpClientTimeout = 10
 	HeaderSecretToken = "Authorization"

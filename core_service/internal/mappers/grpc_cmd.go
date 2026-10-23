@@ -45,3 +45,12 @@ func NewDeleteApiCommandFromGrpcMessage(msg *coreService.DeleteApiReq) *commands
 		Params: models.ApiParamsFromGrpcMessage(msg.GetParams()),
 	}
 }
+
+func NewEventGetCommandFromGrpcMessage(msg *coreService.EventGetReq) *commands.EventGetCommand {
+	return &commands.EventGetCommand{
+		Params: models.ApiParamsFromGrpcMessage(msg.GetParams()),
+		Data: &models.EventGetReq{
+			EventUuid: msg.GetEventUuid(),
+		},
+	}
+}

@@ -19,45 +19,47 @@ func (c *webhookMethodsHandler) Webhook(ctx context.Context, command *WebhookCom
 	defer span.End()
 
 	if !c.isValidCommand(command) {
-		return errors.New("invalid input")
+		return attrErr(span, nil, nil, errors.New("invalid input"))
 	}
 
-	params := command.Payload.Params
-
+	params := &models.ApiParams{
+		CompanyUuid: command.Payload.Params.CompanyUuid,
+		ApiUuid:     command.Payload.Params.ApiUuid,
+	}
 	company := &models.Company{Uuid: params.CompanyUuid}
 	utils.Attr(span, "company_uuid", company.Uuid)
 
 	adminToken, err := getAdminToken(ctx, c.cloakRepo, c.redisRepo)
 	if err != nil {
-		return err
+		return attrErr(span, params, command.Payload.Body, err)
 	}
 
 	api, err := getApiData(ctx, c.adminRepo, c.redisRepo, &models.ApiParams{
 		AccessToken: adminToken, CompanyUuid: company.Uuid, ApiUuid: params.ApiUuid,
 	})
 	if err != nil {
-		return err
+		return attrErr(span, params, command.Payload.Body, err)
 	}
 
 	webhookMessage := command.Payload.Body.Message
 	if webhookMessage == "" {
-		return errors.New("empty message")
+		return attrErr(span, params, command.Payload.Body, errors.New("empty message"))
 	}
 
 	var msg models.WebhookMessage
 	err = json.Unmarshal([]byte(webhookMessage), &msg)
 	if err != nil {
-		return errors.Wrap(err, "json.Unmarshal update")
+		return attrErr(span, params, command.Payload.Body, errors.Wrap(err, "json.Unmarshal update"))
 	}
 
 	event, err := c.createKafkaEvent(ctx, api, company.Uuid, adminToken, msg)
 	if err != nil {
-		return errors.Wrap(err, "createKafkaEvent")
+		return attrErr(span, params, msg, errors.Wrap(err, "createKafkaEvent"))
 	}
 
 	eventBytes, err := proto.Marshal(event)
 	if err != nil {
-		return err
+		return attrErr(span, params, msg, err)
 	}
 
 	_ = eventBytes //delete this line
@@ -95,11 +97,11 @@ func (c *webhookMethodsHandler) createKafkaEvent(ctx context.Context, api *model
 		// }
 
 		// c.processIncomingMsg(ctx, out, companyUuid, adminToken, msg)
+		return out, nil
 
-		if msg.Type == "outgoingMessage" {
-			out.Direction = kafkaMessages.Direction_OUTCOMING
-			out.From.IsBot = true
-		}
+	case "outgoingMessage":
+		out.Direction = kafkaMessages.Direction_OUTCOMING
+		out.From.IsBot = true
 		return out, nil
 
 	case "messageStatus":

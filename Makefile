@@ -1,4 +1,6 @@
-.PHONY:
+.PHONY: run_gw run_core run_graph init_project docker_dev local down-local clean logs-local \
+	tidy deps-reset deps-upgrade deps-cleancache run-linter swagger proto_kafka proto_core \
+	evans_core gqlgen
 
 run_gw:
 	go run api_gateway_service/cmd/main.go -config=./api_gateway_service/config/config.yaml
@@ -8,6 +10,23 @@ run_core:
 
 run_graph:
 	go run graphql_service/cmd/main.go -config=./graphql_service/config/config.yaml
+
+# ==============================================================================
+# Bootstrap new project from this template
+#
+#   make init_project
+#   → 1/2 MODULE (e.g. 5s-dataset-api)
+#   → 2/2 GQL_SUFFIX — short Federation prefix instead of tmp_
+#                      (as in supergraph: dts, acc, chat → dts_eventGet, …)
+#   → ShortMicroserviceName = name without 5s-  (5s-dataset-api → dataset-api)
+#
+#   make init_project MODULE=5s-dataset-api GQL_SUFFIX=dts
+# Optional flags: SKIP_GQLGEN=1 DRY_RUN=1 FORCE=1
+
+init_project:
+	@MODULE="$(MODULE)" GQL_SUFFIX="$(GQL_SUFFIX)" \
+		SKIP_GQLGEN="$(SKIP_GQLGEN)" DRY_RUN="$(DRY_RUN)" FORCE="$(FORCE)" \
+		bash .data/scripts/init_project.sh
 
 # ==============================================================================
 # Docker
@@ -24,7 +43,7 @@ local:
 # ==============================================================================
 # Docker support
 
-FILES := $(shell docker ps -aq)
+FILES := $(shell docker ps -aq 2>/dev/null)
 
 down-local:
 	docker stop $(FILES)
@@ -83,18 +102,41 @@ DB_NAME = products
 DB_HOST = localhost
 DB_PORT = 5432
 SSL_MODE = disable
+MIGRATE_PATH = .data/migrations
 
 force_db:
-	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path migrations force 1
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) force 1
 
 version_db:
-	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path migrations version
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) version
 
 migrate_up:
-	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path migrations up 1
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) up 1
 
 migrate_down:
-	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path migrations down 1
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) down 1
+
+# Прогон всех миграций up → down → up на временной БД (создаётся и удаляется): ловит
+# сломанный порядок DROP/DELETE в down-файлах и ошибки в up без риска для рабочей базы.
+# Нужен psql в контейнере (MIGRATE_CHECK_PSQL) либо локальный psql.
+MIGRATE_CHECK_DB = $(DB_NAME)_migcheck
+MIGRATE_CHECK_PSQL = docker exec microservices_postgesql psql -U postgres
+migrate_check:
+	$(MIGRATE_CHECK_PSQL) -c "DROP DATABASE IF EXISTS $(MIGRATE_CHECK_DB)" -c "CREATE DATABASE $(MIGRATE_CHECK_DB)"
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(MIGRATE_CHECK_DB)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) up
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(MIGRATE_CHECK_DB)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) down -all
+	migrate -database postgres://postgres:postgres@$(DB_HOST):$(DB_PORT)/$(MIGRATE_CHECK_DB)?sslmode=$(SSL_MODE) -path $(MIGRATE_PATH) up
+	$(MIGRATE_CHECK_PSQL) -c "DROP DATABASE $(MIGRATE_CHECK_DB)"
+
+# ==============================================================================
+# Tests
+
+test:
+	go vet ./...
+	go test ./...
+
+fmt:
+	gofmt -l -w .
 
 # ==============================================================================
 # Swagger
@@ -108,11 +150,11 @@ swagger:
 
 proto_kafka:
 	@echo Generating kafka proto
-	cd proto/kafka && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. common.proto payload.proto events.proto
+	cd proto/kafka && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. *.proto
 
 proto_core:
-	@echo Generating connector microservice proto
-	cd core_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. core_svc.proto core_messages.proto
+	@echo Generating core microservice proto
+	cd core_service/proto && protoc --go_out=. --go-grpc_opt=require_unimplemented_servers=false --go-grpc_out=. *.proto
 
 # ==============================================================================
 # Evans
@@ -126,4 +168,4 @@ evans_core:
 
 gqlgen:
 	@echo Generating GraphQL modules
-	cd .data/gqlgen && go run -mod=mod github.com/99designs/gqlgen --verbose gener
+	cd .data/gqlgen && go run -mod=mod github.com/99designs/gqlgen --verbose generate

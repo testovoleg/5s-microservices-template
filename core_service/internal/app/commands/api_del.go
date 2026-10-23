@@ -13,23 +13,23 @@ func (c *apiMethodsHandler) DeleteApi(ctx context.Context, command *DeleteApiCom
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.DeleteApi")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
 	if err != nil {
-		return err
+		return attrErr(span, command.Params, nil, err)
 	}
 
 	if command.Params.ApiUuid == "" {
-		return errors.New("apiUuid is not filled")
+		return attrErr(span, command.Params, nil, errors.New("apiUuid is not filled"))
 	}
 
 	listApi, err := c.adminRepo.GetProperty(ctx, command.Params.AccessToken, company.Uuid)
 	if err != nil {
-		return errors.Wrap(err, "adminRepo.GetProperty")
+		return attrErr(span, command.Params, nil, errors.Wrap(err, "adminRepo.GetProperty"))
 	}
 
 	res, deleted := c.filterApiList(listApi, command.Params.ApiUuid)
 	if !deleted {
-		return errors.New("apiUuid not found")
+		return attrErr(span, command.Params, nil, errors.New("apiUuid not found"))
 	}
 
 	//delete before add if admin change with error
@@ -37,7 +37,7 @@ func (c *apiMethodsHandler) DeleteApi(ctx context.Context, command *DeleteApiCom
 
 	err = c.adminRepo.AddProperty(ctx, command.Params.AccessToken, company.Uuid, res)
 	if err != nil {
-		return errors.Wrap(err, "adminRepo.AddProperty")
+		return attrErr(span, command.Params, nil, errors.Wrap(err, "adminRepo.AddProperty"))
 	}
 
 	return nil

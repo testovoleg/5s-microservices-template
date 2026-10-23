@@ -19,6 +19,7 @@ type ApiParamsDto struct {
 	AccessToken string `json:"access_token"`
 	CompanyUuid string `json:"company_uuid"`
 	ApiUuid     string `json:"api_uuid"`
+	IdmUserUuid string `json:"idm_user_uuid"`
 }
 
 type AddApiReqDto struct {
@@ -33,7 +34,7 @@ type GetApiReqDto struct {
 
 type GetFullApiReqDto struct {
 	CompanyUuid string `query:"company_uuid"`
-	ApiUuid     string `param:"Api_UUID"`
+	ApiUuid     string `param:"API_UUID"`
 }
 
 type UpdateApiReqDto struct {
@@ -44,7 +45,7 @@ type UpdateApiReqDto struct {
 
 type DeleteApiReqDto struct {
 	CompanyUuid string `query:"company_uuid"`
-	ApiUuid     string `param:"api_UUID"`
+	ApiUuid     string `param:"API_UUID"`
 }
 
 type UpdateWebhookResDto struct {
@@ -54,3 +55,10 @@ type UpdateWebhookResDto struct {
 type EventResDto struct {
 	EventUuid string `json:"event_uuid,omitempty"`
 }
+
+/*
+	Swagger/JSON: protobuf empty repeated fields are nil and encode as null.
+	Keep omitempty off the slice and map with utils.NonNilSlice:
+
+		Subscriptions: utils.NonNilSlice(in.GetSubscriptions()),
+*/

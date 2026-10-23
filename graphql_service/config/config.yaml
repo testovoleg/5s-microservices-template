@@ -13,12 +13,12 @@ http:
   debugHeaders: false
   httpClientDebug: false
   debugErrorsResponse: true
-  ignoreLogUrls: ["metrics", "/graphql/query"]
+  ignoreLogUrls: ["metrics", "/ready", "/live", "/health"]
 probes:
   readinessPath: /ready
   livenessPath: /live
-  port: :3001
-  pprof: :6001
+  port: :3010
+  pprof: :6010
   prometheusPath: /metrics
   prometheusPort: :8021
   checkIntervalSeconds: 10

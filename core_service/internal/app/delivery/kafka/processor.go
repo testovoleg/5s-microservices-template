@@ -25,7 +25,7 @@ var (
 func (s *coreMessageProcessor) processWebhookExample(ctx context.Context, r *kafka.Reader, m kafka.Message) {
 	s.metrics.Get("WebhookExample", metrics.KAFKA).Inc()
 
-	ctx, span := tracing.StartKafkaConsumerTracerSpan(ctx, m.Headers, "coreMessageProcessor.processWebhookExample")
+	ctx, span := tracing.StartSpan(ctx, "coreMessageProcessor.processWebhookExample")
 	defer span.End()
 
 	msg := &kafkaMessages.Payload{}

@@ -99,7 +99,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	utils.CheckKafkaGroup(&cfg.Kafka.GroupID, constants.ShortMicroserviceName)
-	utils.CheckOTLName(&cfg.OTL.ServiceName, constants.GATEWAY, constants.ShortMicroserviceName)
+	utils.CheckOTLName(&cfg.OTL.ServiceName, constants.CORE, constants.ShortMicroserviceName)
 
 	utils.CheckEnvStr(&cfg.GRPC.Port, constants.GrpcPort)
 	utils.CheckEnvStr(&cfg.Postgresql.Host, constants.PostgresqlHost)
@@ -107,6 +107,7 @@ func InitConfig() (*Config, error) {
 	utils.CheckEnvStr(&cfg.Postgresql.User, constants.PostgresqlUser)
 	utils.CheckEnvStr(&cfg.Postgresql.Password, constants.PostgresqlPassword)
 	utils.CheckEnvStr(&cfg.Postgresql.DBName, constants.PostgresqlDatabase)
+	utils.CheckEnvInt(&cfg.Postgresql.MaxConns, constants.PostgresqlMaxConns)
 	utils.CheckEnvStr(&cfg.Redis.Addr, constants.RedisAddr)
 	utils.CheckEnvStr(&cfg.Redis.Password, constants.RedisPassword)
 	utils.CheckEnvInt(&cfg.Redis.DB, constants.RedisDB)

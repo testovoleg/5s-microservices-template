@@ -11,20 +11,20 @@ func (c *apiMethodsHandler) GetFullApi(ctx context.Context, command *GetFullApiC
 	ctx, span := tracing.StartSpan(ctx, "apiMethodsHandler.GetFullApi")
 	defer span.End()
 
-	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, command.Params)
+	_, company, err := getUserData(ctx, c.log, c.cloakRepo, c.adminRepo, c.redisRepo, command.Params)
 	if err != nil {
-		return nil, err
+		return nil, attrErr(span, command.Params, nil, err)
 	}
 
 	api, err := getApiData(ctx, c.adminRepo, c.redisRepo, &models.ApiParams{AccessToken: command.Params.AccessToken, CompanyUuid: company.Uuid, ApiUuid: command.Params.ApiUuid})
 	if err != nil {
-		return nil, err
+		return nil, attrErr(span, command.Params, nil, err)
 	}
 
 	subscriptions := []string{}
 	// subscriptions, err := c.targetRepo.GetSubscriptions(ctx, company, api)
 	// if err != nil {
-	// 	return nil, errors.Wrap(err, "targetRepo.GetSubscriptions")
+	// 	return nil, attrErr(span, command.Params, nil, errors.Wrap(err, "targetRepo.GetSubscriptions"))
 	// }
 
 	return &models.ApiFull{

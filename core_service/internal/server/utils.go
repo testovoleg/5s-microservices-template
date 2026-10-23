@@ -16,6 +16,8 @@ import (
 
 const (
 	stackSize = 1 << 10 // 1 KB
+	// probeTimeout — предел одной readiness-проверки Kafka (и Postgres, если подключён).
+	probeTimeout = 5 * time.Second
 )
 
 func (s *server) connectKafkaBrokers(ctx context.Context) error {
@@ -55,28 +57,53 @@ func (s *server) initKafkaTopics(ctx context.Context) {
 
 	s.log.Infof("established new kafka controller connection: %s", controllerURI)
 
-	webhookTopic := kafka.TopicConfig{
-		Topic:             s.cfg.KafkaTopics.WebhookExample.TopicName,
-		NumPartitions:     s.cfg.KafkaTopics.WebhookExample.Partitions,
-		ReplicationFactor: s.cfg.KafkaTopics.WebhookExample.ReplicationFactor,
+	// Новые топики добавлять в оба списка: здесь (создание) и в getConsumerGroupTopics
+	// (подписка). Пустое имя (топик выключен конфигом) пропускается.
+	toCreate := make([]kafka.TopicConfig, 0, 1)
+	for _, t := range []kafka.TopicConfig{
+		kafkaTopic(s.cfg.KafkaTopics.WebhookExample),
+	} {
+		if t.Topic != "" {
+			toCreate = append(toCreate, t)
+		}
 	}
-
-	if err := conn.CreateTopics(
-		webhookTopic,
-	); err != nil {
+	if err := conn.CreateTopics(toCreate...); err != nil {
 		s.log.WarnMsg("kafkaConn.CreateTopics", err)
 		return
 	}
 
-	s.log.Infof("kafka topics created or already exists: %+v", []kafka.TopicConfig{
-		webhookTopic,
-	})
+	s.log.Infof("kafka topics created or already exists: %+v", toCreate)
+}
+
+// kafkaTopic — TopicConfig из конфига с дефолтами: partitions/replicationFactor ≤ 0
+// брокер отвергает (InvalidPartitions), а забыть их в yaml нового топика легко.
+func kafkaTopic(cfg kafkaClient.TopicConfig) kafka.TopicConfig {
+	parts := cfg.Partitions
+	if parts <= 0 {
+		parts = 1
+	}
+	rf := cfg.ReplicationFactor
+	if rf <= 0 {
+		rf = 1
+	}
+	return kafka.TopicConfig{
+		Topic:             cfg.TopicName,
+		NumPartitions:     parts,
+		ReplicationFactor: rf,
+	}
 }
 
 func (s *server) getConsumerGroupTopics() []string {
-	return []string{
+	topics := []string{
 		s.cfg.KafkaTopics.WebhookExample.TopicName,
 	}
+	out := make([]string, 0, len(topics))
+	for _, t := range topics {
+		if t != "" {
+			out = append(out, t)
+		}
+	}
+	return out
 }
 
 func (s *server) runHealthCheck(ctx context.Context) {
@@ -90,12 +117,19 @@ func (s *server) runHealthCheck(ctx context.Context) {
 		return s.redisClient.Ping(ctx).Err()
 	}, time.Duration(s.cfg.Probes.CheckIntervalSeconds)*time.Second))
 
+	// Свежее соединение на каждую проверку: долгоживущий s.kafkaConn после переезда
+	// брокера остаётся мёртвым, и под навсегда выпадал бы из Service при живом liveness.
 	health.AddReadinessCheck(constants.Kafka, healthcheck.AsyncWithContext(ctx, func() error {
-		_, err := s.kafkaConn.Brokers()
+		dialCtx, cancel := context.WithTimeout(ctx, probeTimeout)
+		defer cancel()
+		conn, err := kafkaClient.NewKafkaConn(dialCtx, s.cfg.Kafka)
 		if err != nil {
 			return err
 		}
-		return nil
+		defer conn.Close() // nolint: errcheck
+		_ = conn.SetDeadline(time.Now().Add(probeTimeout))
+		_, err = conn.Brokers()
+		return err
 	}, time.Duration(s.cfg.Probes.CheckIntervalSeconds)*time.Second))
 
 	go func() {

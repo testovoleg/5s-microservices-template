@@ -1,17 +1,23 @@
 package httpErrors
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
+	"io"
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/go-playground/validator"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -212,8 +218,23 @@ func ParseErrors(err error, debug bool) RestErr {
 	}
 }
 
+// clientCausedSqlStateCodes are Postgres error classes caused by bad client input
+// (integrity constraints, malformed data). Everything else is a server-side problem.
+var clientCausedSqlStateCodes = map[string]bool{
+	"23505": true, // unique_violation
+	"23503": true, // foreign_key_violation
+	"23502": true, // not_null_violation
+	"23514": true, // check_violation
+	"22001": true, // string_data_right_truncation
+	"22P02": true, // invalid_text_representation
+}
+
 func parseSqlErrors(err error, debug bool) RestErr {
-	return NewRestError(http.StatusBadRequest, ErrBadRequest, err, debug)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && clientCausedSqlStateCodes[pgErr.Code] {
+		return NewRestError(http.StatusBadRequest, ErrBadRequest, err, debug)
+	}
+	return NewRestError(http.StatusInternalServerError, ErrInternalServerError, err, debug)
 }
 
 func parseValidatorError(err error, debug bool) RestErr {
@@ -237,4 +258,188 @@ func ErrorResponse(err error, debug bool) (int, interface{}) {
 func ErrorCtxResponse(ctx echo.Context, err error, debug bool) error {
 	restErr := ParseErrors(err, debug)
 	return ctx.JSON(restErr.Status(), restErr)
+}
+
+func ErrorWrap(err error, span trace.Span, opt ...string) error {
+	if err != nil && len(opt) > 0 && opt[0] != "" {
+		err = errors.Wrap(err, opt[0])
+	}
+	return UpdateSpan(span, err)
+}
+
+func HttpResponse(res *http.Response, span trace.Span, opt ...string) error {
+	return ErrorWrap(ParseHttpResponse(res), span, opt...)
+}
+
+// HttpBody is like HttpResponse but for a body that was already read from res.
+func HttpBody(status string, body []byte, span trace.Span, opt ...string) error {
+	return ErrorWrap(ParseHttpBody(status, body), span, opt...)
+}
+
+func UpdateSpan(span trace.Span, err error) error {
+	if span != nil && err != nil {
+		span.SetStatus(codes.Error, "operation in core_service failed")
+		span.RecordError(err)
+	}
+	return AddTraceID(err, span)
+}
+
+func AddTraceID(err error, s trace.Span) error {
+	if err == nil {
+		return nil
+	}
+
+	if s == nil {
+		return err
+	}
+
+	if strings.Contains(err.Error(), "TraceID:") {
+		return err
+	}
+
+	return errors.New(err.Error() + " TraceID: " + s.SpanContext().TraceID().String())
+}
+
+func ParseHttpResponse(res *http.Response) error {
+	if res == nil || res.Body == nil {
+		return errors.New("empty HTTP response")
+	}
+
+	body, err := io.ReadAll(res.Body)
+	_ = res.Body.Close()
+	if err != nil {
+		return err
+	}
+
+	return ParseHttpBody(res.Status, body)
+}
+
+const maxHTTPErrorBodyLen = 2048
+
+// ParseHttpBody builds an error from an already-read HTTP response body.
+// It understands common upstream shapes (Admin/Auth/Keycloak/5s APIs) and
+// falls back to a truncated raw body when the payload is not structured.
+func ParseHttpBody(status string, body []byte) error {
+	body = bytes.TrimSpace(body)
+	if len(body) == 0 {
+		if status != "" {
+			return errors.New(status)
+		}
+		return errors.New("empty HTTP response")
+	}
+
+	if detail := extractHTTPErrorDetail(body); detail != "" {
+		return formatHTTPError(status, detail)
+	}
+
+	return formatHTTPError(status, truncateRunes(string(body), maxHTTPErrorBodyLen))
+}
+
+func formatHTTPError(status, detail string) error {
+	detail = strings.TrimSpace(detail)
+	status = strings.TrimSpace(status)
+	switch {
+	case status == "" && detail == "":
+		return errors.New("empty HTTP response")
+	case status == "":
+		return errors.New(detail)
+	case detail == "" || detail == status:
+		return errors.New(status)
+	case strings.HasPrefix(detail, status):
+		return errors.New(detail)
+	default:
+		return errors.New(status + ": " + detail)
+	}
+}
+
+// extractHTTPErrorDetail pulls a human-readable detail from known JSON error shapes.
+// Returns "" when body is not JSON or contains no recognizable error fields.
+func extractHTTPErrorDetail(body []byte) string {
+	var payload struct {
+		Message          any    `json:"message"`
+		Error            any    `json:"error"`
+		ErrError         any    `json:"err_error"`
+		ErrorDescription any    `json:"error_description"`
+		StatusCode       any    `json:"statusCode"`
+		Path             string `json:"path"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return ""
+	}
+
+	parts := make([]string, 0, 4)
+	appendUnique := func(s string) {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			return
+		}
+		for _, p := range parts {
+			if p == s {
+				return
+			}
+		}
+		parts = append(parts, s)
+	}
+
+	// Prefer descriptive fields first, then codes/path for context.
+	for _, v := range []any{
+		payload.Message,
+		payload.ErrorDescription,
+		payload.Error,
+		payload.ErrError,
+	} {
+		appendUnique(anyToString(v))
+	}
+	appendUnique(anyToString(payload.StatusCode))
+	appendUnique(payload.Path)
+
+	return strings.Join(parts, "; ")
+}
+
+func anyToString(v any) string {
+	switch t := v.(type) {
+	case nil:
+		return ""
+	case string:
+		return strings.TrimSpace(t)
+	case float64:
+		if t == float64(int64(t)) {
+			return fmt.Sprintf("%d", int64(t))
+		}
+		return fmt.Sprintf("%v", t)
+	case json.Number:
+		return t.String()
+	case bool:
+		return fmt.Sprintf("%t", t)
+	case []any:
+		items := make([]string, 0, len(t))
+		for _, item := range t {
+			if s := anyToString(item); s != "" {
+				items = append(items, s)
+			}
+		}
+		return strings.Join(items, ", ")
+	case map[string]any:
+		// Nested objects like {"message":"..."}; prefer common keys.
+		for _, key := range []string{"message", "error", "error_description", "description"} {
+			if s := anyToString(t[key]); s != "" {
+				return s
+			}
+		}
+		b, err := json.Marshal(t)
+		if err != nil {
+			return ""
+		}
+		return truncateRunes(string(b), 512)
+	default:
+		return strings.TrimSpace(fmt.Sprintf("%v", t))
+	}
+}
+
+func truncateRunes(s string, max int) string {
+	if max <= 0 || utf8.RuneCountInString(s) <= max {
+		return s
+	}
+	runes := []rune(s)
+	return string(runes[:max]) + "…"
 }

@@ -3,8 +3,10 @@ package metrics
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -15,9 +17,11 @@ import (
 )
 
 type MetricsManager struct {
+	mu            sync.Mutex
 	Counters      []*MetricCounter
 	MetricOptions MetricOptions
 	log           logger.Logger
+	server        *echo.Echo
 }
 
 type MetricCounter struct {
@@ -57,25 +61,37 @@ func NewMetricsManager(log logger.Logger, serviceName, serverPath, serverPort st
 
 func (m *MetricsManager) NewServer(cancel context.CancelFunc, stackSize int) {
 	metricsServer := echo.New()
+	metricsServer.HideBanner = true
 	metricsServer.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         stackSize,
 		DisablePrintStack: true,
 		DisableStackAll:   true,
 	}))
+	m.server = metricsServer
 	go func() {
 		metricsServer.GET(m.MetricOptions.PrometheusPath, echo.WrapHandler(promhttp.Handler()))
 		m.log.Infof("Metrics server is running on port: %s", m.MetricOptions.PrometheusPort)
-		if err := metricsServer.Start(m.MetricOptions.PrometheusPort); err != nil {
+		if err := metricsServer.Start(m.MetricOptions.PrometheusPort); err != nil && err != http.ErrServerClosed {
 			m.log.Errorf("metricsServer.Start: %v", err)
 			cancel()
 		}
 	}()
 }
 
+func (m *MetricsManager) Shutdown(ctx context.Context) error {
+	if m == nil || m.server == nil {
+		return nil
+	}
+	return m.server.Shutdown(ctx)
+}
+
 func (m *MetricsManager) Get(operation string, transport TransportType) *MetricCounter {
 	if operation == "" {
 		return nil
 	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	name, help := m.Opts(operation, transport)
 	for _, c := range m.Counters {

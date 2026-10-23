@@ -12,6 +12,9 @@ import (
 type Producer interface {
 	PublishMessage(ctx context.Context, msgs ...kafka.Message) error
 	PublishMessageInTopic(ctx context.Context, topicName string, bytes []byte) error
+	// PublishKeyedMessage publishes with a partition key: keyAwareBalancer hashes the key so
+	// all messages of one entity land on one partition and are consumed in order.
+	PublishKeyedMessage(ctx context.Context, topicName string, key, value []byte) error
 	Close() error
 }
 
@@ -31,11 +34,21 @@ func (p *producer) PublishMessage(ctx context.Context, msgs ...kafka.Message) er
 }
 
 func (p *producer) PublishMessageInTopic(ctx context.Context, name string, value []byte) error {
-	if len(value) == 0 {
+	return p.PublishKeyedMessage(ctx, name, nil, value)
+}
+
+func (p *producer) PublishKeyedMessage(ctx context.Context, name string, key, value []byte) error {
+	if len(key) == 0 && len(value) == 0 {
 		return nil
 	}
 
-	return p.PublishMessage(ctx, kafka.Message{Topic: name, Value: value, Time: time.Now().UTC(), Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(ctx)})
+	return p.PublishMessage(ctx, kafka.Message{
+		Topic:   name,
+		Key:     key,
+		Value:   value,
+		Time:    time.Now().UTC(),
+		Headers: tracing.GetKafkaTracingHeadersFromSpanCtx(ctx),
+	})
 }
 
 func (p *producer) Close() error {

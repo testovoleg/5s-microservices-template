@@ -1,6 +1,14 @@
-
 input GeneralParamsInput {
-	accessToken: String
-	companyUuid: String
-	idmUserUuid: String
+  companyUuid: String!
+  apiUuid: String
+  idmUserUuid: String
+}
+
+input TipicalPaginationInput {
+  page: Int = 1
+  size: Int = 10
+}
+
+input TipicalEventGetInput {
+  eventUuid: String!
 }

@@ -2,6 +2,6 @@
 
 type Mutation {
   "This is an example mutation"
-  tmp_tipicalMutation(input: GeneralParamsInput!): TipicalMutationResponse!
+  tmp_tipicalMutation(params: GeneralParamsInput!): TipicalMutationResponse!
 }
 
